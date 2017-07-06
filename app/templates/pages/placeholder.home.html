@@ -1,0 +1,12 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  {% for u in users %}
+  <h1 style="color: white;">{{ u.name }}</h1>
+  {% endfor %}
+</div>
+<p class="lead">.</p>
+
+{% endblock %}

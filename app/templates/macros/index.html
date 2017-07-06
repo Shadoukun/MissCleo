@@ -1,0 +1,28 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Macros{% endblock %}
+
+{% block css %}
+<link href="{{ url_for('static', filename='css/macros.scss.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block scripts %}
+<script>
+$( document ).ready(function() {
+$("#nav li").removeClass("active");
+$('#nav #macros').addClass('active');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+    <nav id="macro_nav" class="nav nav-pills nav-fill">
+        <a id="macros" class="text-sm-center nav-link" href="{{url_for('macros.macros')}}">Macros</a>
+        <a id="responses" class="text-sm-center nav-link" href="{{ url_for('macros.responses') }}">Responses</a>
+        <a id="reactions" class="text-sm-center nav-link" href="{{ url_for('macros.reactions') }}">Reactions</a>
+    </nav>
+
+    {% block macropage %}
+    {% endblock %}
+
+{% endblock %}

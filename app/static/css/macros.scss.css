@@ -1,0 +1,37 @@
+#sidebar {
+  background: #111111; }
+  #sidebar .card {
+    background: none;
+    margin-bottom: 10px; }
+  #sidebar a {
+    color: white;
+    padding: 10px;
+    background: #32353c;
+    margin-bottom: 1px; }
+
+.macro-card {
+  background: #32353c;
+  margin-bottom: 10px; }
+  .macro-card .macro-heading {
+    margin-bottom: 0px; }
+  .macro-card .button {
+    border-radius: 0px; }
+  .macro-card #delete {
+    float: right; }
+
+textarea, .form-control {
+  background: none;
+  color: white;
+  border: none;
+  border-radius: 0px;
+  outline: none;
+  margin-bottom: 20px;
+  border-bottom: 1px solid white; }
+  textarea:active, textarea:focus, .form-control:active, .form-control:focus {
+    border-bottom: 1px solid #2761CF;
+    background: none;
+    color: white; }
+
+#macro_nav {
+  margin-left: 15px;
+  margin-bottom: 10px; }

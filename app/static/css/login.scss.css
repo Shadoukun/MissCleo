@@ -1,0 +1,62 @@
+#login-box {
+  position: absolute;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0 auto;
+  border: 1px solid black;
+  background: #32353C;
+  min-height: 250px;
+  padding: 20px;
+  z-index: 9999; }
+
+#login-box .logo .logo-caption {
+  color: white;
+  text-align: center;
+  margin-bottom: 0px; }
+
+#login-box .logo .tweak {
+  color: #ff5252; }
+
+#login-box .controls {
+  padding-top: 30px; }
+
+#login-box .controls input {
+  border-radius: 0px;
+  background: none;
+  border: 0px;
+  color: white;
+  width: 100%;
+  margin-bottom: 20px;
+  height: 30px;
+  border-bottom: 1px solid white; }
+
+#login-box .controls input:focus {
+  box-shadow: none;
+  outline: none;
+  border-bottom: 1px solid #2761CF; }
+
+#login-box .controls input:first-child {
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px; }
+
+#login-box .controls input:last-child {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px; }
+
+#login-box button.btn-custom {
+  border-radius: 2px;
+  margin-top: 8px;
+  background: #ff5252;
+  border-color: #302e2d;
+  color: white;
+  font-family: 'Nunito', sans-serif; }
+
+#login-box button.btn-custom:hover {
+  -webkit-transition: all 500ms ease;
+  -moz-transition: all 500ms ease;
+  -ms-transition: all 500ms ease;
+  -o-transition: all 500ms ease;
+  transition: all 500ms ease;
+  background: #302e2d;
+  border-color: #ff5252; }

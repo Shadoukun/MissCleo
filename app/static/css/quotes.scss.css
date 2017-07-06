@@ -1,0 +1,72 @@
+#sidebar .card {
+  margin-bottom: 20px;
+  background: #111111; }
+
+#sidebar a {
+  color: white;
+  padding: 10px;
+  background: #32353c;
+  margin-bottom: 1px; }
+
+.quote-card {
+  background: #191A1C;
+  margin-bottom: 10px; }
+  .quote-card .quote-block {
+    padding: 0; }
+  .quote-card .quote-heading {
+    color: white;
+    background-color: #32353C;
+    padding: 10px;
+    margin-bottom: 0; }
+    .quote-card .quote-heading label {
+      display: inline-block; }
+    .quote-card .quote-heading a {
+      color: white; }
+  .quote-card .quote-body {
+    padding: 15px;
+    color: white;
+    word-wrap: break-word; }
+
+.dropdown-toggle::after {
+  margin-left: 0; }
+
+.dropdown {
+  float: right;
+  margin-top: -65px;
+  margin-right: 10px;
+  background: none; }
+  .dropdown .btn {
+    background: none;
+    border: none;
+    padding: 0 5px; }
+  .dropdown .dropdown-menu {
+    font-size: 12px;
+    min-width: 80px;
+    min-width: inherit; }
+    .dropdown .dropdown-menu li {
+      white-space: nowrap; }
+      .dropdown .dropdown-menu li a {
+        padding: 10px; }
+
+.user a {
+  display: flex;
+  align-items: center; }
+
+.user img {
+  height: 40px;
+  width: 40px;
+  border-radius: 50px;
+  margin-right: 15px; }
+
+.avatar {
+  display: inline-block; }
+  .avatar img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50px;
+    margin-right: 10px; }
+
+.timestamp {
+  margin-left: 54px;
+  margin-top: -14px;
+  color: #5d6169; }

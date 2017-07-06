@@ -1,0 +1,33 @@
+{% macro reactionEntry(react, form=None) -%}
+{% set react_id = react.id %}
+{% set trigger = react.trigger %}
+{% set reaction = react.reaction %}
+
+<div class="card macro-card">
+  <div class="card-block macro-block">
+  <div class="card-title macro-heading">
+    {% if not react_id %}
+      <form action="/macros/reactions/new" method="post">
+    {% else %}
+      <form id="{{react_id}}" action="/macros/reactions/{{react_id}}/edit" method="post">
+    {% endif %}
+
+    <h5>Trigger</h5>
+    {{ form.command(class='form-control', value=trigger, id=react_id) }}
+    <h5>Reactions</h5>
+    {% set response = form.response.process_data(reaction) %}
+    {{ form.response(class='form-control', rows='6', label=reaction, id=react_id) }}
+    {{ form.hidden_tag() }}
+
+    {% if react_id %}
+    <input id="save" class="button btn btn-success" type="submit" value="submit" />
+    <a href="/macros/reactions/{{react_id}}/delete" id="delete" class="button btn btn-danger">Delete</a>
+    {% else %}
+    <input id="new" class="button btn btn-success" type="submit" value="submit" />
+    {% endif %}
+
+  </form>
+  </div>
+  </div>
+</div>
+{%- endmacro %}
