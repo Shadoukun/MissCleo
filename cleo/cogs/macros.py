@@ -65,7 +65,8 @@ class Macros:
                 self.bot.remove_command(m.command)
 
             func = self._make_macro(m)
-            cmd = commands.Command(name=m.command, callback=func, pass_context=True, no_pm=True)
+            cmd = commands.Command(name=m.command, callback=func, cog_name='Macro')
+            cmd.macro = True
             self.bot.add_command(cmd)
 
     async def _process_responses(self, message):
@@ -91,7 +92,7 @@ class Macros:
         '''Triggers an automatic discord reaction if message containers trigger'''
 
         message = message.content.lower()
-        emojis = self.bot.get_all_emojis()
+        emojis = self.bot.emojis
 
         for trigger in self.reactions:
             if trigger in message:
@@ -108,8 +109,7 @@ class Macros:
     async def update_macros_task(self):
         '''Update macro commands from database'''
         await self.bot.wait_until_ready()
-
-        while not self.bot.is_closed:
+        while not self.bot.is_closed():
 
             macros = self.db.query(Macro).all()
             if macros:
@@ -127,8 +127,7 @@ class Macros:
     async def add_responses_task(self):
         '''Add macro responses from database'''
         await self.bot.wait_until_ready()
-
-        while not self.bot.is_closed:
+        while not self.bot.is_closed():
 
             self.responses.clear()
             responses = self.db.query(MacroResponse).all()
@@ -144,8 +143,7 @@ class Macros:
     async def add_reactions_task(self):
         '''Add macro reactions from database'''
         await self.bot.wait_until_ready()
-
-        while not self.bot.is_closed:
+        while not self.bot.is_closed():
 
             self.reactions = {}
             reactions = self.db.query(MacroReaction).all()

@@ -23,6 +23,14 @@ class Command:
         enabled_commands = self.get_enabled_commands(ctx)
         command = ctx.command.qualified_name.split(' ')
 
+        # janky solution
+        # check if the command is a macro
+        try:
+            if ctx.command.macro:
+                return True
+        except:
+            pass
+
         # always allow auto-enabled commands
         if command[0] in AUTO_ENABLE:
             return True
