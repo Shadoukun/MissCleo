@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, EqualTo, Length, Required
 from flask_bcrypt import check_password_hash
 
 from app.models import FlaskUser
+from app import db
 
 
 class LoginForm(Form):
@@ -19,7 +20,7 @@ class LoginForm(Form):
         if not rv:
             return False
 
-        user = FlaskUser.query.filter_by(username=self.username.data).first()
+        user = db.session.query(FlaskUser).filter_by(username=self.username.data).first()
         if user is None:
             self.username.errors.append('Unknown username')
             return False

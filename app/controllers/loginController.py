@@ -53,7 +53,7 @@ def user_loader(user_id):
 
     :param unicode user_id: user_id (email) user to retrieve
     """
-    return FlaskUser.query.get(user_id)
+    return db.session.query(FlaskUser).get(user_id)
 
 #@login_manager.unauthorized_handler
 #def unauthorized():

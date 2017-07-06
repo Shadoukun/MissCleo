@@ -23,10 +23,10 @@ def index():
 @login_required
 def macros(macro_id=None):
     form = CommandForm(request.form)
-    macros = Macro.query.all()
+    macros = db.session.query(Macro).all()
 
     if macro_id:
-        macro = Macro.query.filter_by(id=macro_id).first()
+        macro = db.session.query(Macro).filter_by(id=macro_id).first()
         return render_template('macros/macros.html', macros=macros, form=form, current_macro=macro)
     else:
         return render_template('macros/macros.html', macros=macros, form=form)
@@ -47,7 +47,7 @@ def edit_macros(operation, macro_id=None):
             db.session.commit()
 
         if operation == 'edit':
-            macro = Macro.query.filter_by(id=macro_id).first()
+            macro = db.session.query(Macro).filter_by(id=macro_id).first()
             macro.command = form['command'].data
             macro.response = form['response'].data
             macro.modified_flag = 1
@@ -56,7 +56,7 @@ def edit_macros(operation, macro_id=None):
     if (request.method == 'GET') and (macro_id):
 
         if operation == 'delete':
-            Macro.query.filter_by(id=macro_id).delete()
+            db.session.query(Macro).filter_by(id=macro_id).delete()
             db.session.commit()
 
     return redirect(url_for('macros.macros'))
@@ -67,10 +67,10 @@ def edit_macros(operation, macro_id=None):
 @login_required
 def responses(resp_id=None):
     form = CommandForm(request.form)
-    response_list = MacroResponse.query.all()
+    response_list = db.session.query(MacroResponse).all()
 
     if resp_id:
-        resp = MacroResponse.query.filter_by(id=resp_id).first()
+        resp = db.sessin.query(MacroResponse).filter_by(id=resp_id).first()
         return render_template('macros/responses.html', responses=response_list, form=form, current_resp=resp)
     else:
         return render_template('macros/responses.html', responses=response_list, form=form)
@@ -91,7 +91,7 @@ def edit_responses(operation, resp_id=None):
             db.session.commit()
 
         if operation == 'edit':
-            resp = MacroResponse.query.filter_by(id=resp_id).first()
+            resp = db.session.query(MacroResponse).filter_by(id=resp_id).first()
             resp.trigger = form['command'].data
             resp.response = form['response'].data
             db.session.commit()
@@ -99,7 +99,7 @@ def edit_responses(operation, resp_id=None):
     if (request.method == 'GET') and (resp_id):
 
         if operation == 'delete':
-            MacroResponse.query.filter_by(id=resp_id).delete()
+            db.sessin.query(MacroResponse).filter_by(id=resp_id).delete()
             db.session.commit()
 
     return redirect(url_for('macros.responses'))
@@ -109,10 +109,10 @@ def edit_responses(operation, resp_id=None):
 @login_required
 def reactions(react_id=None):
     form = CommandForm(request.form)
-    reaction_list = MacroReaction.query.all()
+    reaction_list = db.session.query(MacroReaction).all()
 
     if react_id:
-        reaction = MacroReaction.query.filter_by(id=react_id).first()
+        reaction = db.session.query(MacroReaction).filter_by(id=react_id).first()
         return render_template('macros/reactions.html', reactions=reaction_list, form=form, current_react=reaction)
     else:
         return render_template('macros/reactions.html', reactions=reaction_list, form=form)
@@ -134,7 +134,7 @@ def edit_reactions(operation, react_id=None):
             db.session.flush()
 
         if operation == 'edit':
-            reaction = MacroReaction.query.filter_by(id=react_id).first()
+            reaction = db.session.query(MacroReaction).filter_by(id=react_id).first()
             reaction.trigger = form['command'].data
             reaction.reaction = form['response'].data
             db.session.commit()
