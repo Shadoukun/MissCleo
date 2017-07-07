@@ -16,6 +16,8 @@ class Command:
         self.db = bot.db
         self._cache = {}
 
+        self.bot.auto_enable = AUTO_ENABLE
+
     async def __global_check(self, ctx):
         #Checks that a command is enabled for the current channel.
         # Enabled commands are listed in the 'channels' table of the db.
@@ -23,16 +25,9 @@ class Command:
         enabled_commands = self.get_enabled_commands(ctx)
         command = ctx.command.qualified_name.split(' ')
 
-        # janky solution
-        # check if the command is a macro
-        try:
-            if ctx.command.macro:
-                return True
-        except:
-            pass
 
         # always allow auto-enabled commands
-        if command[0] in AUTO_ENABLE:
+        if command[0] in self.bot.auto_enable:
             return True
 
         if command[0] in enabled_commands:
@@ -92,42 +87,41 @@ class Command:
         if not commands:
             return
 
-        channel = ctx.channel.id
         commands = commands.split(" ")
 
         #list of newly enabled commands
-        newcommands = []
+        enabled = []
 
         # enable 'all' commands
         if commands[0] == 'all':
-            commands = (c for c in self.bot.commands)
+            commands = self.bot.commands
+
         else:
             for i, command in enumerate(commands):
                 try:
                     command = self.bot.get_command(command)
-                    commands[i] = command
+                    command[i] = command
                 except:
-                    pass
+                    commands.remove(command)
 
         for command in commands:
-            if command.name not in AUTO_ENABLE:
-                try:
-                    self.enable_commands(ctx, command)
-                    newcommands.append(command)
-                except:
-                    pass
+            if command.name in self.bot.auto_enable:
+                continue
 
-        if newcommands:
+            self.enable_commands(ctx, command)
+            enabled.append(command)
+
+        if enabled:
             # create fancy message with ugly for loop.
-            for i, command in enumerate(newcommands):
+            for i, command in enumerate(enabled):
                 if command.help:
                     command = command.name + command.help
                 else:
                     command = command.name
 
-                newcommands[i] = command
+                enabled[i] = command
 
-            await ctx.channel.send("Enabled: ```{0}```".format('\n'.join(newcommands)))
+            await ctx.channel.send("Enabled: ```{0}```".format('\n'.join(enabled)))
         else:
             await ctx.channel.send("Failed.")
 

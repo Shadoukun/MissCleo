@@ -32,14 +32,13 @@ def _quoteStats():
     quotes = db.session.query(Quote).all()
 
     for quote in quotes:
+
         if quote.user:
             if quote.user.display_name:
                 user = quote.user.display_name
-
             # weird issue if user left server.
             else:
                 user = discord.utils.get(message.server.members, id=quote.userid).display_name
-
         else:
             continue
 

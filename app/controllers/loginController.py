@@ -54,9 +54,3 @@ def user_loader(user_id):
     :param unicode user_id: user_id (email) user to retrieve
     """
     return db.session.query(FlaskUser).get(user_id)
-
-#@login_manager.unauthorized_handler
-#def unauthorized():
-#    # do stuff
-#    flash
-#    return redirect(url_for("login.login"))

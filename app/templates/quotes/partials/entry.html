@@ -6,9 +6,9 @@
       <img src="{{ user.avatar_url }}">
     </div>
     {% if curchannel is not none %}
-    {% set user_url = request.url_root + 'quotes/' + curchannel + '/' + user.userid %}
+    {% set user_url = request.url_root + 'quotes/' + curchannel + '/' + user.id|string %}
     {% else %}
-    {% set user_url = request.url_root + 'quotes/all/' + user.userid %}
+    {% set user_url = request.url_root + 'quotes/all/' + user.id|string %}
     {% endif %}
 
     {% if user_url %}

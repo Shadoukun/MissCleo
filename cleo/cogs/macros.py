@@ -20,9 +20,11 @@ class Macros:
         self.bot.loop.create_task(self.add_reactions_task())
 
     async def on_message(self, message):
+        if message.author.id == self.bot.user.id:
+            return
+
         await self._process_responses(message)
         await self._process_reactions(message)
-
 
     def _make_macro(self, macro):
         '''Returns a generic send_message callback function
@@ -66,41 +68,51 @@ class Macros:
 
             func = self._make_macro(m)
             cmd = commands.Command(name=m.command, callback=func, cog_name='Macro')
-            cmd.macro = True
             self.bot.add_command(cmd)
+
+            try:
+                if m.command not in self.bot.auto_enable:
+                    self.bot.auto_enable.append(m.command)
+            except:
+                pass
 
     async def _process_responses(self, message):
         '''Triggers a macro response if message containers trigger.'''
         channel = message.channel
-        message = str(message.content)
+        message = message.content.lower()
+        resp = []
 
         # check for trigger in message
         for trigger in self.responses:
-            if trigger in message.lower():
+            if trigger in message:
                 resp = self.responses[trigger].split('\n')
 
                 # check if there are multiple possible responses
-                if len(resp) > 1:
-                    resp = random.choice(resp)
-                else:
-                    resp = resp[0]
 
-                await channel.send(resp)
-                return
+        if resp:
+            if len(resp) > 1:
+                    resp = random.choice(resp)
+            else:
+                resp = resp[0]
+
+            await channel.send(resp)
 
     async def _process_reactions(self, message):
         '''Triggers an automatic discord reaction if message containers trigger'''
 
-        message = message.content.lower()
         emojis = self.bot.emojis
+        reactions = []
 
         for trigger in self.reactions:
-            if trigger in message:
+            if trigger in message.content.lower():
+                print('trigger')
                 reactions = self.reactions[trigger].split('\n')
-                for react in reactions:
-                    for emoji in emojis:
-                        if react == emoji.name:
-                            await message.add_reaction(emoji)
+
+        if reactions:
+            for react in reactions:
+                for emoji in emojis:
+                    if react == emoji.name:
+                        await message.add_reaction(emoji)
 
 
     ### Background Tasks ###

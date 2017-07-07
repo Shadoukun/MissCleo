@@ -17,7 +17,7 @@ blueprint = Blueprint('quotes', __name__)
 @blueprint.route('/quotes/<channel>/<user>')
 def quotes(channel=None, user=None):
 
-    channels, users, quotes = _getQuotes(channel, user)
+    channel, channels, users, quotes = _getQuotes(channel, user)
 
     return render_template('quotes/quotes.html',
                            quotes=quotes,
@@ -30,30 +30,32 @@ def _getQuotes(channel=None, user=None):
     '''Returns a filtered list of quotes by channel, user.
        If no args provided, returns full quote list.'''
 
+    if channel == 'all':
+        channel = None
+
     allusers = db.session.query(User).filter(User.quotes.any())
-    channels = (c for c in db.session.query(Channel) \
-                            .filter(Channel.quotes).all())
+    channels = db.session.query(Channel) \
+                            .filter(Channel.quotes)
 
     # if a channel is given, filter by channel
-    if channel:
-            quotes = db.session.query(Quote) \
-                        .filter_by(channel=channel)
 
+    if channel:
+            channel = db.session.query(Channel).filter_by(name=channel).first()
+            quotes = db.session.query(Quote) \
+                        .filter_by(channel_id=channel.id)
     # else if None, all quotes from all channels.
     else:
         quotes = db.session.query(Quote).all()
 
     # If a user is given, filter by user.
     if user:
-        users = db.session.query(User).filter_by(id=user).first()
+        users = db.session.query(User).filter_by(id=user)
         quotes = db.session.query(Quote) \
-                    .filter_by(userid=users[0].userid).all()
+                    .filter_by(user_id=users[0].id).all()
 
     # else, all users.
     else:
         users = allusers.all()
-        quotes = db.session.query(Quote) \
-                    .filter_by(channel=channel).all()
 
-    return channels, users, quotes
+    return channel, channels, users, quotes
 

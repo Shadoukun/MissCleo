@@ -121,10 +121,10 @@ class MessageStat(Base):
     messagecount = Column(Integer)
     channel_id = Column(Integer, ForeignKey('channels.id'))
 
-    def __init__(self, timestamp, messagecount, channelid):
+    def __init__(self, timestamp, messagecount, channel_id):
         self.timestamp = timestamp
         self.messagecount = messagecount
-        self.channelid = channel_id
+        self.channel_id = channel_id
 
 class Quote(Base):
     """User quotes"""
