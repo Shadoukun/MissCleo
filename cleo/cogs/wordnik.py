@@ -1,7 +1,7 @@
-from discord.ext import commands
+import discord
 from wordnik import *
 from wordnik import swagger
-import discord
+from discord.ext import commands
 
 NORESULTS_MSG = "No results found."
 

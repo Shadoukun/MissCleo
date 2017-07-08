@@ -1,12 +1,12 @@
-import wikipedia
 import discord
+import wikipedia
 from discord.ext import commands
 
 NORESULTS_MSG = "No results found."
 
 class Wikipedia:
     """Wikipedia lookups"""
-    
+
     def __init__(self, bot):
         self.bot = bot
 

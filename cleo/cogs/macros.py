@@ -1,8 +1,8 @@
+import asyncio
+import random
 import discord
 from discord.ext import commands
-import random
 from cleo.db import Macro, MacroReaction, MacroResponse
-import asyncio
 
 class Macros:
     """Macro commands, responses, and reactions"""
@@ -71,6 +71,7 @@ class Macros:
             self.bot.add_command(cmd)
 
             try:
+                # if commands cog is enabled, add macro to auto-enabled commands.
                 if m.command not in self.bot.auto_enable:
                     self.bot.auto_enable.append(m.command)
             except:
@@ -87,8 +88,8 @@ class Macros:
             if trigger in message:
                 resp = self.responses[trigger].split('\n')
 
-                # check if there are multiple possible responses
 
+        # check if there are multiple possible responses
         if resp:
             if len(resp) > 1:
                     resp = random.choice(resp)

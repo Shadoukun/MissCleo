@@ -1,12 +1,12 @@
-import sys
 import asyncio
+import sys
 from difflib import get_close_matches
-from discord.ext import commands
 from getpass import getpass
 from flask_bcrypt import generate_password_hash
+from discord.ext import commands
+
 from app import db
 from app.models import User, Admin, Channel, Macro, Quote, FlaskUser
-
 
 async def findUser(ctx, username: str):
 

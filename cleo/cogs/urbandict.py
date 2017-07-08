@@ -1,6 +1,6 @@
-from discord.ext import commands
 import json
 import discord
+from discord.ext import commands
 
 NORESULTS_MSG = "No results found."
 
@@ -19,7 +19,7 @@ class UrbanDictionary:
 
         async with self.bot.session.get(self.url.format(query)) as resp:
             data = await resp.text()
-        
+
         try:
             data = json.loads(data)
             data = data['list'][0]

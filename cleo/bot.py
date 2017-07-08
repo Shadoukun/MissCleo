@@ -67,7 +67,7 @@ class MissCleo(commands.Bot):
     async def update_database_task(self):
         '''add missing guilds/channels/users to database'''
         await self.wait_until_ready()
-        while not self.is_closed:
+        while not self.is_closed():
 
             guilds = self.db.query(Guild.id).all()
             channels = self.db.query(Channel.id).all()
@@ -75,18 +75,21 @@ class MissCleo(commands.Bot):
 
             # add missing guilds.
             for guild in self.guilds:
+                print(guild)
                 if guild.id not in guilds:
                     new_guild = Guild(guild)
                     self.db.add(new_guild)
 
                 # add missing channels.
                 for channel in guild.channels:
+                    print(channel)
                     if channel.id not in channels:
                         new_channel = Channel(channel)
                         self.db.add(new_channel)
 
                 # add missing users.
                 for user in guild.members:
+                    print(user)
                     if user.id not in users:
                         new_user = User(user)
                         self.db.add(new_user)
@@ -98,7 +101,7 @@ class MissCleo(commands.Bot):
     async def update_users_task(self):
         '''update user avatar and nickname info'''
         await self.wait_until_ready()
-        while not self.is_closed:
+        while not self.is_closed():
 
             for user in self.db.query(User).all():
                 member = self.get_user(user.id)

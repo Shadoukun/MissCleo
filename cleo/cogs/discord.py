@@ -1,6 +1,5 @@
 from discord.ext import commands
 from discord.ext.commands import guild_only
-from pprint import pprint
 import discord
 from cleo.utils import findUser
 
@@ -18,7 +17,7 @@ class Discord:
 
         if username is None:
             username = ctx.message.author.name
-            
+
         user = await findUser(ctx, username)
 
         if user:

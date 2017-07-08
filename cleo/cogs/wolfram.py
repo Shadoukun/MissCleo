@@ -1,5 +1,5 @@
-import wolframalpha
 import discord
+import wolframalpha
 from discord.ext import commands
 
 class WolframAlpha:

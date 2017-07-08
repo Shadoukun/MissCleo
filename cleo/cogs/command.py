@@ -1,7 +1,6 @@
-from discord.ext import commands
-from pathlib import Path
-import yaml
 import json
+import yaml
+from discord.ext import commands
 from cleo.db import Channel
 from discord.ext.commands import guild_only
 
@@ -24,7 +23,6 @@ class Command:
 
         enabled_commands = self.get_enabled_commands(ctx)
         command = ctx.command.qualified_name.split(' ')
-
 
         # always allow auto-enabled commands
         if command[0] in self.bot.auto_enable:

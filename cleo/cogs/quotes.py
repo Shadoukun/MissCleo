@@ -1,8 +1,8 @@
 import discord
 import random
 from discord.ext import commands
-import cleo.db as db
 from cleo.utils import findUser
+import cleo.db as db
 
 NORESULTS_MSG = "Message not found."
 NOQUOTE_MSG = "Quote not found."
