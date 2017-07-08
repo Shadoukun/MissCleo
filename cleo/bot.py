@@ -71,7 +71,7 @@ class MissCleo(commands.Bot):
 
             guilds = self.db.query(Guild)
             channels = self.db.query(Channel)
-            users = self.db.query(User)
+            users = [u.id for u in self.db.query(User).all()]
 
             # add missing guilds.
             for guild in self.guilds:
@@ -87,7 +87,7 @@ class MissCleo(commands.Bot):
 
                 # add missing users.
                 for user in guild.members:
-                    if user.id not in [u.id for u in users.all()]:
+                    if user.id not in users:
                         new_user = User(user)
                         self.db.add(new_user)
 

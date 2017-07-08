@@ -89,12 +89,11 @@ class Command:
         commands = commands.split(" ")
 
         #list of newly enabled commands
-        enabled = list()
-
+        enabled = []
         # enable 'all' commands
         if commands[0] == 'all':
             commands = self.bot.commands
-            enabled = self.bot.commands
+            enabled = list(self.bot.commands)
             for cmd in commands:
                 self.enable_commands(ctx, cmd)
 
@@ -109,6 +108,7 @@ class Command:
         if enabled:
             # create fancy message with ugly for loop.
             for i, cmd in enumerate(enabled):
+                print(type(enabled))
                 if cmd.help:
                     enabled[i] = cmd.name + cmd.help
                 else:
