@@ -89,7 +89,7 @@ class Command:
         commands = commands.split(" ")
 
         #list of newly enabled commands
-        enabled = []
+        enabled = list()
 
         # enable 'all' commands
         if commands[0] == 'all':

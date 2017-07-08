@@ -87,7 +87,7 @@ class MissCleo(commands.Bot):
 
                 # add missing users.
                 for user in guild.members:
-                    if user.id not in (u.id for u in users.all()):
+                    if user.id not in [u.id for u in users.all()]:
                         new_user = User(user)
                         self.db.add(new_user)
 
