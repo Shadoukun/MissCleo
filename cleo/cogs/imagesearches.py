@@ -172,7 +172,7 @@ class ImageSearches:
 
         if default_tags:
             if tags:
-                tagstring = tags + ' '.join(default_tags)
+                tagstring = tags + ' ' + ' '.join(default_tags)
             else:
                 tagstring = " ".join(default_tags)
         else:
