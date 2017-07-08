@@ -34,7 +34,6 @@ class ImageSearches:
         self.default_tags = {}
         self.load_tag_file()
 
-
         for site in SITES:
             self.count_cache[site] = TTLCache(maxsize=500, ttl=300)
             self.caches[site] = TTLCache(maxsize=500, ttl=300)
@@ -45,7 +44,7 @@ class ImageSearches:
     @commands.command(name="cum")
     async def gelbooru(self, ctx, *, tags: str=None):
         tags = self.create_tag_string(ctx, tags)
- 
+
         url = "http://gelbooru.com/index.php"
         params = {
             'page': 'dapi',
@@ -96,7 +95,7 @@ class ImageSearches:
                     "orig_url": "http://booru.shotachan.net/post/show/{0}".format(post['id'])
                 }
 
-                embed = await self.create_embed(embed)        
+                embed = await self.create_embed(embed)
                 await ctx.channel.send(embed=embed)
 
     @is_nsfw()
@@ -123,9 +122,9 @@ class ImageSearches:
                     "orig_url": "https://e621.net/post/show/{0}".format(post.find("id").text)
                 }
 
-                embed = await self.create_embed(embed)            
+                embed = await self.create_embed(embed)
                 await ctx.channel.send(embed=embed)
-    
+
     async def search(self, ctx, site, url, params, limit):
 
         print(url, params)
@@ -139,7 +138,7 @@ class ImageSearches:
                     data = await resp.text()
                     soup = BeautifulSoup(data, 'lxml')
                     count = int(soup.find("posts")['count'])
-        
+
         if not count:
             await ctx.channel.send(NORESULTS_MSG)
             return None
@@ -147,7 +146,7 @@ class ImageSearches:
         maxpage = int(round(count/limit))
         if maxpage < 1:
             maxpage = 1
-        
+
         self.count_cache[site][params['tags']] = count
         pageid = random.sample(list(range(0, maxpage)), 1)[0]
 
@@ -170,7 +169,7 @@ class ImageSearches:
         command = ctx.command.name
         guild = ctx.guild.name
         default_tags = self.get_default_tags(channel, command)
-       
+
         if default_tags:
             if tags:
                 tagstring = tags + ' '.join(default_tags)
@@ -227,7 +226,7 @@ class ImageSearches:
     async def default_tags_cmd(self, ctx):
         if ctx.invoked_subcommand is None:
             pass
-    
+
     @default_tags_cmd.command(name="add")
     async def add_default_tags(self, ctx, cmd, *, tags : str):
         channel = ctx.channel.id
@@ -236,10 +235,10 @@ class ImageSearches:
         for tag in tags:
             if tag not in self.default_tags[channel][cmd]:
                 self.default_tags[channel][cmd].append(tag)
-        
+
         self.write_tag_file()
         await ctx.channel.send(str(self.default_tags[channel][cmd]))
-    
+
     @default_tags_cmd.command(name="remove")
     async def remove_default_tags(self, ctx, cmd, *, tags: str):
         channel = ctx.channel.id
@@ -248,10 +247,10 @@ class ImageSearches:
         for tag in tags:
             if tag in self.default_tags[channel][cmd]:
                 self.default_tags[channel][cmd].remove(tag)
-        
+
         self.write_tag_file()
         await ctx.channel.send(str(self.default_tags[channel][cmd]))
-        
+
     def get_default_tags(self, channel, command):
         try:
             return self.default_tags[channel][command]
@@ -261,7 +260,7 @@ class ImageSearches:
 
             self.default_tags[channel][command] = SEEDTAGS[command]
             return self.default_tags[channel][command]
-    
+
     def load_tag_file(self):
 
         if not os.path.exists(TAGFILE):
@@ -278,6 +277,7 @@ class ImageSearches:
 
     def write_tag_file(self):
         with open(TAGFILE, 'w') as tagfile:
+            yaml.dumper.ignore_aliases = lambda *args : True
             yaml.dump(self.default_tags, tagfile, default_flow_style=False)
 
 def setup(bot):

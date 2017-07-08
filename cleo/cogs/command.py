@@ -134,7 +134,7 @@ class Command:
         commands = commands.split(" ")
 
         disabledcommands = []
-        DISABLED_MSG = "Disabled: ```{0}```".format('\n'.join(disabledcommands))
+        DISABLED_MSG = "Disabled: ```{0}```"
 
         # disable all commands
         if commands[0] == 'all':
@@ -149,7 +149,7 @@ class Command:
                 continue
 
         if disabledcommands:
-            await ctx.channel.send(DISABLED_MSG)
+            await ctx.channel.send(DISABLED_MSG.format('\n'.join(disabledcommands)))
 
 
 def setup(bot):
