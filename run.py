@@ -22,5 +22,6 @@ def main():
     client.load_cogs()
     client.run(tokens['discord'])
 
+
 if __name__ == "__main__":
     main()

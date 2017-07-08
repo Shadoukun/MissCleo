@@ -1,15 +1,14 @@
-from discord.ext import commands
-from discord.ext.commands import guild_only, is_nsfw
-
-from bs4 import BeautifulSoup, SoupStrainer
+import copy
 import random
-from cachetools import TTLCache
-import discord
-import time
 import os
 import yaml
-import json
-import copy
+import discord
+from cachetools import TTLCache
+from bs4 import BeautifulSoup
+
+from discord.ext import commands
+from discord.ext.commands import guild_only, is_nsfw
+from cleo.utils import is_admin
 
 
 SITES = ['gelbooru', 'shotachan', 'e621']
@@ -222,12 +221,12 @@ class ImageSearches:
         embed.add_field(name="\u200B", value=source_text, inline=False)
         return embed
 
-
     @commands.group(name="default_tags", hidden=True)
     async def default_tags_cmd(self, ctx):
         if ctx.invoked_subcommand is None:
             pass
 
+    @is_admin()
     @default_tags_cmd.command(name="add")
     async def add_default_tags(self, ctx, cmd, *, tags : str):
         channel = ctx.channel.id
@@ -240,6 +239,7 @@ class ImageSearches:
         self.write_tag_file()
         await ctx.channel.send(str(self.default_tags[channel][cmd]))
 
+    @is_admin()
     @default_tags_cmd.command(name="remove")
     async def remove_default_tags(self, ctx, cmd, *, tags: str):
         channel = ctx.channel.id

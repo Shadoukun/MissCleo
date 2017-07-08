@@ -25,7 +25,7 @@ channel_members = Table('channel_members',
 #
 
 class Guild(Base):
-    """Discord Servers/Guilds"""
+    '''Discord Servers/Guilds'''
 
     __tablename__ = "guilds"
 
@@ -42,7 +42,7 @@ class Guild(Base):
 
 
 class Channel(Base):
-    """Server channels"""
+    '''Server channels'''
 
     __tablename__ = "channels"
 
@@ -59,7 +59,7 @@ class Channel(Base):
         self.guild_id = channel.guild.id
 
 class User(Base):
-    """Users"""
+    '''Users'''
 
     __tablename__ = "users"
 
@@ -77,7 +77,7 @@ class User(Base):
         self.avatar_url = user.avatar_url
         self.guild_id = user.guild.id
 
-class Admin():
+class Admin(Base):
 
     __tablename__ = "admins"
 
@@ -89,12 +89,12 @@ class Admin():
         self.user_id = user_id
 
 class FlaskUser(Base):
-   """An admin user capable of viewing reports.
+   '''An admin user capable of viewing reports.
 
    :param str username: username for the user
    :param str password: encrypted password for the user
 
-   """
+   '''
    __tablename__ = 'web_users'
 
    username = Column(String, primary_key=True)
@@ -102,24 +102,24 @@ class FlaskUser(Base):
    authenticated = Column(Boolean, default=False)
 
    def is_active(self):
-       """True, as all users are active."""
+       '''True, as all users are active.'''
        return True
 
    def get_id(self):
-       """Return the email address to satisfy Flask-Login's requirements."""
+       '''Return the email address to satisfy Flask-Login's requirements.'''
        return self.username
 
    def is_authenticated(self):
-       """Return True if the user is authenticated."""
+       '''Return True if the user is authenticated.'''
        return self.authenticated
 
    def is_anonymous(self):
-       """False, as anonymous users aren't supported."""
+       '''False, as anonymous users aren't supported.'''
        return False
 
 
 class MessageStat(Base):
-   """Total messages sent over time (Hourly)"""
+   '''Total messages sent over time (Hourly)'''
 
    __tablename__ = "message_stats"
 
@@ -135,7 +135,7 @@ class MessageStat(Base):
 
 
 class Quote(Base):
-    """User quotes"""
+    '''User quotes'''
 
     __tablename__ = "quotes"
 
@@ -155,7 +155,7 @@ class Quote(Base):
         self.channel_id = message.channel.id
 
 class Macro(Base):
-    """Macro commands"""
+    '''Macro commands'''
 
     __tablename__ = "macros"
 
@@ -170,7 +170,7 @@ class Macro(Base):
         self.modified_flag = modified_flag
 
 class MacroResponse(Base):
-    """Automatic response to keywords"""
+    '''Automatic response to keywords'''
 
     __tablename__ = "responses"
 
@@ -183,7 +183,7 @@ class MacroResponse(Base):
         self.response = response
 
 class MacroReaction(Base):
-
+    '''Automatic reaction to keywords'''
     __tablename__ = "reactions"
 
     id = Column(Integer, primary_key=True)

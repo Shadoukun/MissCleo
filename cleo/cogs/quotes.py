@@ -1,7 +1,7 @@
 import discord
 import random
 from discord.ext import commands
-from cleo.utils import findUser
+from cleo.utils import findUser, is_admin
 import cleo.db as db
 
 NORESULTS_MSG = "Message not found."
@@ -46,6 +46,7 @@ class Quotes:
             ctx.invoke(self.get_user_quote)
 
     @commands.guild_only()
+    @is_admin()
     @quote.command(name="add")
     async def quote_add(self, ctx, *, message_id: int):
         '''Add a quote to quote database'''
@@ -64,6 +65,7 @@ class Quotes:
         await ctx.channel.send(embed=embed)
 
     @commands.guild_only()
+    @is_admin()
     @quote.command(name="remove")
     async def remove(self, ctx, *, message_id: int):
         """remove a quote from quote database"""

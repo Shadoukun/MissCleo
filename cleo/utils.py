@@ -9,6 +9,10 @@ from app import db
 from app.models import User, Admin, Channel, Macro, Quote, FlaskUser
 
 async def findUser(ctx, username: str):
+    '''Tries to find user with discord MemberConverter or
+       Fuzzy searches userlist to find user specified
+
+       returns User object, or None'''
 
     memberconverter = commands.MemberConverter()
 
@@ -53,3 +57,21 @@ def add_user(app):
         db.session.add(user)
         db.session.commit()
         print('User added.')
+
+
+def is_admin():
+    async def predicate(ctx):
+        app_info = await ctx.bot.application_info()
+
+        if app_info.owner.id == ctx.author.id:
+            return True
+
+        try:
+            if ctx.author.id in ctx.bot.admins:
+                return True
+        except:
+            return True
+
+        return False
+
+    return commands.check(predicate)
