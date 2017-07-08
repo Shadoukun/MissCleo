@@ -7,7 +7,7 @@ from cleo.bot import MissCleo, tokens
 from app import create_app
 from gevent import monkey; monkey.patch_all()
 from cleo.utils import add_user
-
+import sys
 
 def main():
     app = create_app('config', debug=False)
@@ -21,10 +21,6 @@ def main():
     client = MissCleo(command_prefix="!", description="Miss Cleo")
     client.load_cogs()
     client.run(tokens['discord'])
-
-
-
-
 
 if __name__ == "__main__":
     main()

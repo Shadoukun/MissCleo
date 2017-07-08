@@ -9,6 +9,7 @@ import time
 import os
 import yaml
 import json
+import copy
 
 
 SITES = ['gelbooru', 'shotachan', 'e621']
@@ -251,6 +252,14 @@ class ImageSearches:
         self.write_tag_file()
         await ctx.channel.send(str(self.default_tags[channel][cmd]))
 
+
+    @default_tags_cmd.before_invoke
+    async def default_tags_check(self, ctx):
+        # janky check to ensure default_tags list for a channel exists.
+        print("Default tags:", ctx.channel)
+        for command in SEEDTAGS:
+            default_tags = self.get_default_tags(ctx.channel.id, command)
+
     def get_default_tags(self, channel, command):
         try:
             return self.default_tags[channel][command]
@@ -258,7 +267,9 @@ class ImageSearches:
             if channel not in self.default_tags:
                 self.default_tags[channel] = {}
 
-            self.default_tags[channel][command] = SEEDTAGS[command]
+            self.default_tags[channel][command] = copy.copy(SEEDTAGS[command])
+            self.write_tag_file()
+
             return self.default_tags[channel][command]
 
     def load_tag_file(self):
@@ -277,7 +288,6 @@ class ImageSearches:
 
     def write_tag_file(self):
         with open(TAGFILE, 'w') as tagfile:
-            yaml.Dumper.ignore_aliases = lambda *args : True
             yaml.dump(self.default_tags, tagfile, default_flow_style=False)
 
 def setup(bot):

@@ -22,6 +22,7 @@ class Command:
         # Enabled commands are listed in the 'channels' table of the db.
 
         enabled_commands = self.get_enabled_commands(ctx)
+        print(enabled_commands)
         command = ctx.command.qualified_name.split(' ')
 
         # always allow auto-enabled commands

@@ -69,25 +69,25 @@ class MissCleo(commands.Bot):
         await self.wait_until_ready()
         while not self.is_closed():
 
-            guilds = self.db.query(Guild.id).all()
-            channels = self.db.query(Channel.id).all()
-            users = self.db.query(User.id).all()
+            guilds = self.db.query(Guild)
+            channels = self.db.query(Channel)
+            users = self.db.query(User)
 
             # add missing guilds.
             for guild in self.guilds:
-                if guild.id not in guilds:
+                if guild.id not in (g.id for g in guilds.all()):
                     new_guild = Guild(guild)
                     self.db.add(new_guild)
 
                 # add missing channels.
                 for channel in guild.channels:
-                    if channel.id not in channels:
+                    if channel.id not in (c.id for c in channels.all()):
                         new_channel = Channel(channel)
                         self.db.add(new_channel)
 
                 # add missing users.
                 for user in guild.members:
-                    if user.id not in users:
+                    if user.id not in (u.id for u in users.all()):
                         new_user = User(user)
                         self.db.add(new_user)
 
