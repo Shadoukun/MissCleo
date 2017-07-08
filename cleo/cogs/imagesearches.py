@@ -277,7 +277,7 @@ class ImageSearches:
 
     def write_tag_file(self):
         with open(TAGFILE, 'w') as tagfile:
-            yaml.dumper.ignore_aliases = lambda *args : True
+            yaml.Dumper.ignore_aliases = lambda *args : True
             yaml.dump(self.default_tags, tagfile, default_flow_style=False)
 
 def setup(bot):
