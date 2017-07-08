@@ -5,7 +5,12 @@ from cleo.db import Channel
 from discord.ext.commands import guild_only
 from cleo.utils import is_admin
 
-AUTO_ENABLE = ['help', 'disable', 'enable', 'guild_enable']
+AUTO_ENABLE = ['help', 'disable', 'enable', 'guild_enable', 'guild_disable']
+
+ENABLED_MSG = "Disabled: ```{0}"
+DISABLED_MSG = "Disabled: ```{0}```"
+ENABLEDALL_MSG = "Commands enabled."
+DISABLEDALL_MSG = "Commands disabled"
 
 class Command:
     '''Cog for command management(enable/disable) commands'''
@@ -75,8 +80,6 @@ class Command:
             enabled_commands = self.get_enabled_commands(channel.id)
             if command.name not in enabled_commands:
                 self._cache[channel.id].append(command.name)
-            else:
-                pass
 
             channel.enabled_commands = json.dumps(self._cache[channel.id])
 
@@ -94,6 +97,17 @@ class Command:
 
             channel.enabled_commands = json.dumps(self._cache[ctx.channel.id])
             self.db.commit()
+
+    def disable_commands_all(self, command):
+
+        channels = self.db.query(Channel).all()
+
+        for channel in [c for c in channels]:
+            if command in self.get_enabled_commands(channel.id):
+                self._cache[channel.id].remove(command)
+                channel.enable_commands = json.dumps(self._cache[channel.id])
+
+        self.db.commit()
 
     @guild_only()
     @is_admin()
@@ -126,7 +140,6 @@ class Command:
         if enabled:
             # create fancy message with ugly for loop.
             for i, cmd in enumerate(enabled):
-                print(type(enabled))
                 if cmd.help:
                     enabled[i] = cmd.name + cmd.help
                 else:
@@ -136,6 +149,8 @@ class Command:
         else:
             await ctx.channel.send("Failed.")
 
+    @guild_only()
+    @is_admin()
     @commands.command(name="guild_enable", hidden=True)
     async def guild_enable(self, ctx, *, commands : str=None):
         if not commands:
@@ -145,37 +160,29 @@ class Command:
         channels = self.db.query(Channel).all()
 
         enabled = []
-        print(commands)
+
         #list of newly enabled commands
         # enable 'all' commands
         if commands[0] == 'all':
-            commands = list(self.bot.commands)
-            for channel in channels:
-                for cmd in commands:
-                    if cmd.name not in self.bot.auto_enable:
-                        self.enable_commands_all(cmd)
-
-                        if cmd not in enabled:
-                            enabled.append(cmd)
-
-        else:
-            print(commands)
-            for cmd in commands:
-                cmd = self.bot.get_command(cmd)
-
-            if cmd:
+            for cmd in self.bot.commands:
                 if cmd.name not in self.bot.auto_enable:
-                    self.enable_commands_all(ctx, cmd)
+                    self.enable_commands_all(cmd)
                     enabled.append(cmd)
+        else:
+            for cmd in commands:
+                if cmd not in self.bot.auto_enable:
+                    cmd = self.bot.get_command(cmd)
+                    if cmd:
+                        self.enable_commands_all(cmd)
+                        enabled.append(cmd)
 
         if enabled:
             # create fancy message with ugly for loop.
             for i, cmd in enumerate(enabled):
-                print(type(enabled))
+                cmd_string = cmd.name
                 if cmd.help:
-                    enabled[i] = cmd.name + cmd.help
-                else:
-                    enabled[i] = cmd.name
+                    cmd_string = cmd_string + cmd.help
+                enabled[i] = cmd_string
 
             await ctx.channel.send("Enabled: ```{0}```".format('\n'.join(enabled)))
         else:
@@ -192,24 +199,50 @@ class Command:
 
         commands = commands.split(" ")
 
-        disabledcommands = []
-        DISABLED_MSG = "Disabled: ```{0}```"
-
+        disabled = []
         # disable all commands
         if commands[0] == 'all':
-            DISABLED_MSG = "Commands disabled"
             commands = [c for c in self.get_enabled_commands(ctx.channel.id)]
 
         for cmd in commands:
             try:
                 self.disable_commands(ctx, cmd)
-                disabledcommands.append(cmd)
+                disabled.append(cmd)
+
             except:
                 continue
 
-        if disabledcommands:
-            await ctx.channel.send(DISABLED_MSG.format('\n'.join(disabledcommands)))
+        if disabled:
+            await ctx.channel.send(DISABLED_MSG.format('\n'.join(disabled)))
 
+
+    @guild_only()
+    @is_admin()
+    @commands.command(name="guild_disable", hidden=True)
+    async def guild_disable(self, ctx, *, commands : str=None):
+
+        if not commands:
+            return
+
+        commands = commands.split(" ")
+
+        disabled = []
+        if commands[0] == 'all':
+            for cmd in [c.name for c in self.bot.commands]:
+                    self.disable_commands_all(cmd)
+                    if cmd not in self.bot.auto_enable:
+                        disabled.append(cmd)
+        else:
+            for cmd in commands:
+                try:
+                    self.disable_commands(ctx, cmd)
+                    if cmd not in self.bot.auto_enable:
+                        disabled.append(cmd)
+                except:
+                    pass
+
+        if disabled:
+            await ctx.channel.send(DISABLED_MSG.format('\n'.join(disabled)))
 
 def setup(bot):
     bot.add_cog(Command(bot))
