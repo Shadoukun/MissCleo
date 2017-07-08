@@ -75,21 +75,18 @@ class MissCleo(commands.Bot):
 
             # add missing guilds.
             for guild in self.guilds:
-                print(guild)
                 if guild.id not in guilds:
                     new_guild = Guild(guild)
                     self.db.add(new_guild)
 
                 # add missing channels.
                 for channel in guild.channels:
-                    print(channel)
                     if channel.id not in channels:
                         new_channel = Channel(channel)
                         self.db.add(new_channel)
 
                 # add missing users.
                 for user in guild.members:
-                    print(user)
                     if user.id not in users:
                         new_user = User(user)
                         self.db.add(new_user)
