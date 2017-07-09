@@ -97,7 +97,7 @@ class Quotes:
 
         if user:
             # if user, filter list of quotes again by user.
-            quotes = quotes.filter(db.Quote.userid == user.id).all()
+            quotes = quotes.filter(db.Quote.user_id == user.id).all()
             random.shuffle(quotes)
             message = quotes[0].message
 
