@@ -110,6 +110,8 @@ class MissCleo(commands.Bot):
                         for m in guild.members:
                             if m.id == user.id:
                                 member = m
+                            else:
+                                member = None
 
                     if member:
                         user.avatar_url = member.avatar_url
