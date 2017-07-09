@@ -101,12 +101,11 @@ class MissCleo(commands.Bot):
         while not self.is_closed():
 
             for user in self.db.query(User).all():
-                member = self.get_user(user.id)
-                try:
-                    user.avatar_url = member.avatar_url
-                    user.display_name = member.display_name
-                except:
-                    print("Failed to update user:", member.name)
+                    member = self.get_user(user.id)
+
+                    if member:
+                        user.avatar_url = member.avatar_url
+                        user.display_name = member.display_name
 
             self.db.commit()
             await asyncio.sleep(12600)
