@@ -14,12 +14,15 @@ async def findUser(ctx, username: str):
 
        returns User object, or None'''
 
+    username = username.lower()
+
     memberconverter = commands.MemberConverter()
 
     # Try to get member from discord.py's member converter
     try:
         user = await memberconverter.convert(ctx, username)
-        return user
+        if user:
+            return user
     except:
         pass
 
@@ -35,7 +38,7 @@ async def findUser(ctx, username: str):
             display_name = user.display_name.lower()
             name = user.name.lower()
             if (display_name == username) or (name == username):
-                return memberconverter.convert(ctx, user.id)
+                return user
 
             else:
                 return None
