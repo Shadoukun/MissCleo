@@ -15,7 +15,6 @@ async def findUser(ctx, username: str):
        returns User object, or None'''
 
     username = username.lower()
-
     memberconverter = commands.MemberConverter()
 
     # Try to get member from discord.py's member converter
@@ -39,9 +38,6 @@ async def findUser(ctx, username: str):
             name = user.name.lower()
             if (display_name == username) or (name == username):
                 return user
-
-            else:
-                return None
 
 def add_user(app):
     '''Create Flask admin user'''

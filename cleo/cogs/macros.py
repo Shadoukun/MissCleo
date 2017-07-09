@@ -67,7 +67,7 @@ class Macros:
                 self.bot.remove_command(m.command)
 
             func = self._make_macro(m)
-            cmd = commands.Command(name=m.command, callback=func, cog_name='Macro')
+            cmd = commands.Command(name=m.command, callback=func)
             self.bot.add_command(cmd)
 
             try:
