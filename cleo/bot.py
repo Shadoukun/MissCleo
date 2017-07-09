@@ -113,9 +113,10 @@ class MissCleo(commands.Bot):
                             else:
                                 member = None
 
-                    if member:
-                        user.avatar_url = member.avatar_url
-                        user.display_name = member.display_name
+                        if member:
+                            user.avatar_url = member.avatar_url
+                            user.display_name = member.display_name
+
 
             self.db.commit()
             await asyncio.sleep(12600)
