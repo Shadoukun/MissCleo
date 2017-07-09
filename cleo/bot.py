@@ -99,9 +99,17 @@ class MissCleo(commands.Bot):
         '''update user avatar and nickname info'''
         await self.wait_until_ready()
         while not self.is_closed():
+            converter = commands.MemberConverter()
 
             for user in self.db.query(User).all():
-                    member = self.get_user(user.id)
+                    for g in self.guilds:
+                        if user.guild_id == g.id:
+                            guild = g
+
+                    if guild:
+                        for m in guild.members:
+                            if m.id == user.id:
+                                member = m
 
                     if member:
                         user.avatar_url = member.avatar_url

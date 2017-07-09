@@ -35,7 +35,7 @@ async def findUser(ctx, username: str):
             display_name = user.display_name.lower()
             name = user.name.lower()
             if (display_name == username) or (name == username):
-                return user
+                return memberconverter.convert(ctx, user.id)
 
             else:
                 return None
