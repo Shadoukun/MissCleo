@@ -70,7 +70,7 @@ def responses(resp_id=None):
     response_list = db.session.query(MacroResponse).all()
 
     if resp_id:
-        resp = db.sessin.query(MacroResponse).filter_by(id=resp_id).first()
+        resp = db.session.query(MacroResponse).filter_by(id=resp_id).first()
         return render_template('macros/responses.html', responses=response_list, form=form, current_resp=resp)
     else:
         return render_template('macros/responses.html', responses=response_list, form=form)
