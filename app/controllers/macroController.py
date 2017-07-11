@@ -110,7 +110,7 @@ def edit_responses(operation, resp_id=None):
 
     if (request.method == 'GET') and (resp_id):
         if operation == 'delete':
-            db.sessin.query(MacroResponse).filter_by(id=resp_id).delete()
+            db.session.query(MacroResponse).filter_by(id=resp_id).delete()
             db.session.commit()
 
             requests.get('http://127.0.0.1:10000/update_responses')
@@ -157,7 +157,7 @@ def edit_reactions(operation, react_id=None):
 
     if (request.method == 'GET') and (react_id):
         if operation == 'delete':
-            reaction.query.filter_by(id=react_id).delete()
+            reaction = db.session.query(MacroReaction).filter_by(id=react_id).delete()
             db.session.commit()
 
             requests.get('http://127.0.0.1:10000/update_reactions')

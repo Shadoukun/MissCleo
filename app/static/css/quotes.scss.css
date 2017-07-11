@@ -6,7 +6,10 @@
   color: white;
   padding: 10px;
   background: #32353c;
-  margin-bottom: 1px; }
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; }
 
 .quote-card {
   background: #191A1C;
