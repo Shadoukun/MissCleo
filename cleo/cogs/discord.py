@@ -32,6 +32,8 @@ class Discord:
     @commands.command(name="uinfo")
     async def userInfo(self, ctx, username:str=None):
         """: !uinfo <username>  | Post a user's information."""
+        if username is None:
+            username = ctx.message.author.name
 
         channel = ctx.message.channel
         user = await findUser(ctx, username)

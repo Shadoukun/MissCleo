@@ -1,9 +1,12 @@
 import asyncio
 import json
 import discord
+import logging
 from discord.ext import commands
 
 NORESULTS_MSG = "No results found."
+
+logger = logging.getLogger(__name__)
 
 class IMDB:
 
@@ -15,7 +18,12 @@ class IMDB:
     @commands.command(name='imdb')
     async def imdb_search(self, ctx, *, title: str):
         """: !imdb <title>      | lookup a movie on IMDB. """
-        print(title)
+
+        if not title:
+            return
+
+        logger.debug(title)
+
         async with self.bot.session.get(self.url.format(self.bot.tokens['omdb'], title)) as resp:
             data = await resp.text()
             movie = json.loads(data)
@@ -31,6 +39,8 @@ class IMDB:
             embed.add_field(name="Director", value=movie['Director'], inline=False)
             embed.add_field(name="Actors", value=movie['Actors'])
             embed.add_field(name="Plot", value=movie['Plot'])
+
+            logger.debug(embed.to_dict())
             await ctx.channel.send(embed=embed)
 
         else:

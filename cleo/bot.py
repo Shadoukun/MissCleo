@@ -1,19 +1,20 @@
+from cleo.db import *
+import cleo.utils as utils
+
+import logging
 import os
 import glob
 import asyncio
 import discord
 import yaml
 import aiohttp
-import logging
 from pathlib import Path
 from sqlalchemy.orm import sessionmaker
 from discord.ext import commands
 
-from cleo.db import *
 
-
-logger = logging.getLogger('discord')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -30,92 +31,70 @@ class MissCleo(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # create database if it doesn't exist.
-
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.db = session
         self.tokens = tokens
 
+        
+
+
     async def on_ready(self):
         # database background tasks
-        self.loop.create_task(self.update_database_task())
-        self.loop.create_task(self.update_users_task())
+        logger.debug("Client ready")
+        await utils.update_database(self)
 
-        print('------')
-        print('Logged in as:', self.user.name)
-        print('User ID:', self.user.id)
-        print('------')
+        logger.info(f'Logged in as: {self.user.name}')
+        logger.info(f'User ID: {self.user.id}')
+
+    async def on_member_update(self, before, after):
+        # Update a user's info in the database when they change it.
+        user = self.db.query(User) \
+                    .filter_by(id=after.id).one()
+
+        user.avatar_url = after.avatar_url
+        user.display_name = after.display_name
+        self.db.commit()
+
+        logger.debug("Member info updated.")
+        logger.debug(f'Before: {before.display_name}, {before.avatar_url}')
+        logger.debug(f'After: {after.display_name}, {after.avatar_url}')
+
+    async def on_member_join(self, member):
+        # Add new members to the database.
+        new_user = User(member)
+        self.db.add(new_user)
+        self.db.commit()
+
+        logging.debug(f'{member.name} joined {guild.name}.')
+
+    async def on_guild_channel_create(self, channel):
+        # Add new channels to the database.
+        new_channel = Channel(channel)
+        self.db.add(new_channel)
+        self.db.commit()
+
+        logging.debug(f"Channel {channel.name} created")
+
+    async def on_guild_join(self, guild):
+        # Add new guilds to the database.
+        new_guild = Guild(guild)
+        self.db.add(new_guild)
+        self.db.commit()
+
+        logging.debug(f"Joined {guild.name}")
 
     def load_cogs(self):
         """Load cogs from cogs folder."""
 
-        print("Loading Cogs...")
-        path = os.path.join(os.getcwd(), "cleo", "cogs", "*.py")
-        cmd_path = glob.glob(path, recursive=True)
+        logger.info("Loading Cogs...")
+        extensions = [f'cleo.cogs.{f.stem}' for f in Path('cleo/cogs').glob('*.py')]
 
-        for c in cmd_path:
-            # Skip commands/files that contain with __
-            if "__" in c:
-                continue
-
-            name = os.path.basename(c)[:-3]
-            self.load_extension("cleo.cogs." + name)
-
-    # I want these to be in a cog, or modularized somehow
-    # but I haven't decided how best to do it.
-
-    async def update_database_task(self):
-        '''add missing guilds/channels/users to database'''
-        await self.wait_until_ready()
-        while not self.is_closed():
-
-            guilds = self.db.query(Guild)
-            channels = self.db.query(Channel)
-            users = [u.id for u in self.db.query(User).all()]
-
-            # add missing guilds.
-            for guild in self.guilds:
-                if guild.id not in (g.id for g in guilds.all()):
-                    new_guild = Guild(guild)
-                    self.db.add(new_guild)
-
-                # add missing channels.
-                for channel in guild.channels:
-                    if channel.id not in (c.id for c in channels.all()):
-                        new_channel = Channel(channel)
-                        self.db.add(new_channel)
-
-                # add missing users.
-                for user in guild.members:
-                    if user.id not in users:
-                        new_user = User(user)
-                        self.db.add(new_user)
-
-            self.db.commit()
-            await asyncio.sleep(7200)
+        for extension in extensions:
+            try:
+                self.load_extension(extension)
+            except Exception as e:
+                logger.info(f'Failed to load extension {extension}\n{type(e).__name__}: {e}')
 
 
-    async def update_users_task(self):
-        '''update user avatar and nickname info'''
-        await self.wait_until_ready()
-        while not self.is_closed():
-            converter = commands.MemberConverter()
 
-            for user in self.db.query(User).all():
-                for g in self.guilds:
-                    if user.guild_id == g.id:
-                        guild = g
 
-                    if guild:
-                        for m in guild.members:
-                            if m.id == user.id:
-                                member = m
-                            else:
-                                member = None
-
-                    if member:
-                        user.avatar_url = member.avatar_url
-                        user.display_name = member.display_name
-
-            self.db.commit()
-            await asyncio.sleep(12600)

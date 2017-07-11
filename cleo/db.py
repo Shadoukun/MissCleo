@@ -1,4 +1,3 @@
-import discord
 from sqlalchemy import *
 from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy import Column, Integer, String, Table, DateTime, Boolean
@@ -89,49 +88,49 @@ class Admin(Base):
         self.user_id = user_id
 
 class FlaskUser(Base):
-   '''An admin user capable of viewing reports.
+    '''An admin user capable of viewing reports.
 
-   :param str username: username for the user
-   :param str password: encrypted password for the user
+    :param str username: username for the user
+    :param str password: encrypted password for the user
+    '''
 
-   '''
-   __tablename__ = 'web_users'
+    __tablename__ = 'web_users'
 
-   username = Column(String, primary_key=True)
-   password = Column(String)
-   authenticated = Column(Boolean, default=False)
+    username = Column(String, primary_key=True)
+    password = Column(String)
+    authenticated = Column(Boolean, default=False)
 
-   def is_active(self):
-       '''True, as all users are active.'''
-       return True
+    def is_active(self):
+        '''True, as all users are active.'''
+        return True
 
-   def get_id(self):
-       '''Return the email address to satisfy Flask-Login's requirements.'''
-       return self.username
+    def get_id(self):
+        '''Return the email address to satisfy Flask-Login's requirements.'''
+        return self.username
 
-   def is_authenticated(self):
-       '''Return True if the user is authenticated.'''
-       return self.authenticated
+    def is_authenticated(self):
+        '''Return True if the user is authenticated.'''
+        return self.authenticated
 
-   def is_anonymous(self):
-       '''False, as anonymous users aren't supported.'''
-       return False
+    def is_anonymous(self):
+        '''False, as anonymous users aren't supported.'''
+        return False
 
 
 class MessageStat(Base):
-   '''Total messages sent over time (Hourly)'''
+    '''Total messages sent over time (Hourly)'''
 
-   __tablename__ = "message_stats"
+    __tablename__ = "message_stats"
 
-   id = Column(Integer, primary_key=True)
-   timestamp = Column(DateTime, default=datetime.utcnow)
-   messagecount = Column(Integer)
-   channel_id = Column(Integer, ForeignKey('channels.id'))
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    messagecount = Column(Integer)
+    channel_id = Column(Integer, ForeignKey('channels.id'))
 
-   def __init__(self, timestamp, messagecount, channelid):
-       self.timestamp = timestamp
-       self.messagecount = messagecount
-       self.channelid = channel_id
+    def __init__(self, timestamp, messagecount, channel_id):
+        self.timestamp = timestamp
+        self.messagecount = messagecount
+        self.channelid = channel_id
 
 
 class Quote(Base):

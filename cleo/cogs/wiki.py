@@ -24,7 +24,7 @@ class Wikipedia:
 
             await ctx.channel.send(embed=embed)
 
-        except wikipedia.DisambiguationError:
+        except wikipedia.DisambiguationError as e:
             title = "'{t}' may refer to:\n".format(t=e.title)
             text = '\n'.join(e.options[:10])
 

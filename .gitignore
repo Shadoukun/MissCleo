@@ -1,6 +1,6 @@
 # Cleo stuff
 database.db
-config/*.yaml
+config/cogs/*.yaml
 
 
 # Byte-compiled / optimized / DLL files

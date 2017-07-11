@@ -1,5 +1,6 @@
 import discord
 import random
+import logging
 from discord.ext import commands
 from cleo.utils import findUser, is_admin
 import cleo.db as db
@@ -8,6 +9,8 @@ NORESULTS_MSG = "Message not found."
 NOQUOTE_MSG = "No quote found."
 REMOVED_MSG = "Quote removed."
 ADDED_MSG = "Quote added."
+
+logger = logging.getLogger(__name__)
 
 class Quotes:
 
@@ -18,13 +21,15 @@ class Quotes:
 
     async def _add_quote(self, ctx, message):
         '''Add a quote to the database.'''
-        quote = db.Quote(message)
+        logger.debug("adding quote")
 
+        quote = db.Quote(message)
         # Users no longer in the server won't be in the userlist.
         # Add message author if they are no longer in the server.
         if not self.db.query(db.User) \
                     .filter_by(id=message.author.id).count():
 
+            logger.debug("User not found. adding to database")
             newuser = db.User(message.author)
             self.db.add(newuser)
 
@@ -32,13 +37,18 @@ class Quotes:
         self.db.commit()
 
         embed = self._create_embed(message.author, message.content)
+        logger.debug(embed.to_dict())
         await ctx.channel.send(embed=embed)
 
     async def _remove_quote(self, ctx, message):
         '''Remove a quote from the database.'''
+        logger.debug("removing quote")
+
         quotes = self.db.query(db.Quote) \
                     .filter_by(channel_id=ctx.channel.id) \
                     .filer_byt(message_id=message.id).all()
+
+        logger.debug(quotes)
 
         if quotes:
             for quote in quotes:
@@ -52,29 +62,38 @@ class Quotes:
 
     async def _get_quote(self, user, channel):
         '''Get quote by the user from the current channel.'''
+        logger.debug("getting quote")
         quotes = self.db.query(db.Quote) \
                     .filter_by(channel_id=channel.id) \
                     .filter_by(user_id=user.id).all()
 
+
         if quotes and user:
             random.shuffle(quotes)
             quote = quotes[0]
+            logger.debug(quote)
             return quote
 
         else:
+            logger.debug("no quotes found")
             return None
 
     async def _get_random_quote(self, channel):
         '''get random quote from the current channel.'''
+        logger.debug("getting random quote")
         quotes = self.db.query(db.Quote) \
                     .filter_by(channel_id=channel.id).all()
+
 
         if quotes:
             random.shuffle(quotes)
             quote = quotes[0]
+            logger.debug(quote)
             return quote
 
+
         else:
+            logger.debug("no quotes found")
             return None
 
     def _create_embed(self, user, message):

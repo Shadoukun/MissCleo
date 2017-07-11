@@ -1,9 +1,12 @@
 import json
 import yaml
+import logging
 from discord.ext import commands
 from cleo.db import Channel
 from discord.ext.commands import guild_only
 from cleo.utils import is_admin
+
+logger = logging.getLogger(__name__)
 
 AUTO_ENABLE = ['help', 'disable', 'enable', 'guild_enable', 'guild_disable']
 
@@ -25,15 +28,18 @@ class Command:
     async def __global_check(self, ctx):
         #Checks that a command is enabled for the current channel.
         # Enabled commands are listed in the 'channels' table of the db.
+        logger.debug("!" + ctx.command.qualified_name)
+
+        command = ctx.command.qualified_name.split(' ')[0]
+        logger.debug(f"checking if !{command} is enabled")
 
         enabled_commands = self.get_enabled_commands(ctx.channel.id)
-        command = ctx.command.qualified_name.split(' ')
 
         # always allow auto-enabled commands
-        if command[0] in self.bot.auto_enable:
+        if command in self.bot.auto_enable:
             return True
 
-        if command[0] in enabled_commands:
+        if command in enabled_commands:
             return True
 
 
@@ -58,6 +64,7 @@ class Command:
 
     def enable_commands(self, ctx, command):
         '''Takes a list of commands to enable for the current channel.'''
+        logger.debug(f"enabling command: {command.name}")
 
         channel = self.db.query(Channel).filter_by(id=ctx.channel.id).one()
 
@@ -72,6 +79,7 @@ class Command:
 
     def enable_commands_all(self, command):
         '''takes a list of commands to enable for all channels in guild'''
+        logger.debug("enabling command for guild: {0}".format(command.name))
 
         channels = self.db.query(Channel).all()
 
@@ -87,6 +95,7 @@ class Command:
 
     def disable_commands(self, ctx, command):
         '''Takes a list of commands to disable for the current channel.'''
+        logger.debug(f"disabling command: {command.name}")
 
         channel = self.db.query(Channel).filter_by(id=ctx.channel.id).one()
 
@@ -99,6 +108,7 @@ class Command:
             self.db.commit()
 
     def disable_commands_all(self, command):
+        logger.debug("disabling command for guild: {0}".format(command.name))
 
         channels = self.db.query(Channel).all()
 
@@ -153,6 +163,7 @@ class Command:
     @is_admin()
     @commands.command(name="guild_enable", hidden=True)
     async def guild_enable(self, ctx, *, commands : str=None):
+
         if not commands:
             return
 
