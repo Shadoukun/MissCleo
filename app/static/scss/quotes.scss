@@ -14,6 +14,9 @@
         padding:10px;
         background: #32353c;
         margin-bottom:1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
 }
