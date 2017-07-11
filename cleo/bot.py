@@ -35,7 +35,7 @@ class MissCleo(commands.Bot):
         self.db = session
         self.tokens = tokens
 
-        
+
 
 
     async def on_ready(self):
@@ -65,7 +65,7 @@ class MissCleo(commands.Bot):
         self.db.add(new_user)
         self.db.commit()
 
-        logging.debug(f'{member.name} joined {guild.name}.')
+        logging.debug(f'{member.name} joined {member.guild.name}.')
 
     async def on_guild_channel_create(self, channel):
         # Add new channels to the database.
