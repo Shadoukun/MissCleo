@@ -15,7 +15,7 @@ $('nav #quotes').addClass('active');
 {% endblock %}
 
 {% block content %}
-
+{{ super() }}
 
   <div class="container-fluid">
 
@@ -59,9 +59,8 @@ $('nav #quotes').addClass('active');
       {% for quote in quotes[::-1] %}
 
         {% for user in users if quote.user == user %}
-            {% set current_user = user %}
-            {% from "quotes/partials/entry.html" import quoteEntry %}
-            {{ quoteEntry(user=current_user, curchannel=curchannel, quote=quote) }}
+            {% from "quotes/partials/entry.html" import quoteEntry with context %}
+            {{ quoteEntry(current_user=current_user, user=user, curchannel=curchannel, quote=quote) }}
         {% endfor %}
       {% endfor %}
     </div>

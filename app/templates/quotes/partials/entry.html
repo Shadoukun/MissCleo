@@ -1,4 +1,5 @@
-{% macro quoteEntry(user, curchannel, quote) -%}
+{% macro quoteEntry(current_user, user, curchannel, quote) -%}
+
 <div class="card quote-card" id="{{ quote['message_id'] }}">
   <div class="card-block quote-block">
   <div class="card-title quote-heading">
@@ -30,6 +31,9 @@
       </button>
       <ul class="dropdown-menu">
         <li><a href="#">Copy ID</a></li>
+        {% if current_user.is_authenticated %}
+        <li><a href="{{ url_for('.delete_quote', id=quote.message_id|string) }}">Delete</a><li>
+        {% endif %}
       </ul>
     </div>
 

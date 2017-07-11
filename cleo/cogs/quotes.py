@@ -116,7 +116,7 @@ class Quotes:
     @quote.command(name="add")
     async def quote_add(self, ctx, *, message_id: int):
 
-        message = ctx.get_message(message_id)
+        message = await ctx.get_message(message_id)
 
         if message:
             await self._add_quote(ctx, message)

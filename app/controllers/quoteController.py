@@ -2,7 +2,8 @@ import sys
 import json
 import discord
 from sqlalchemy import func
-from flask import render_template, Blueprint, request
+from flask import render_template, Blueprint, request, redirect, url_for
+from flask_login import login_required
 
 from app import db
 from app.forms import *
@@ -26,9 +27,19 @@ def quotes(channel=None, user=None):
                            curchannel=channel.name if channel else None)
 
 
+@blueprint.route("/delete_quote/<id>")
+@login_required
+def delete_quote(id):
+    quote = db.session.query(Quote).filter_by(message_id=id).delete()
+    db.session.commit()
+
+    return redirect(url_for('quotes.quotes'))
+
+
 def _getQuotes(channel=None, user=None):
     '''Returns a filtered list of quotes by channel, user.
        If no args provided, returns full quote list.'''
+
 
     if channel == 'all':
         channel = None

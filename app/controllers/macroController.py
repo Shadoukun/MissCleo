@@ -41,11 +41,13 @@ def edit_macros(operation, macro_id=None):
 
         if not form.validate_on_submit():
             flash(form.errors)
+            return
 
         if operation == 'new':
             macro = Macro(form.command.data, form.response.data, 1)
             db.session.add(macro)
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_macros')
 
         if operation == 'edit':
@@ -54,14 +56,15 @@ def edit_macros(operation, macro_id=None):
             macro.response = form['response'].data
             macro.modified_flag = 1
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_macros')
 
 
     if (request.method == 'GET') and (macro_id):
-
         if operation == 'delete':
             db.session.query(Macro).filter_by(id=macro_id).delete()
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_macros')
 
     return redirect(url_for('macros.macros'))
@@ -94,6 +97,7 @@ def edit_responses(operation, resp_id=None):
             resp = MacroResponse(form.command.data, form.response.data)
             db.session.add(resp)
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_responses')
 
         if operation == 'edit':
@@ -101,13 +105,14 @@ def edit_responses(operation, resp_id=None):
             resp.trigger = form['command'].data
             resp.response = form['response'].data
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_responses')
 
     if (request.method == 'GET') and (resp_id):
-
         if operation == 'delete':
             db.sessin.query(MacroResponse).filter_by(id=resp_id).delete()
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_responses')
 
     return redirect(url_for('macros.responses'))
@@ -139,6 +144,7 @@ def edit_reactions(operation, react_id=None):
             reaction = MacroReaction(form.command.data, form.response.data)
             db.session.add(reaction)
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_reactions')
 
         if operation == 'edit':
@@ -146,13 +152,14 @@ def edit_reactions(operation, react_id=None):
             reaction.trigger = form['command'].data
             reaction.reaction = form['response'].data
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_reactions')
 
     if (request.method == 'GET') and (react_id):
-
         if operation == 'delete':
             reaction.query.filter_by(id=react_id).delete()
             db.session.commit()
+
             requests.get('http://127.0.0.1:10000/update_reactions')
 
     return redirect(url_for('macros.reactions'))
