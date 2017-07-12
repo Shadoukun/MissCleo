@@ -3,8 +3,6 @@ import logging.config
 import yaml
 from threading import Thread
 from pathlib import Path
-from gevent.pywsgi import WSGIServer
-from gevent import monkey; monkey.patch_all()
 
 from app import create_app
 from cleo.bot import MissCleo, tokens
@@ -20,12 +18,11 @@ if path.exists():
 
     logging.config.dictConfig(cfg)
 else:
-    logging.basicConfig(level=level)
+    logging.basicConfig(level=INFO)
 
 
 def main():
-    app = create_app('config', debug=False)
-    http = WSGIServer(('', 5000), app.wsgi_app)
+    app, http = create_app('config', debug=False)
     flask_thread = Thread(target=http.serve_forever)
     flask_thread.start()
 

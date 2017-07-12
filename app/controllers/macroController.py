@@ -15,7 +15,7 @@ blueprint = Blueprint('macros', __name__)
 
 @blueprint.route('/macros')
 def index():
-    return render_template('macros/index.html')
+    return render_template('pages/macros/index.html')
 
 
 
@@ -28,9 +28,9 @@ def macros(macro_id=None):
 
     if macro_id:
         macro = db.session.query(Macro).filter_by(id=macro_id).first()
-        return render_template('macros/macros.html', macros=macros, form=form, current_macro=macro)
+        return render_template('pages/macros/macros.html', macros=macros, form=form, current_macro=macro)
     else:
-        return render_template('macros/macros.html', macros=macros, form=form)
+        return render_template('pages/macros/macros.html', macros=macros, form=form)
 
 @login_required
 @blueprint.route('/macros/macros/<int:macro_id>/<string:operation>', methods=['POST', 'GET'])
@@ -79,9 +79,9 @@ def responses(resp_id=None):
 
     if resp_id:
         resp = db.session.query(MacroResponse).filter_by(id=resp_id).first()
-        return render_template('macros/responses.html', responses=response_list, form=form, current_resp=resp)
+        return render_template('pages/macros/responses.html', responses=response_list, form=form, current_resp=resp)
     else:
-        return render_template('macros/responses.html', responses=response_list, form=form)
+        return render_template('pages/macros/responses.html', responses=response_list, form=form)
 
 @login_required
 @blueprint.route('/macros/responses/<int:resp_id>/<string:operation>', methods=['POST', 'GET'])
@@ -126,9 +126,9 @@ def reactions(react_id=None):
 
     if react_id:
         reaction = db.session.query(MacroReaction).filter_by(id=react_id).first()
-        return render_template('macros/reactions.html', reactions=reaction_list, form=form, current_react=reaction)
+        return render_template('pages/macros/reactions.html', reactions=reaction_list, form=form, current_react=reaction)
     else:
-        return render_template('macros/reactions.html', reactions=reaction_list, form=form)
+        return render_template('pages/macros/reactions.html', reactions=reaction_list, form=form)
 
 @login_required
 @blueprint.route('/macros/reactions/<int:react_id>/<string:operation>', methods=['POST', 'GET'])

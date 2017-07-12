@@ -1,6 +1,14 @@
-# Cleo stuff
+
+# discord bot stuff
 database.db
+*.log
 config/cogs/*.yaml
+
+
+# flask stuff
+app/static/bower_components
+app/static/css/*.css
+
 
 
 # Byte-compiled / optimized / DLL files

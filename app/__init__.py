@@ -7,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
 from sassutils.wsgi import SassMiddleware
 from sassutils.builder import build_directory
+from gevent.pywsgi import WSGIServer
+from gevent import monkey; monkey.patch_all()
 
 login_manager = LoginManager()
 db = SQLAlchemy()
@@ -40,23 +42,21 @@ def create_app(config_filename, debug=False):
 
 
     if debug:
-
-        log.setLevel(logging.NOTSET)
-        app.logger.setLevel(logging.NOTSET)
-
         # compile SCSS to CSS with every request.
         # useful for updating/debugging styles.
         app.wsgi_app = SassMiddleware(app.wsgi_app, {
             'app': ('static/scss', 'static/css', 'static/css')
             })
     else:
-        log.setLevel(logging.INFO)
-        app.logger.setLevel(logging.INFO)
-
         # compile stylesheets once at start.
         build_directory("app/static/scss", "app/static/css")
 
-    return app
+    # create wsgi server
+
+    http = WSGIServer(('', 5000), app.wsgi_app, log=app.logger)
+
+
+    return app, http
 
 
 def add_user(app):

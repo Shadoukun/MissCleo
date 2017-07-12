@@ -20,7 +20,7 @@ def stats():
     hourly_stats = _hourlyStats()
     daily_stats = _dailyStats()
     quote_stats = _quoteStats()
-    return render_template('stats/stats.html',
+    return render_template('pages/stats/stats.html',
                            hourly_stats=hourly_stats,
                            daily_stats=daily_stats,
                            quote_stats=quote_stats)

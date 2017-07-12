@@ -1,28 +1,24 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Login{% endblock %}
-{% block content %}
-  <form action="/login" method=POST class="form-horizontal">
-  {{ form.hidden_tag() }}
-    <h2>Signin to FlaskLogin(Todo) Application </h2>
-    <div class="control-group">
-        <div class="controls">
-          <input type="text" id="email" name="email" class="input-xlarge"
-            placeholder="Enter Username" required>
-        </div>
-    </div>
- 
-    <div class="control-group">
-        <div class="controls">
-          <input type="password" id="password" name="password" class="input-xlarge"
-            placeholder="Enter Password" required>
-        </div>
-    </div>
- 
-    <div class="control-group">
-        <div class="controls">
 
-          <input id="login" class="button btn btn-success" type="submit" value="submit" />
-        </div>
-    </div>
-  </form>
+{% block css %}
+<link href="{{ url_for('static', filename='css/login.scss.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+	<div id="login-box">
+		<div class="logo">
+			<h1 class="logo-caption">Login</h1>
+		</div>
+    
+    <form action="/login" id="login" method=POST class="form-horizontal">
+		<div class="control-group">
+      <div class="controls">
+        {{ form.hidden_tag() }}
+        <input type="text" id="username" name="username" placeholder="Username">
+        <input type="password" id="password" name="password" placeholder="Password">
+			  <button type="submit" form="login" class="btn btn-default btn-block btn-custom">Login</button>
+		  </div>
+	  </div>
+    </form>
 {% endblock %}

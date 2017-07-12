@@ -20,7 +20,7 @@ def quotes(channel=None, user=None):
 
     channel, channels, users, quotes = _getQuotes(channel, user)
 
-    return render_template('quotes/quotes.html',
+    return render_template('pages/quotes/quotes.html',
                            quotes=quotes,
                            channels=channels,
                            users=users,

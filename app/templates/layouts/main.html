@@ -11,8 +11,8 @@
 
 <!-- styles -->
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap-reboot.min.css') }}">
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-reboot.scss.css') }}">
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.scss.css') }}">
 <link type="text/css" rel="stylesheet" href="/static/css/layout.main.scss.css" />
 
 {% block css %}{% endblock %}
@@ -29,10 +29,10 @@
 <!-- /favicons -->
 
 <!-- scripts -->
-<script src="/static/js/libs/modernizr-2.6.2.min.js"></script>
-<script src="{{url_for('static', filename='bower_components/jquery/dist/jquery.min.js')}}"></script>
-<script src="{{url_for('static', filename='bower_components/tether/dist/js/tether.min.js')}}"></script>
-<script src="{{url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/libs/modernizr-2.6.2.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/libs/jquery.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/libs/tether.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/libs/bootstrap.min.js')}}"></script>
 
 {% block scripts %}{% endblock %}
 

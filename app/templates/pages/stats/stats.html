@@ -1,0 +1,166 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Quotes{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{url_for('static', filename='js/libs/highcharts/highcharts.js')}}"></script>
+<script src="{{url_for('static', filename='js/libs/highcharts/themes/grid.js')}}"></script>
+
+<script>
+$( document ).ready(function() {
+$(".nav li").removeClass("active");
+$('nav #stats').addClass('active');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid">
+
+  <div class="row" id="main">
+    <div class="col-4" id="sidebar">
+    </div>
+
+    <div class="col-8" >
+    <div id="hourly-container"></div>
+    <div id="daily-container"></div>
+    <div id="daily-containier2"></div>
+      <script language="JavaScript">
+   var chart = {
+      type: 'areaspline'
+   };
+   var title = {
+      text: 'Messages - Hourly'
+   };
+   var subtitle = {
+      style: {
+         position: 'absolute',
+         right: '0px',
+         bottom: '10px'
+      }
+   };
+   var legend = {
+      enabled: false,
+      layout: 'vertical',
+      align: 'left',
+      verticalAlign: 'top',
+      x: 150,
+      y: 100,
+      floating: true,
+      borderWidth: 1,
+      backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+   };
+   var xAxis = {
+      categories: {{hourly_stats[0][-12:]|safe}}
+   };
+   var yAxis = {
+      title: {
+         text: 'Messages'
+      }
+   };
+   var tooltip = {
+       shared: true,
+       valueSuffix: ' units'
+   };
+   var credits = {
+       enabled: false
+   }
+   var plotOptions = {
+      areaspline: {
+         fillOpacity: 0.9
+      }
+   };
+
+   var series= [{
+        name: 'Messages',
+            data: {{hourly_stats[1][-12:]}}
+        }
+   ];
+
+   var json = {};
+   json.chart = chart;
+   json.title = title;
+   json.subtitle = subtitle;
+   json.xAxis = xAxis;
+   json.yAxis = yAxis;
+   json.legend = legend;
+   json.plotOptions = plotOptions;
+   json.credits = credits;
+   json.series = series;
+   $('#hourly-container').highcharts(json);
+  </script>
+
+  <script>
+   var chart = {
+      type: 'areaspline'
+   };
+   var title = {
+      text: 'Messages - Daily'
+   };
+   var subtitle = {
+      style: {
+         position: 'absolute',
+         right: '0px',
+         bottom: '10px'
+      }
+   };
+   var legend = {
+      enabled: false,
+      layout: 'vertical',
+      align: 'left',
+      verticalAlign: 'top',
+      x: 150,
+      y: 100,
+      floating: true,
+      borderWidth: 1,
+      backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+   };
+   var xAxis = {
+      categories: {{daily_stats[0]|safe}}
+   };
+   var yAxis = {
+      title: {
+         text: 'Messages'
+      }
+   };
+   var tooltip = {
+       shared: true,
+       valueSuffix: ' units'
+   };
+   var credits = {
+       enabled: false
+   }
+   var plotOptions = {
+      areaspline: {
+         fillOpacity: 0.9
+      }
+   };
+
+   var series= [{
+        name: 'Messages',
+            data: {{daily_stats[1]}}
+        }
+   ];
+
+   var json = {};
+   json.chart = chart;
+   json.title = title;
+   json.subtitle = subtitle;
+   json.xAxis = xAxis;
+   json.yAxis = yAxis;
+   json.legend = legend;
+   json.plotOptions = plotOptions;
+   json.credits = credits;
+   json.series = series;
+   $('#daily-container').highcharts(json)
+   </script>
+
+</script>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

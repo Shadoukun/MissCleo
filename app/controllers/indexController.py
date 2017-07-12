@@ -15,9 +15,9 @@ blueprint = Blueprint('index', __name__)
 @blueprint.route('/')
 def home():
     #users = User.query.all()
-    return render_template('index/placeholder.home.html')
+    return render_template('pages/placeholder.home.html')
 
 
 @blueprint.route('/about')
 def about():
-    return render_template('index/placeholder.about.html')
+    return render_template('pages/placeholder.about.html')

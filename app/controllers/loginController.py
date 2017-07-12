@@ -31,7 +31,7 @@ def login():
                 db.session.commit()
                 login_user(user, remember=True)
                 return redirect(url_for("index.home"))
-    return render_template("index/login.html", form=form)
+    return render_template("pages/login.html", form=form)
 
 
 @blueprint.route("/logout", methods=["GET"])
