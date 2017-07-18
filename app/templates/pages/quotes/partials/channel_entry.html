@@ -1,0 +1,18 @@
+{% macro channelEntry(current_channel, channel, filter_user) -%}
+
+  {% if channel.name == current_channel %}
+    <div class="channel-entry active">
+      <a class="channel" id="{{channel.id}}" href="{{url_for('quotes.quotes', channel=channel.name, user=filter_user)}}">
+        <div class=name>#{{ channel.name }}</div>
+          <a class="remove-link" href="{{url_for('quotes.quotes', channel='all', user=filter_user)}}">
+            <i class="fa fa-times remove" aria-hidden="true"></i>
+          </a>
+      </a>
+    </div>
+  {% else %}
+  <div class="channel-entry">
+    <a class="channel" id="{{channel.id}}" href="{{url_for('quotes.quotes', channel=channel.name, user=filter_user)}}">#{{ channel.name }}</a>
+  </div>
+  {% endif %}
+
+{%- endmacro %}

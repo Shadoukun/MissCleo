@@ -1,47 +1,41 @@
-{% macro quoteEntry(current_user, user, curchannel, quote) -%}
+{% macro quoteEntry(current_user, user, quote) -%}
 
 <div class="card quote-card" id="{{ quote['message_id'] }}">
   <div class="card-block quote-block">
-  <div class="card-title quote-heading">
-    <div class="avatar">
-      <img src="{{ user.avatar_url }}">
-    </div>
-    {% if curchannel is not none %}
-    {% set user_url = request.url_root + 'quotes/' + curchannel + '/' + user.id|string %}
-    {% else %}
-    {% set user_url = request.url_root + 'quotes/all/' + user.id|string %}
-    {% endif %}
+    <div class="card-title quote-heading">
 
-    {% if user_url %}
-      <a href="{{ user_url }}">{{ quote.user.display_name}}</a>
-      <div class="timestamp">
-        {{ quote.timestamp }}
-      </div>
-    {% else %}
-      <a href="{{ user_url }}">{{ quote.user.display_name}}</a>
-      <div class="timestamp">
-        {{ quote.timestamp }}
-      </div>
-    {% endif %}
+      <div class="avatar"><img class="avatar" src="{{ user.avatar_url }}"></div>
 
-  </div>
-    <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-      <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu">
-        <li><a href="#">Copy ID</a></li>
-        {% if current_user.is_authenticated %}
-        <li><a href="{{ url_for('.delete_quote', id=quote.message_id|string) }}">Delete</a><li>
-        {% endif %}
-      </ul>
+      <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+          <span class="caret"></span>
+        </button>
+
+        <ul class="dropdown-menu">
+          <li><a href="#">Copy ID</a></li>
+          {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('.delete_quote', id=quote.message_id|string) }}">Delete</a><li>
+          {% endif %}
+        </ul>
+      </div>
+
+      {% if user_url %}
+        <a href="{{ user_url }}">{{ quote.user.display_name}}</a>
+        <div class="timestamp">
+          {{ quote.timestamp }}
+        </div>
+      {% else %}
+        <a href="{{ user_url }}">{{ quote.user.display_name}}</a>
+        <div class="timestamp">
+          {{ quote.timestamp }}
+        </div>
+      {% endif %}
     </div>
 
-
-
-  <div class="quote-body">
-    {{ quote['message'] }}
-  </div>
+    <div class="quote-body">
+      {{ quote['message'] }}
+    </div>
   </div>
 </div>
+
 {%- endmacro %}

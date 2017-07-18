@@ -18,11 +18,11 @@ if path.exists():
 
     logging.config.dictConfig(cfg)
 else:
-    logging.basicConfig(level=INFO)
+    logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    app, http = create_app('config', debug=False)
+    app, http = create_app('config', debug=True)
     flask_thread = Thread(target=http.serve_forever)
     flask_thread.start()
 

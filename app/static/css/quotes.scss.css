@@ -1,75 +1,113 @@
-#sidebar .card {
-  margin-bottom: 20px;
-  background: #111111; }
-
-#sidebar a {
-  color: white;
-  padding: 10px;
-  background: #32353c;
-  margin-bottom: 1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; }
+#sidebar {
+  height: 100vmax;
+  background: #222;
+  padding-top: 25px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23); }
+  #sidebar .card {
+    margin-bottom: 20px;
+    background: initial;
+    border: 0; }
+  #sidebar a {
+    color: #ACADAF;
+    padding: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 -15px;
+    padding-left: 1.5vh; }
+    #sidebar a:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+      text-decoration: initial; }
+  #sidebar .user {
+    align-items: center;
+    display: flex; }
+    #sidebar .user .name {
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis; }
+    #sidebar .user div {
+      display: inline-block; }
+    #sidebar .user a {
+      display: flex;
+      align-items: center; }
 
 .quote-card {
-  background: #191A1C;
-  margin-bottom: 10px; }
+  background: #222;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  color: #ACADAF; }
   .quote-card .quote-block {
     padding: 0; }
   .quote-card .quote-heading {
-    color: white;
-    background-color: #32353C;
     padding: 10px;
     margin-bottom: 0; }
     .quote-card .quote-heading label {
       display: inline-block; }
-    .quote-card .quote-heading a {
-      color: white; }
+    .quote-card .quote-heading > a {
+      vertical-align: middle;
+      font-family: 'Lato', sans-serif;
+      color: #ACADAF; }
+      .quote-card .quote-heading > a:hover {
+        text-decoration: initial; }
+    .quote-card .quote-heading .timestamp {
+      display: inline-flex;
+      vertical-align: middle;
+      font-size: 0.8rem;
+      color: #5d6169;
+      margin-left: 5px; }
+    .quote-card .quote-heading .dropdown {
+      float: right;
+      background: none; }
+      .quote-card .quote-heading .dropdown .dropdown-toggle {
+        background: none;
+        border: none;
+        padding: 0 5px; }
+        .quote-card .quote-heading .dropdown .dropdown-toggle:after {
+          margin: 0; }
+      .quote-card .quote-heading .dropdown .dropdown-menu {
+        font-size: 12px;
+        min-width: 80px; }
+        .quote-card .quote-heading .dropdown .dropdown-menu li {
+          white-space: nowrap; }
+          .quote-card .quote-heading .dropdown .dropdown-menu li a {
+            padding: 10px; }
   .quote-card .quote-body {
-    padding: 15px;
-    color: white;
-    word-wrap: break-word; }
-
-.dropdown-toggle::after {
-  margin-left: 0; }
-
-.dropdown {
-  float: right;
-  margin-top: -65px;
-  margin-right: 10px;
-  background: none; }
-  .dropdown .btn {
-    background: none;
-    border: none;
-    padding: 0 5px; }
-  .dropdown .dropdown-menu {
-    font-size: 12px;
-    min-width: 80px;
-    min-width: inherit; }
-    .dropdown .dropdown-menu li {
-      white-space: nowrap; }
-      .dropdown .dropdown-menu li a {
-        padding: 10px; }
-
-.user a {
-  display: flex;
-  align-items: center; }
-
-.user img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50px;
-  margin-right: 15px; }
+    display: inline-block;
+    padding: 0 65px 15px 65px;
+    word-wrap: break-word;
+    font-family: 'Lato', sans-serif; }
 
 .avatar {
-  display: inline-block; }
+  display: inline-block;
+  margin-right: 5px; }
   .avatar img {
+    display: inline-block;
     height: 40px;
     width: 40px;
-    border-radius: 50px;
-    margin-right: 10px; }
+    border-radius: 50px; }
 
-.timestamp {
-  margin-left: 54px;
-  margin-top: -14px;
-  color: #5d6169; }
+#page {
+  padding-top: 2vh; }
+
+.embed {
+  margin-top: 1.5vh;
+  display: flex;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(1, 1, 1, 0.2);
+  border-left: 5px solid #2761CF;
+  border-radius: 5px;
+  color: #848587; }
+  .embed #domain {
+    position: absolute;
+    bottom: 20px; }
+  .embed .preview-image {
+    margin-left: 2vh;
+    border-radius: 2px; }
+
+.embed_img img {
+  margin-top: 20px;
+  max-height: 250px;
+  border-radius: 2px; }
+
+/*# sourceMappingURL=../css/quotes.scss.css.map */

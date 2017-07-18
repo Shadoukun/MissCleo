@@ -1,0 +1,20 @@
+{% macro userEntry(current_channel, user, filter_user) -%}
+
+{% if user.id|string == filter_user|string %}
+<div class="user-entry active">
+{% else %}
+<div class="user-entry">
+{% endif %}
+    <a class="user" id="{{user.id|string}}" href="{{url_for('quotes.quotes', channel=current_channel, user=user.id|string)}}">
+        <div class="avatar"><img src="{{user.avatar_url}}"></div>
+        <div class="name">{{ user.display_name }}</div>
+
+    {% if user.id|string == filter_user|string %}
+        <a class="remove-link" href="{{url_for('quotes.quotes', channel=current_channel)}}">
+            <i class="fa fa-times remove" aria-hidden="true"></i>
+        </a>
+    {% endif %}
+    </a>
+</div>
+
+{%- endmacro %}

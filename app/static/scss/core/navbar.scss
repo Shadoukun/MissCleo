@@ -1,0 +1,39 @@
+@import 'vars';
+
+.navbar {
+    background-color: $primary-color;
+    padding: 0;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+
+    .navbar-brand {
+        vertical-align: middle;
+        margin-left:10px;
+        color:white !important;
+    }
+
+    img {
+        height:50px;
+        border-radius: 100px;
+        width:50px;
+
+    }
+
+
+
+    @media (min-width: 992px) {
+    .login-btn, .logout-btn {
+        color: rgba(255,255,255,.75);
+        position: absolute;
+        right: 2vh;
+
+        &:focus, &:hover {
+          text-decoration: none;
+        }
+    }
+}
+}
+
+.navbar-toggler-right {
+    top:0.5rem;
+}
+//

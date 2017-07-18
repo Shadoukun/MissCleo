@@ -9,22 +9,30 @@ from app import db
 from app.forms import *
 from app.models import *
 
+PAGE_SIZE = 20
 
 blueprint = Blueprint('quotes', __name__)
 
 
 @blueprint.route('/quotes')
-@blueprint.route('/quotes/<channel>')
-@blueprint.route('/quotes/<channel>/<user>')
-def quotes(channel=None, user=None):
+def quotes(channel='all', user=None):
+
+    user = request.args.get('user', None)
+    channel = request.args.get('channel', 'all')
+    page = int(request.args.get('page', 1))
+
 
     channel, channels, users, quotes = _getQuotes(channel, user)
+    quotes, page_count = _paginate(quotes, page)
 
     return render_template('pages/quotes/quotes.html',
                            quotes=quotes,
+                           pages=page_count,
+                           current_page=page,
                            channels=channels,
                            users=users,
-                           curchannel=channel.name if channel else None)
+                           user=user,
+                           current_channel=channel)
 
 
 @blueprint.route("/delete_quote/<id>")
@@ -36,37 +44,41 @@ def delete_quote(id):
     return redirect(url_for('quotes.quotes'))
 
 
-def _getQuotes(channel=None, user=None):
+def _getQuotes(channel, user=None):
     '''Returns a filtered list of quotes by channel, user.
        If no args provided, returns full quote list.'''
 
+    current_channel = None
 
     if channel == 'all':
         channel = None
+        current_channel = 'all'
 
-    allusers = db.session.query(User).filter(User.quotes.any())
+    quotes = db.session.query(Quote)
+    users = db.session.query(User).filter(User.quotes.any())
     channels = db.session.query(Channel) \
                             .filter(Channel.quotes)
 
     # if a channel is given, filter by channel
-
     if channel:
-            channel = db.session.query(Channel).filter_by(name=channel).first()
-            quotes = db.session.query(Quote) \
-                        .filter_by(channel_id=channel.id)
-    # else if None, all quotes from all channels.
-    else:
-        quotes = db.session.query(Quote).all()
+        channel = channels.filter_by(name=channel).first()
+        quotes = quotes.filter_by(channel_id=channel.id)
+        current_channel = channel.name
 
-    # If a user is given, filter by user.
     if user:
-        users = db.session.query(User).filter_by(id=user)
-        quotes = db.session.query(Quote) \
-                    .filter_by(user_id=users[0].id).all()
+        users = users.filter_by(id=user).all()
+        quotes = quotes.filter_by(user_id=users[0].id)
 
-    # else, all users.
-    else:
-        users = allusers.all()
+    return current_channel, channels, users, quotes
 
-    return channel, channels, users, quotes
 
+def _paginate(quotes, page):
+
+    page_count = int(quotes.count() / PAGE_SIZE)
+    if page_count < 1:
+        page_count = 1
+    page -= 1
+
+    quotes = quotes.offset(page*PAGE_SIZE).limit(PAGE_SIZE)
+
+    return quotes, page_count

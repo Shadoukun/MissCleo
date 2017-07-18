@@ -131,6 +131,7 @@ class Quote(Base):
 
     __tablename__ = "quotes"
 
+    
     message_id = Column(Integer, primary_key=True)
     message = Column(String)
     timestamp = Column(String)

@@ -11,9 +11,12 @@
 
 <!-- styles -->
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-reboot.scss.css') }}">
+<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+<!-- <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-reboot.scss.css') }}">
 <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.scss.css') }}">
-<link type="text/css" rel="stylesheet" href="/static/css/layout.main.scss.css" />
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-grid.scss.css') }}"> -->
+
+<link type="text/css" rel="stylesheet" href="/static/css/application.scss.css" />
 
 {% block css %}{% endblock %}
 
@@ -29,6 +32,7 @@
 <!-- /favicons -->
 
 <!-- scripts -->
+<script src="https://use.fontawesome.com/a2d816415e.js"></script>
 <script src="{{url_for('static', filename='js/libs/modernizr-2.6.2.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/libs/jquery.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/libs/tether.min.js')}}"></script>
@@ -51,10 +55,10 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <a class="navbar-brand">
+      <div class="navbar-brand">
         <img src="{{ url_for('static', filename='img/logo.jpg') }}">
-        Shotachan
-      </a>
+        <a>Shotachan</a>
+      </div>
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul id="nav" class="nav navbar-nav">
@@ -70,19 +74,19 @@
           <li class="nav-item">
             <a class="nav-link" id="stats" href="{{url_for('stats.stats')}}">Stats</a>
           </li>
+          {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="logout nav-link logout-btn" href="{{url_for('login.logout')}}">Logout</a>
+          {% else %}
+            <li class="nav-item">
+              <a class="login nav-link login-btn" href="{{url_for('login.login')}}">Login</a>
+          {% endif %}
         </ul>
-
       </div>
-        {% if current_user.is_authenticated %}
-        <a class="logout" href="{{url_for('login.logout')}}">Logout</a>
-        {% else %}
-        <a class="login" href="{{url_for('login.login')}}">Login</a>
-        {% endif %}
     </nav>
 
-
     <!-- Begin page content -->
-    <main id="content" role="main" class="container">
+    <main id="content" role="main">
 
       {% with messages = get_flashed_messages() %}
         {% if messages %}

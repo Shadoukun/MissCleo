@@ -35,9 +35,6 @@ class MissCleo(commands.Bot):
         self.db = session
         self.tokens = tokens
 
-
-
-
     async def on_ready(self):
         # database background tasks
         logger.debug("Client ready")
@@ -48,27 +45,13 @@ class MissCleo(commands.Bot):
 
     async def on_member_update(self, before, after):
         # Update a user's info in the database when they change it.
-        user = self.db.query(User) \
-                    .filter_by(id=after.id).one()
+        # Adds newly joined users to db.
 
-        user.avatar_url = after.avatar_url
-        user.display_name = after.display_name
-        self.db.commit()
-
-        logger.debug("Member info updated.")
-        logger.debug(f'Before: {before.display_name}, {before.avatar_url}')
-        logger.debug(f'After: {after.display_name}, {after.avatar_url}')
-
-    async def on_member_join(self, member):
-        # Add new members to the database.
-        new_user = User(member)
-        self.db.add(new_user)
-        self.db.commit()
-
-        logging.debug(f'{member.name} joined {member.guild.name}.')
+        utils.update_user(self.db, before, after)
 
     async def on_guild_channel_create(self, channel):
         # Add new channels to the database.
+
         new_channel = Channel(channel)
         self.db.add(new_channel)
         self.db.commit()
@@ -77,6 +60,7 @@ class MissCleo(commands.Bot):
 
     async def on_guild_join(self, guild):
         # Add new guilds to the database.
+
         new_guild = Guild(guild)
         self.db.add(new_guild)
         self.db.commit()

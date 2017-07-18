@@ -1,65 +1,30 @@
-@import 'vars';
-
 #login-box {
-	position: absolute;
-	top: 150px;
-	left: 50%;
-	transform: translateX(-50%);
-	margin: 0 auto;
-	border: 1px solid black;
-	background:$background-secondary-color;
-	min-height: 250px;
-	padding: 20px;
-	z-index: 9999;
+    margin-top: 20vh;
+    background: #222;
+    padding: 30px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+
+
+
+    .logo-caption {
+        text-align: center;
+        margin-bottom: 5vh;
+        color: white;
+    }
+
+    input {
+        margin-bottom: 20px;
+    }
+
+    button {
+        margin-top: 10px;
+        background: #5cb85c;
+        color: white;
+    }
 }
-#login-box .logo .logo-caption {
-	color: white;
-	text-align: center;
-	margin-bottom: 0px;
-}
-#login-box .logo .tweak {
-	color: #ff5252;
-}
-#login-box .controls {
-	padding-top: 30px;
-}
-#login-box .controls input {
-	border-radius: 0px;
-	background:none;
-	border: 0px;
-	color: white;
-    width:100%;
-    margin-bottom: 20px;
-    height: 30px;
-    border-bottom: 1px solid white;
-}
-#login-box .controls input:focus {
-	box-shadow: none;
-    outline:none;
-    border-bottom: 1px solid $primary-color;
-}
-#login-box .controls input:first-child {
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
-}
-#login-box .controls input:last-child {
-	border-bottom-left-radius: 2px;
-	border-bottom-right-radius: 2px;
-}
-#login-box button.btn-custom {
-	border-radius: 2px;
-	margin-top: 8px;
-	background:#ff5252;
-	border-color: rgba(48, 46, 45, 1);
-	color: white;
-	font-family: 'Nunito', sans-serif;
-}
-#login-box button.btn-custom:hover{
-	-webkit-transition: all 500ms ease;
-	-moz-transition: all 500ms ease;
-	-ms-transition: all 500ms ease;
-	-o-transition: all 500ms ease;
-	transition: all 500ms ease;
-	background: rgba(48, 46, 45, 1);
-	border-color: #ff5252;
+
+#login .controls {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
 }

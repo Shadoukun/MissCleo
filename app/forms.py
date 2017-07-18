@@ -16,11 +16,14 @@ class LoginForm(Form):
         self.user = None
 
     def validate(self):
+
         rv = Form.validate(self)
         if not rv:
             return False
 
-        user = db.session.query(FlaskUser).filter_by(username=self.username.data).first()
+        user = db.session.query(FlaskUser) \
+                    .filter_by(username=self.username.data).first()
+
         if user is None:
             self.username.errors.append('Unknown username')
             return False

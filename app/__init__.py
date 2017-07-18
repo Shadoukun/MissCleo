@@ -34,6 +34,8 @@ def create_app(config_filename, debug=False):
     # add initial admin user if there isn't one.
     add_user(app)
 
+    app.url_map.strict_slashes = False
+
     app.register_blueprint(indexController.blueprint)
     app.register_blueprint(quoteController.blueprint)
     app.register_blueprint(macroController.blueprint)
@@ -53,7 +55,7 @@ def create_app(config_filename, debug=False):
 
     # create wsgi server
 
-    http = WSGIServer(('', 5000), app.wsgi_app, log=app.logger)
+    http = WSGIServer(('0.0.0.0', 5000), app.wsgi_app, log=app.logger)
 
 
     return app, http

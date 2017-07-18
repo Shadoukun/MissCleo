@@ -1,7 +1,7 @@
 {% macro reactionEntry(react, form=None) -%}
-{% set react_id = react.id %}
-{% set trigger = react.trigger %}
-{% set reaction = react.reaction %}
+  {% set react_id = react.id %}
+  {% set trigger = react.trigger %}
+  {% set reaction = react.reaction %}
 
 <div class="card macro-card">
   <div class="card-block macro-block">
@@ -30,4 +30,5 @@
   </div>
   </div>
 </div>
+
 {%- endmacro %}

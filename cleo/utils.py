@@ -121,3 +121,44 @@ def is_admin():
         return False
 
     return commands.check(predicate)
+
+
+def add_user(db, member):
+    logger.debug(f"add user: {member.name}")
+
+    user = db.query(User).filter_by(id=member.id)
+
+    if not db.query(user.exists()):
+        new_user = User(member)
+        db.add(new_user)
+        db.commit()
+
+
+
+def update_user(db, before, after):
+    logger.debug(f"update user: {after.name}")
+
+    logger.debug(before)
+
+    user = db.query(User).filter_by(id=before.id).first()
+
+
+    if user and after:
+        user = user
+
+        user.avatar_url = after.avatar_url
+        user.display_name = after.display_name
+        db.commit()
+
+        logger.debug("Member info updated.")
+        logger.debug(f'Before: {before.display_name}, {before.avatar_url}')
+        logger.debug(f'After: {after.display_name}, {after.avatar_url}')
+
+    else:
+        # on_user_update is called when a member joins the first time.
+        # so add new users if they arent the database.
+        new_user = User(before)
+        db.add(new_user)
+        db.commit()
+
+        logger.debug(f'{after.name} joined {after.guild.name}.')
