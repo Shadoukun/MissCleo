@@ -95,7 +95,7 @@ class Command:
 
     def disable_commands(self, ctx, command):
         '''Takes a list of commands to disable for the current channel.'''
-        logger.debug(f"disabling command: {command.name}")
+        logger.debug(f"disabling command: {command}")
 
         channel = self.db.query(Channel).filter_by(id=ctx.channel.id).one()
 
@@ -108,7 +108,7 @@ class Command:
             self.db.commit()
 
     def disable_commands_all(self, command):
-        logger.debug("disabling command for guild: {0}".format(command.name))
+        logger.debug("disabling command for guild: {0}".format(command))
 
         channels = self.db.query(Channel).all()
 
@@ -220,7 +220,8 @@ class Command:
                 self.disable_commands(ctx, cmd)
                 disabled.append(cmd)
 
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
         if disabled:
