@@ -21,9 +21,10 @@ class Quotes:
 
     async def _add_quote(self, ctx, message):
         '''Add a quote to the database.'''
-        logger.debug("adding quote")
 
+        logger.debug("adding quote")
         quote = db.Quote(message)
+        
         # Users no longer in the server won't be in the userlist.
         # Add message author if they are no longer in the server.
         if not self.db.query(db.User) \
@@ -83,7 +84,6 @@ class Quotes:
         logger.debug("getting random quote")
         quotes = self.db.query(db.Quote) \
                     .filter_by(channel_id=channel.id).all()
-
 
         if quotes:
             random.shuffle(quotes)
@@ -146,11 +146,14 @@ class Quotes:
             user = await findUser(ctx, username)
             # if user, filter list of quotes again by user.
             quote = await self._get_quote(user, ctx.channel)
+            print(quote)
 
             if quote:
                 embed = self._create_embed(user, quote.message)
                 await ctx.channel.send(embed=embed)
-
+            else:
+                await ctx.channel.send(NOQUOTE_MSG)
+    
         else:
             quote = await self._get_random_quote(ctx.channel)
             user = await findUser(ctx, str(quote.user_id))

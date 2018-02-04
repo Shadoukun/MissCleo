@@ -25,32 +25,34 @@ async def findUser(ctx, username: str):
             return user
 
     except:
-        logger.debug('User not found')
+        logger.debug('User not found with MemberConverter')
 
     logger.debug("Trying fuzzy username match")
+   
     users = ctx.guild.members
     names = (u.name.lower() for u in users)
     displaynames = (u.display_name.lower() for u in users)
 
-    username = get_close_matches(username, names, 1) or \
-                    get_close_matches(username, displaynames, 1)
+    name_search = get_close_matches(username, names, 1, cutoff=0.8)
+    dname_search = get_close_matches(username, displaynames, 1, cutoff=0.8)
 
+    logger.debug(f"NAME: {name_search[0]}")    
+    logger.debug(f"DISPLAY NAME: {dname_search[0]}")    
 
-    if username:
-        username = username[0]
-        logger.debug(f"Username: {username}")
+    for user in users:
+        display_name = user.display_name.lower()
+        username = user.name.lower()
 
-        for user in users:
-            display_name = user.display_name.lower()
-            name = user.name.lower()
+        if display_name == dname_search[0]:
+            logger.debug(f"User found: {user.name}")
+            return user
+            
+        elif username == name_search[0]:
+            logger.debug(f"User found: {user.name}")
+            return user            
 
-            if (display_name == username) or (name == username):
-                logger.debug(f"User found: {user.name}")
-                return user
-
-            else:
-                logger.debug("User not found")
-                return None
+    logger.debug("User not found")
+    return None
 
 async def update_database(self):
     '''add missing guilds/channels/users to database
