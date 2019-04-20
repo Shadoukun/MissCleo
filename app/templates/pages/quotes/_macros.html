@@ -1,0 +1,85 @@
+{% macro _arg_url_for(endpoint, base) %}
+{# calls url_for() with a given endpoint and **base as the parameters,
+   additionally passing on all keyword_arguments (may overwrite existing ones)
+ #}
+{%- with kargs = base.copy() -%}
+{%- do kargs.update(kwargs) -%}
+{{url_for(endpoint, **kargs)}}
+{%- endwith %}
+{%- endmacro %}
+
+{% macro render_pagination(pagination,
+                          endpoint=None,
+                          prev=('&laquo;')|safe,
+                          next=('&raquo;')|safe,
+                          size=None,
+                          ellipses='…',
+                          args={}
+                          )
+%}
+{% with url_args = {} %}
+{%- do url_args.update(request.view_args if not endpoint else {}),
+       url_args.update(request.args if not endpoint else {}),
+       url_args.update(args) -%}
+
+{% with endpoint = endpoint or request.endpoint %}
+<nav class="d-flex justify-content-center" aria-label="...">
+  <ul id="paginator" class="pagination" {{kwargs|xmlattr}}>
+    {# prev and next are only show if a symbol has been passed. #}
+  {% if prev != None -%}
+    <li class="page-item {%if not pagination.has_prev%}disabled{%endif%}">
+      <a class="page-link" href="{{_arg_url_for(endpoint, url_args, page=pagination.prev_num) if pagination.has_prev else '#'}}">{{prev}}</a>
+    </li>
+  {%- endif -%}
+
+  {%- for page in pagination.iter_pages() %}
+    {% if page %}
+      {% if page != pagination.page %}
+        <li class="page-item"><a class="page-link" href="{{_arg_url_for(endpoint, url_args, page=page)}}">{{page}}</a></li>
+      {% else %}
+        <li class="page-item active"><a class="page-link" href="#">{{page}} <span class="sr-only">(current)</span></a></li>
+      {% endif %}
+    {% elif ellipses != None %}
+      <li class="page-item disabled"><a class="page-link" href="#">{{ellipses}}</a></li>
+    {% endif %}
+  {%- endfor %}
+
+  {% if next != None -%}
+    <li class="page-item {%if not pagination.has_next%}disabled{%endif%}">
+      <a class="page-link" href="{{_arg_url_for(endpoint, url_args, page=pagination.next_num) if pagination.has_next else '#'}}">{{next}}</a>
+    </li>
+  {%- endif -%}
+
+  </ul>
+</nav>
+{% endwith %}
+{% endwith %}
+{% endmacro %}
+
+{% macro quote_entry(data, quote, current_user) -%}
+{% with url=url_for('quotes.quotes', guild=data.current_guild.id,user=quote.user.id), delete_url=url_for('.delete_quote',id=quote.message_id) %}
+  <div class="card quote-card p-2 mb-4 rounded pb-2" id="{{ quote.message_id }}">
+
+    <div class="card-block quote-block pr-0 pl-0 pt-0 pb-2">
+
+      <div class="card-title quote-heading d-flex p-2 align-items-center rounded-top">
+
+          <div class="avatar"><img class="avatar" src="{{ quote.user.avatar_url }}"></div>
+          <a class="p-1 ml-2 text-white" href="{{ url }}">{{ quote.user.display_name}}</a>
+          <div class="timestamp ml-2 text-muted">{{ quote.timestamp }}</div>
+
+          <div class="dropdown ml-auto">
+            <button class="btn btn-primary dropdown-toggle quote-dropdown h-100 text-muted" type="button" data-toggle="dropdown"></button>
+
+            <ul class="dropdown-menu">
+              <li><a href="#">Copy ID</a></li>
+              {% if current_user.is_authenticated %}<li><a href="{{ delete_url }}">Delete</a><li>{% endif %}
+            </ul>
+        </div>
+      </div>
+
+      <div class="quote-body p-2 pl-3 rounded">{{ quote.message }}</div>
+    </div>
+  </div>
+{% endwith %}
+{% endmacro %}

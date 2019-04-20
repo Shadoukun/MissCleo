@@ -1,0 +1,115 @@
+@import "bootstrap/scss/bootstrap";
+
+$nav-color: #202225;
+$bg-color: #2f3136;
+$fg-color: #36393f;
+
+
+@media (min-width: 1200px) {
+  #sidebar {
+    flex: 0 1 320px;
+  }
+}
+
+html, body {
+    background: $bg-color;
+}
+
+.navbar {
+    background: $nav-color;
+}
+
+img.avatar {
+    height: 2em;
+    border-radius: 50%;
+}
+
+.navbar {
+    @include media-breakpoint-up(md) {
+    @supports (position: sticky) {
+      position: sticky;
+      top: 0;
+      z-index: 1071; // over everything in bootstrap
+    }
+  }
+}
+
+#sidebar {
+    background: $fg-color;
+    box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
+    -webkit-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
+
+    @include media-breakpoint-up(md) {
+    @supports (position: sticky) {
+      position: sticky;
+      top: 3.5rem;
+      z-index: 1000;
+      height: calc(100vh - 3.5rem);
+    }
+}
+    .card {
+        background: none;
+        border: none;
+    }
+}
+
+#content {
+    margin: 0 auto;
+  }
+
+.timestamp {
+    font-size:80%;
+}
+
+.quote-card {
+    background: $fg-color;
+    color: #e1e1e1;
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+    -webkit-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+}
+
+.quote-heading {
+    background: #36393f;
+    height: 3em;
+}
+
+.quote-dropdown {
+
+    display: flex;
+    background: none;
+    border: none;
+    color: black;
+
+    &::after {
+    margin-left: 0;
+    }
+
+}
+
+#paginator.pagination .page-item {
+
+  &.active .page-link {
+    background:lighten($bg-color, 10%);
+    pointer-events: none;
+    cursor: default;
+  }
+
+  &.disabled .page-link {
+    background: $bg-color;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .page-link {
+    background:none;
+    border-radius: 5%;
+    border: 1px solid lighten($nav-color, 0%);
+    color: white;
+  }
+
+  .page-item:first-child .page-link, .page-item:last-child .page-link {
+      background: $fg-color;
+    }
+}

@@ -1,8 +1,10 @@
-{% extends 'layouts/main.html' %}
+{% extends 'main.html' %}
+{% set active_page = "login" %}
+
 {% block title %}Login{% endblock %}
 
 {% block css %}
-<link href="{{ url_for('static', filename='css/login.scss.css') }}" rel="stylesheet" type="text/css">
+<!-- <link href="{{ url_for('static', filename='css/login.scss.css') }}" rel="stylesheet" type="text/css"> -->
 {% endblock %}
 
 {% block content %}
@@ -21,10 +23,10 @@
         <input type="text" id="username" name="username" placeholder="Username">
         <input type="password" id="password" name="password" placeholder="Password">
 			  <button type="submit" form="login" class="btn btn-default btn-block btn-custom">Login</button>
+			</form>
 		  </div>
 		</div>
 		</div>
 	</div>
-		</form>
 </div>
 {% endblock %}

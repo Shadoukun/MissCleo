@@ -11,12 +11,13 @@ import code
 logger = logging.getLogger(__name__)
 
 
-class Macros:
+class Macros(commands.Cog):
     """Macro commands, responses, and reactions"""
 
     def __init__(self, bot):
         self.bot = bot
         self.db = self.bot.db
+
         self.responses = {}
         self.reactions = {}
 
@@ -25,11 +26,12 @@ class Macros:
         app.router.add_get('/{name}', self.handle)
 
 
-        # crappy REST api
+        # crappy REST api for triggering triggering events from flask app to discord bot.
         handler = app.make_handler()
         f = self.bot.loop.create_server(handler, '0.0.0.0', 10000)
         srv = self.bot.loop.run_until_complete(f)
 
+    @commands.Cog.listener()
     async def on_ready(self):
         logger.debug("adding macros, responses, reactions")
 
@@ -37,6 +39,7 @@ class Macros:
         await self.update_responses()
         await self.update_reactions()
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
             return
@@ -55,49 +58,39 @@ class Macros:
             nonlocal macro
             await ctx.channel.send(macro.response)
 
+        # # Chooses a response at random.
+        # TODO: figure out how to handle both random single-line responses/macros and multi-line ones. Thx Noku.
+        # async def _multimacro(ctx):
+        #     nonlocal macro
+        #     randresponse = [r.rstrip() for r in macro.response.split('\n')]
+        #     random.shuffle(randresponse)
+        #     randresponse = randresponse[0]
+        #     await ctx.channel.send(randresponse)
+        # if '\n' in macro.response:
+        #     return _multimacro
+        # else:
 
-        # callback function for macros with multiple responses.
-        # Chooses a response at random.
-        async def _multimacro(ctx):
-            nonlocal macro
-            randresponse = [r.rstrip() for r in macro.response.split('\n')]
-            random.shuffle(randresponse)
-            randresponse = randresponse[0]
-            await ctx.channel.send(randresponse)
-
-        if '\n' in macro.response:
-            return _multimacro
-        else:
-            return _macro
+        return _macro
 
     async def _load_macro_commands(self, macro=None):
         '''Load/Reload macro commands from database
            takes single macro to reload as optional arg'''
 
         logger.debug("loading macro commands")
-
-        if macro is not None:
-            macros = [macro]
-        else:
-            macros = self.db.query(Macro).all()
-
-        if len(macros) < 1:
-            return
+        macros = [macro] if macro else self.db.query(Macro).all()
 
         for m in macros:
             if m.command in self.bot.commands:
                 self.bot.remove_command(m.command)
 
             func = self._make_macro(m)
-            cmd = commands.Command(name=m.command, callback=func)
+            cmd = commands.Command(func, name=m.command)
+            cmd.category = 'Custom'
             self.bot.add_command(cmd)
 
-            try:
                 # if commands cog is enabled, add macro to auto-enabled commands.
-                if m.command not in self.bot.auto_enable:
-                    self.bot.auto_enable.append(m.command)
-            except:
-                pass
+            if m.command not in self.bot.auto_enable:
+                self.bot.auto_enable.append(m.command)
 
     async def _process_responses(self, message):
         '''Triggers a macro response if message containers trigger.'''
@@ -126,6 +119,7 @@ class Macros:
         '''Triggers an automatic discord reaction if message containers trigger'''
 
         logger.debug("processing reactions")
+
         emojis = self.bot.emojis
         reactions = []
 
@@ -141,39 +135,40 @@ class Macros:
                 if react == emoji.name:
                     await message.add_reaction(emoji)
 
-
-
     async def update_macros(self):
         '''Update macro commands from database'''
 
         logger.debug("updating macros")
 
         macros = self.db.query(Macro).all()
-        print([m.command for m in macros])
+
         if macros:
             for macro in macros:
-                # sqlalchemy seems to not refresh consistently
+                # sqlalchemy seems to not refresh consistently. I think
                 self.db.refresh(macro)
                 if macro.modified_flag == 1:
                     macro.modified_flag = 0
                     self.db.commit()
-                    await self._load_macro_commands(macro)
+                    self._load_macro_commands(macro)
 
     async def update_responses(self):
         '''Add macro responses from database'''
 
         logger.debug("updating responses")
+
         self.responses.clear()
         responses = self.db.query(MacroResponse).all()
+
         if responses:
             for resp in responses:
-                # sqlalchemy seems to not refresh consistently
+                # sqlalchemy seems to not refresh consistently. I think
                 self.db.refresh(resp)
                 self.responses[resp.trigger] = resp.response
 
 
     async def update_reactions(self):
         '''Add macro reactions from database'''
+
         logger.debug("updating reactions")
 
         self.reactions = {}
@@ -187,12 +182,13 @@ class Macros:
 
     async def handle(self, request):
         '''crappy rest API'''
+
         name = request.match_info.get('name', "Anonymous")
         if name == "update_macros":
             await self.update_macros()
-        if name == "update_responses":
+        elif name == "update_responses":
             await self.update_responses()
-        if name == "update_reactions":
+        elif name == "update_reactions":
             await self.update_reactions()
 
         text = "Hello, " + name

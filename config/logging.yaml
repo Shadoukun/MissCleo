@@ -7,7 +7,7 @@ formatters:
 handlers:
     console:
         class: logging.StreamHandler
-        level: DEBUG
+        level: INFO
         formatter: simple
         stream: ext://sys.stdout
 
@@ -15,7 +15,7 @@ handlers:
         class: logging.handlers.RotatingFileHandler
         level: INFO
         formatter: simple
-        filename: info.log
+        filename: logs/info.log
         maxBytes: 10485760 # 10MB
         backupCount: 20
         encoding: utf8
@@ -24,7 +24,7 @@ handlers:
         class: logging.handlers.RotatingFileHandler
         level: ERROR
         formatter: simple
-        filename: errors.log
+        filename: logs/errors.log
         maxBytes: 10485760 # 10MB
         backupCount: 20
         encoding: utf8
@@ -36,12 +36,12 @@ loggers:
         propagate: no
 
     cleo:
-        level: INFO
-        handlers: [console]
+        level: DEBUG
+        handlers: [error_file_handler, console]
         propagate: no
     app:
         level: INFO
-        handlers: [console]
+        handlers: [error_file_handler]
         propagate: no
 root:
     level: INFO

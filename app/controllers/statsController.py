@@ -6,10 +6,8 @@ import discord
 from collections import namedtuple
 from sqlalchemy.sql.expression import func
 from flask import render_template, Blueprint, request
-from app import db
+from .. import db
 from app.forms import *
-
-from app.models import *
 
 blueprint = Blueprint('stats', __name__)
 

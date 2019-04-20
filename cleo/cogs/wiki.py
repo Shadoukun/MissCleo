@@ -1,42 +1,55 @@
 import discord
 import wikipedia
 from discord.ext import commands
+from discord import Embed
 
 NORESULTS_MSG = "No results found."
 
-class Wikipedia:
+wiki_help = "LONG HELP"
+
+class Wikipedia(commands.Cog):
     """Wikipedia lookups"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name="wiki")
-    async def wiki_search(self, ctx, *, query: str):
-        """: !wiki <word>       | Lookup something up on Wikipedia."""
+    def disambigEmbed(self, data):
+        embed = Embed().from_dict({
+            "title": "\n",
+            "color": 0xE86222,
+            "author": {"name": "Wikipedia", "icon_url": "https://www.wikipedia.org/static/apple-touch/wikipedia.png"},
+            "fields": [
+                {"name": "Did you mean?",
+                    "value": "\n".join(data), "inline": "false"}
+            ]
+        })
 
+        return embed
+
+
+
+    @commands.group(name="wiki", help=wiki_help)
+    async def wiki_search(self, ctx, *, query: str):
+        """!wiki <word>       | Lookup something up on Wikipedia."""
 
         try:
-            article = wikipedia.page(query, auto_suggest=False)
+            page = wikipedia.page(query)
+            if page:
+                summary = (page.summary[:1021] + '...') if len(page.summary) > 1024 else page.summary
 
-            embed = discord.Embed(title="\u2063", colour=0xF9F9F9)
-            embed.set_author(name="Wikipedia", icon_url="https://www.wikipedia.org/static/favicon/wikipedia.ico")
-            embed.add_field(name=article.title, value=article.summary.split('\n', 1)[0], inline=True)
+                embed = Embed().from_dict({
+                    "title": "\u200b\n" + query.capitalize(),
+                    "color": 0xF0F0F0,
+                    "author": {"name": "Wikipedia", "url": page.url, "icon_url": "https://www.wikipedia.org/static/apple-touch/wikipedia.png"},
+                    "fields": [
+                        {"name": "Summary", "value": summary}
+                    ]
+                })
+                await ctx.channel.send(embed=embed)
 
-            await ctx.channel.send(embed=embed)
-
-        except wikipedia.DisambiguationError as e:
-            title = "'{t}' may refer to:\n".format(t=e.title)
-            text = '\n'.join(e.options[:10])
-
-            embed = discord.Embed(title="\u2063", colour=0xF9F9F9)
-            embed.set_author(name="Wikipedia", icon_url="https://www.wikipedia.org/static/favicon/wikipedia.ico")
-            embed.add_field(name=title, value=text, inline=True)
-
-            await ctx.channel.send(embed=embed)
-
-        except wikipedia.PageError:
-            await ctx.channel.send(NORESULTS_MSG)
-
+        except wikipedia.exceptions.DisambiguationError as e:
+            embed = self.disambigEmbed(e.options[0:10])
+            msg = await ctx.channel.send(embed=embed)
 
 
 def setup(bot):

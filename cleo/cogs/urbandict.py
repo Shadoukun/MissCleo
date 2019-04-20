@@ -1,19 +1,37 @@
 import json
 import discord
+from discord import Embed
 from discord.ext import commands
+import asyncio
 
 NORESULTS_MSG = "No results found."
 
-class UrbanDictionary:
+
+class UrbanDictionary(commands.Cog):
     """Urbandictionary definition lookups"""
 
     def __init__(self, bot):
         self.bot = bot
         self.url = 'http://api.urbandictionary.com/v0/define?term={0}'
 
+
+    def createEmbed(self, page):
+        embed = Embed().from_dict({
+            "title": "\n",
+            "color": 0xE86222,
+            "permalink": page['permalink'],
+            "author": {"name": "urbandictionary", "icon_url": "https://vignette.wikia.nocookie.net/logopedia/images/0/0b/UDFavicon.png/revision/latest?cb=20170422211131"},
+            "fields": [
+                {"name": page['word'], "value": page['entry'], "inline": "false"}
+            ]
+        })
+
+        return embed
+
+
     @commands.group(name='ud')
     async def urbandict_search(self, ctx, *, query: str):
-        """: !ud <word>         | lookup a word on UrbanDictionary."""
+        """!ud <word>         | lookup a word on UrbanDictionary."""
 
         # Returns first entry for requested word.
 
@@ -22,18 +40,61 @@ class UrbanDictionary:
 
         try:
             data = json.loads(data)
-            data = data['list'][0]
+            data = data['list']
         except:
             await ctx.channel.send(NORESULTS_MSG)
             return
 
-        example = "_{0}_".format(data['example'])
+        for i, d in enumerate(data):
+            entry = {"word": d['word'], "entry": f"{d['definition']}\n\n*{d['example']}*", "permalink": d['permalink']}
+            data[i] = entry
 
-        embed = discord.Embed(title="\n", url=data['permalink'], colour=0xE86222)
-        embed.set_author(name="urbandictionary", icon_url="https://www.urbandictionary.com/favicon.ico")
-        embed.add_field(name=data['word'], value="{0}\n\n{1}".format(data['definition'], example), inline=False)
+        page = 1
+        maxpage = len(data)
+        firstrun = True
+        orig_user = ctx.message.author
 
-        await ctx.channel.send(embed=embed)
+        # check function for wait_for
+        _check = lambda reaction, user: reaction.emoji.startswith(('⏪', '⏩'))
+
+        while True:
+            if firstrun:
+                firstrun = False
+                embed = self.createEmbed(data[page-1])
+                msg = await ctx.channel.send(embed=embed)
+
+            if maxpage == 1 and page == 1:
+                break
+            elif page == 1:
+                toReact = ['⏩']
+            elif page == maxpage:
+                toReact = ['⏪']
+            elif page > 1 and page < maxpage:
+                toReact = ['⏪', '⏩']
+
+            for r in toReact:
+                await msg.add_reaction(r)
+                await asyncio.sleep(0.25)
+
+            try:
+                reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=_check)
+            except:
+                break
+
+            if user == orig_user:
+                if '⏪' in str(reaction.emoji):
+                    page = page - 1
+                elif '⏩' in str(reaction.emoji):
+                    page = page + 1
+
+                await msg.clear_reactions()
+                embed = self.createEmbed(data[page-1])
+                await msg.edit(embed=embed)
+            else:
+                await reaction.remove(user)
+
+            await asyncio.sleep(0.25)
+
 
 
 def setup(bot):

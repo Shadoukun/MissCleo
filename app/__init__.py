@@ -1,64 +1,23 @@
+import os
 import logging
 from getpass import getpass
-from flask import Flask, redirect, url_for, request as req
+from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
 from sassutils.wsgi import SassMiddleware
-from sassutils.builder import build_directory
-from gevent.pywsgi import WSGIServer
-from gevent import monkey; monkey.patch_all()
+
+from cleo.db import Base, FlaskUser
 
 login_manager = LoginManager()
-db = SQLAlchemy()
+db = SQLAlchemy(model_class=Base)
 
-from app.controllers import indexController
-from app.controllers import macroController
-from app.controllers import statsController
-from app.controllers import loginController
 from app.controllers import quoteController
-
-from app.models import FlaskUser
-
-
-def create_app(config_filename, debug=False):
-    app = Flask(__name__)
-    app.config.from_object(config_filename)
-    app.login_manager = login_manager
-    log = logging.getLogger('werkzeug')
-
-    db.init_app(app)
-    CSRFProtect(app)
-    login_manager.init_app(app)
-    # add initial admin user if there isn't one.
-    add_user(app)
-
-    app.url_map.strict_slashes = False
-
-    app.register_blueprint(indexController.blueprint)
-    app.register_blueprint(quoteController.blueprint)
-    app.register_blueprint(macroController.blueprint)
-    app.register_blueprint(statsController.blueprint)
-    app.register_blueprint(loginController.blueprint)
-
-
-    if debug:
-        # compile SCSS to CSS with every request.
-        # useful for updating/debugging styles.
-        app.wsgi_app = SassMiddleware(app.wsgi_app, {
-            'app': ('static/scss', 'static/css', 'static/css')
-            })
-    else:
-        # compile stylesheets once at start.
-        build_directory("app/static/scss", "app/static/css")
-
-    # create wsgi server
-
-    http = WSGIServer(('0.0.0.0', 5000), app.wsgi_app, log=app.logger)
-
-
-    return app, http
+from app.controllers import loginController
+from app.controllers import statsController
+from app.controllers import macroController
+from app.controllers import indexController
 
 
 def add_user(app):
@@ -67,7 +26,7 @@ def add_user(app):
         if db.session.query(FlaskUser).all():
             return
 
-        print('Enter Username: '),
+        print('Enter Username: ')
         username = input()
 
         password = getpass()
@@ -78,3 +37,30 @@ def add_user(app):
         db.session.add(user)
         db.session.commit()
         print('User added.')
+
+
+def create_app(config_filename):
+    app = Flask(__name__)
+    app.config.from_object(config_filename)
+    app.debug = os.getenv("DEBUG", False)
+    app.url_map.strict_slashes = False
+
+    CSRFProtect(app)
+    db.init_app(app)
+    login_manager.init_app(app)
+
+    app.register_blueprint(indexController.blueprint)
+    app.register_blueprint(quoteController.blueprint)
+    app.register_blueprint(macroController.blueprint)
+    app.register_blueprint(statsController.blueprint)
+    app.register_blueprint(loginController.blueprint)
+
+    # add initial admin user if there isn't one.
+    add_user(app)
+
+    app.jinja_env.add_extension('jinja2.ext.do')
+    app.wsgi_app = SassMiddleware(app.wsgi_app, {
+        'app': ('static/scss', 'static/css', 'static/css')
+    })
+
+    return app

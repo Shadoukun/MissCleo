@@ -1,13 +1,16 @@
 import discord
-from wordnik import *
-from wordnik import swagger
+from discord import Embed
+from wordnik import swagger, WordApi
 from discord.ext import commands
+import logging
+import asyncio
+
+logger = logging.getLogger(__name__)
 
 NORESULTS_MSG = "No results found."
 
-class Wordnik:
+class Wordnik(commands.Cog):
     """Wordnik dictionary lookups"""
-
 
     def __init__(self, bot):
         self.bot = bot
@@ -16,9 +19,33 @@ class Wordnik:
         self.client = swagger.ApiClient(self.apiKey, self.apiUrl)
         self.wordApi = WordApi.WordApi(self.client)
 
+    def _chunk(self, l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+
+    def checkreaction(self, reaction, user):
+         return reaction.emoji.startswith(('⏪', '⏩', '✅'))
+
+    def createEmbed(self, lookup, defspage):
+
+        embed = Embed().from_dict({
+            "title": "\u200b",
+            "color": 0x006FFA,
+            "author": {"name": "Wordnik", "icon_url": "https://www.wordnik.com/favicon.ico"},
+            "fields": [
+                {"name": "Word", "value": str(
+                    lookup[0].word) + "\n\u200b\n"},
+                {"name": "Definition", "value": "\n -- \n".join(defspage)}
+            ]
+        })
+
+        return embed
+
     @commands.command(name='dict', aliases=['d'])
     async def wordnik_search(self, ctx, *, query: str):
-        """: !d <word>          | Lookup a word in the dictionary"""
+        """!d <word>          | Lookup a word in the dictionary"""
+
+        orig_user = ctx.message.author
 
         lookup = self.wordApi.getDefinitions(query)
 
@@ -27,23 +54,59 @@ class Wordnik:
             return
 
         else:
-            # For now, only work with the first definition given. lookup[0]
-            word = lookup[0].word
-            pos = lookup[0].partOfSpeech
-            definition = lookup[0].text
-            examples = lookup[0].exampleUses
+            # paginate definitions
+            defs = []
+            for l in lookup:
+                entry = f'**{l.partOfSpeech}** \n {l.text}' + ("\n" + l.exampleUses[0] if l.exampleUses else "")
+                defs.append(entry)
+            defs = [defs[i:i + 4] for i in range(0, len(defs), 4)]
 
-            embed = discord.Embed(name='\u2063', colour=0x006FFA)
-            embed.set_author(name="Wordnik", icon_url="https://www.wordnik.com/favicon.ico")
-            definitions = []
-            for res in lookup[0:3]:
-                entry = "_{0}_ \n {1} \n --".format(res.partOfSpeech, res.text)
-                definitions.append(entry)
+            p = 1
+            maxpage = len(defs)
+            firstrun = True
 
-            embed.add_field(name=lookup[0].word, value='\n'.join(definitions), inline=False)
+            # check function for wait_for
+            _check = lambda reaction, user: reaction.emoji.startswith(('⏪', '⏩'))
 
-            await ctx.channel.send(embed=embed)
+            while True:
+                if firstrun:
+                    firstrun = False
+                    embed = self.createEmbed(lookup, defs[p - 1])
+                    msg = await ctx.channel.send(embed=embed)
 
+                if maxpage == 1 and p == 1:
+                    break
+                elif p == 1:
+                    toReact = ['⏩']
+                elif p == maxpage:
+                    toReact = ['⏪']
+                elif p > 1 and p < maxpage:
+                    toReact = ['⏪', '⏩']
+
+                for r in toReact:
+                    await msg.add_reaction(r)
+
+                await asyncio.sleep(0.5)
+
+                try:
+               	    reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=_check)
+                except:
+                    break
+
+                if user == orig_user:
+                    if '⏪' in str(reaction.emoji):
+                        p = p - 1
+                        await msg.clear_reactions()
+                        embed = self.createEmbed(lookup, defs[p - 1])
+                        await msg.edit(embed=embed)
+
+                    elif '⏩' in str(reaction.emoji):
+                        p = p + 1
+                        await msg.clear_reactions()
+                        embed = self.createEmbed(lookup, defs[p - 1])
+                        await msg.edit(embed=embed)
+                else:
+                    reaction.remove(user)
 
 def setup(bot):
     bot.add_cog(Wordnik(bot))

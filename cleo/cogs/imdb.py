@@ -3,44 +3,53 @@ import json
 import discord
 import logging
 from discord.ext import commands
+from discord import Embed
+import urllib.parse
 
 NORESULTS_MSG = "No results found."
 
 logger = logging.getLogger(__name__)
 
-class IMDB:
+class IMDB(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.url = "http://www.omdbapi.com/?i=tt3896198&apikey={0}&t={1}"
+        self.url = f"http://www.omdbapi.com/?i=tt3896198&apikey={self.bot.tokens['omdb']}&t="
 
     @commands.guild_only()
     @commands.command(name='imdb')
     async def imdb_search(self, ctx, *, title: str):
-        """: !imdb <title>      | lookup a movie on IMDB. """
+        """!imdb <title>      | lookup a movie on IMDB. """
 
         if not title:
             return
 
         logger.debug(title)
 
-        async with self.bot.session.get(self.url.format(self.bot.tokens['omdb'], title)) as resp:
+        async with self.bot.session.get(self.url + title) as resp:
             data = await resp.text()
             movie = json.loads(data)
 
+        logger.debug(movie)
         if movie['Response'] == "True":
-            embed = discord.Embed(title="\n", colour=0x006FFA)
-            embed.set_thumbnail(url=movie['Poster'])
-            embed.set_author(name="IMDB", icon_url="http://www.imdb.com/favicon.ico")
-            embed.add_field(name="Title", value=movie['Title'], inline=False)
-            embed.add_field(name="IMDB rating", value=movie['imdbRating'], inline=False)
-            embed.add_field(name="Year", value=movie['Year'], inline=False)
-            embed.add_field(name="Genre", value=movie['Genre'], inline=False)
-            embed.add_field(name="Director", value=movie['Director'], inline=False)
-            embed.add_field(name="Actors", value=movie['Actors'])
-            embed.add_field(name="Plot", value=movie['Plot'])
 
-            logger.debug(embed.to_dict())
+            embed = Embed().from_dict({
+                "title": "\n",
+                "color": 0x006FFA,
+                "thumbnail": {"url": movie['Poster']},
+                "author": {"name": "IMDB", "icon_url": "https://m.media-amazon.com/images/G/01/IMDb/BG_rectangle._CB1509060989_SY230_SX307_AL_.png"},
+                "fields": [
+                    {"name": "Title", "value": movie['Title'] + "\n\u200b", "inline": "false"},
+                    {"name": "IMDB Rating", "value": movie['imdbRating'], "inline": "true"},
+                    {"name": "Year", "value": movie['Year'], "inline": "true"},
+                    {"name": "Genre", "value": movie['Genre'], "inline": "true"},
+                    {"name": "Rated", "value": movie['Rated'], "inline": "true"},
+                    {"name": "\u200b\n" + "Actors", "value": "\n".join(movie['Actors'].split(','))   , "inline": "true"},
+                    {"name": "\u200b\n" + "Director", "value": "\n".join(movie['Director'].split(',')), "inline": "true"},
+                    {"name": "\u200b\n" + "Plot", "value": movie['Plot'], "inline": "false"}
+                ]
+            })
+
             await ctx.channel.send(embed=embed)
 
         else:

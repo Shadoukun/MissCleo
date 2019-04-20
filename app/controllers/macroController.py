@@ -7,17 +7,14 @@ from flask_login import login_required
 from app.forms import CommandForm
 import requests
 
-from app import db
-from app.models import *
-
+from .. import db
+from cleo.db import Macro, MacroResponse, MacroReaction
 
 blueprint = Blueprint('macros', __name__)
 
 @blueprint.route('/macros')
 def index():
     return render_template('pages/macros/index.html')
-
-
 
 @blueprint.route('/macros/macros')
 @blueprint.route('/macros/macros/<int:macro_id>')
@@ -60,7 +57,7 @@ def edit_macros(operation, macro_id=None):
             requests.get('http://127.0.0.1:10000/update_macros')
 
 
-    if (request.method == 'GET') and (macro_id):
+    elif (request.method == 'GET') and (macro_id):
         if operation == 'delete':
             db.session.query(Macro).filter_by(id=macro_id).delete()
             db.session.commit()
@@ -75,18 +72,20 @@ def edit_macros(operation, macro_id=None):
 @login_required
 def responses(resp_id=None):
     form = CommandForm(request.form)
-    response_list = db.session.query(MacroResponse).all()
+    resp_list = db.session.query(MacroResponse).all()
 
     if resp_id:
         resp = db.session.query(MacroResponse).filter_by(id=resp_id).first()
-        return render_template('pages/macros/responses.html', responses=response_list, form=form, current_resp=resp)
     else:
-        return render_template('pages/macros/responses.html', responses=response_list, form=form)
+        resp = None
+
+    return render_template('pages/macros/responses.html', responses=resp_list, form=form, resp=resp)
 
 @login_required
 @blueprint.route('/macros/responses/<int:resp_id>/<string:operation>', methods=['POST', 'GET'])
 @blueprint.route('/macros/responses/<string:operation>', methods=['POST', 'GET'])
 def edit_responses(operation, resp_id=None):
+    
     if request.method == 'POST':
         form = CommandForm(request.form)
 
@@ -100,7 +99,7 @@ def edit_responses(operation, resp_id=None):
 
             requests.get('http://127.0.0.1:10000/update_responses')
 
-        if operation == 'edit':
+        elif operation == 'edit':
             resp = db.session.query(MacroResponse).filter_by(id=resp_id).first()
             resp.trigger = form['command'].data
             resp.response = form['response'].data
@@ -108,7 +107,7 @@ def edit_responses(operation, resp_id=None):
 
             requests.get('http://127.0.0.1:10000/update_responses')
 
-    if (request.method == 'GET') and (resp_id):
+    elif (request.method == 'GET') and (resp_id):
         if operation == 'delete':
             db.session.query(MacroResponse).filter_by(id=resp_id).delete()
             db.session.commit()
@@ -147,7 +146,7 @@ def edit_reactions(operation, react_id=None):
 
             requests.get('http://127.0.0.1:10000/update_reactions')
 
-        if operation == 'edit':
+        elif operation == 'edit':
             reaction = db.session.query(MacroReaction).filter_by(id=react_id).first()
             reaction.trigger = form['command'].data
             reaction.reaction = form['response'].data
@@ -155,7 +154,7 @@ def edit_reactions(operation, react_id=None):
 
             requests.get('http://127.0.0.1:10000/update_reactions')
 
-    if (request.method == 'GET') and (react_id):
+    elif (request.method == 'GET') and (react_id):
         if operation == 'delete':
             reaction = db.session.query(MacroReaction).filter_by(id=react_id).delete()
             db.session.commit()

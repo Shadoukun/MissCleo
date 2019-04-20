@@ -1,5 +1,6 @@
 import sys
-from flask import render_template, Blueprint, request
+from flask import render_template, Blueprint, request, send_from_directory, url_for, redirect
+from flask import current_app as app
 #from app import db
 
 #from app.models import User
@@ -11,12 +12,10 @@ from flask import render_template, Blueprint, request
 
 blueprint = Blueprint('index', __name__)
 
-
 @blueprint.route('/')
 def home():
-    #users = User.query.all()
-    return render_template('pages/placeholder.home.html')
-
+    return redirect(url_for('quotes.quotes'))
+    #return render_template('pages/placeholder.home.html')
 
 @blueprint.route('/about')
 def about():

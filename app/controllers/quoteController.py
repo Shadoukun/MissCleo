@@ -1,84 +1,70 @@
 import sys
 import json
 import discord
-from sqlalchemy import func
+from dataclasses import dataclass
+from datetime import datetime
+from pprint import pprint
+from typing import Any
+from sqlalchemy import func, desc
 from flask import render_template, Blueprint, request, redirect, url_for
+from flask_sqlalchemy import BaseQuery
 from flask_login import login_required
 
-from app import db
-from app.forms import *
-from app.models import *
+from .. import db
+from cleo.db import Quote, User, Channel, Guild
+from ..forms import *
 
-PAGE_SIZE = 20
 
 blueprint = Blueprint('quotes', __name__)
 
+@dataclass
+class PageData:
+    current_guild: Any = None
+    current_user: Any = None
+    current_page: int = 1
+
+    guilds: Any = None
+    users: Any = None
+    quotes: Any = None
+    pages: Any = None
+
+    def __post_init__(self):
+        self.current_guild = db.session.query(Guild).filter_by(id=self.current_guild).first()
+        self.current_user = db.session.query(User).filter_by(id=self.current_user).first()
+        guilds = db.session.query(Guild)
+        users = db.session.query(User)
+        quotes = db.session.query(Quote)
+
+        if self.current_guild:
+            users = users.filter_by(guild_id=self.current_guild.id)
+
+            quotes = quotes.filter_by(guild_id=self.current_guild.id)
+
+        if self.current_user:
+            quotes = quotes.filter_by(user_id=self.current_user.id)
+
+        self.guilds = guilds.all()
+        self.users = users.filter(User.quotes.any()).all()
+        self.quotes = quotes.order_by(Quote.timestamp.desc())
+        self.pages = self.quotes.paginate(self.current_page, 10, False)
+
 
 @blueprint.route('/quotes')
-def quotes(channel='all', user=None):
+def quotes():
 
-    user = request.args.get('user', None)
-    channel = request.args.get('channel', 'all')
+    guild = request.args.get('guild', None)
+    user = request.args.get('user', None) if guild else None
+
     page = int(request.args.get('page', 1))
-
-
-    channel, channels, users, quotes = _getQuotes(channel, user)
-    quotes, page_count = _paginate(quotes, page)
-
-    return render_template('pages/quotes/quotes.html',
-                           quotes=quotes,
-                           pages=page_count,
-                           current_page=page,
-                           channels=channels,
-                           users=users,
-                           user=user,
-                           current_channel=channel)
+    data = PageData(guild, user, page)
+    return render_template('pages/quotes/quotes.html', data=data)
 
 
 @blueprint.route("/delete_quote/<id>")
 @login_required
 def delete_quote(id):
-    quote = db.session.query(Quote).filter_by(message_id=id).delete()
+    quote = db.session.query(Quote).filter_by(message_id=id)
+    db.session.remove(quote)
     db.session.commit()
 
     return redirect(url_for('quotes.quotes'))
-
-
-def _getQuotes(channel, user=None):
-    '''Returns a filtered list of quotes by channel, user.
-       If no args provided, returns full quote list.'''
-
-    current_channel = None
-
-    if channel == 'all':
-        channel = None
-        current_channel = 'all'
-
-    quotes = db.session.query(Quote)
-    users = db.session.query(User).filter(User.quotes.any())
-    channels = db.session.query(Channel) \
-                            .filter(Channel.quotes)
-
-    # if a channel is given, filter by channel
-    if channel:
-        channel = channels.filter_by(name=channel).first()
-        quotes = quotes.filter_by(channel_id=channel.id)
-        current_channel = channel.name
-
-    if user:
-        users = users.filter_by(id=user).all()
-        quotes = quotes.filter_by(user_id=users[0].id)
-
-    return current_channel, channels, users, quotes
-
-
-def _paginate(quotes, page):
-
-    page_count = int(quotes.count() / PAGE_SIZE)
-    if page_count < 1:
-        page_count = 1
-    page -= 1
-
-    quotes = quotes.offset(page*PAGE_SIZE).limit(PAGE_SIZE)
-
-    return quotes, page_count

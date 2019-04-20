@@ -1,7 +1,7 @@
 import discord
 import logging
 from discord.ext import commands
-from cleo.utils import findUser, is_admin
+from cleo.utils import findUser, admin_only
 import cleo.db as db
 
 NOTFOUND_MSG = "User not found."
@@ -10,7 +10,7 @@ REMOVED_MSG = "Admin removed: {0}"
 
 logger = logging.getLogger(__name__)
 
-class Admin:
+class Admin(commands.Cog):
     """Bot admin commands"""
 
     def __init__(self, bot):
@@ -22,10 +22,18 @@ class Admin:
             self.bot.auto_enable.append('admin')
         except:
             logger.error("Commands cog not found")
-            pass
 
-        await self.get_admins()
+        admins = self.db.query(db.Admin).all()
+        self.bot.admins = [a.user_id for a in admins]
 
+    @commands.command(name="find", hidden=False)
+    async def find(self, ctx, *, arg:str):
+        user = await findUser(ctx, arg)
+
+        if user:
+            await ctx.channel.send(f"{user.id}\n{user.name}\n{user.display_name}")
+        else:
+            await ctx.channel.send("Failed.")
 
     @commands.group(name='admin', hidden=True)
     async def admin(self, ctx):
@@ -33,7 +41,7 @@ class Admin:
         if ctx.invoked_subcommand is None:
             pass
 
-    @is_admin()
+    @admin_only()
     @admin.command(name='add')
     async def add_admin(self, ctx, *, username:str):
         logger.debug("!admin add")
@@ -44,21 +52,20 @@ class Admin:
             await ctx.channel.send(NOTFOUND_MSG)
             return
 
-        admins = self.db.query(db.Admin)
         if user.id in self.bot.admins:
             logger.debug("User already an admin")
             return
 
         new_admin = db.Admin(user.id)
         self.db.add(new_admin)
+        self.bot.admins.append(user.id)
         self.db.commit()
 
-        self.bot.admins.append(user.id)
         await ctx.channel.send(ADDED_MSG.format(user.display_name))
+
         logger.debug("admin added")
 
-
-    @is_admin()
+    @admin_only()
     @admin.command(name='remove')
     async def remove_admin(self, ctx, *, username:str):
         logger.debug("!admin remove")
@@ -74,23 +81,11 @@ class Admin:
         for admin in admins:
             if admin.user_id == user.id:
                 self.db.delete(admin)
-                self.db.commit()
                 self.bot.admins.remove(user.id)
+                self.db.commit()
 
                 await ctx.channel.send(REMOVED_MSG.format(user.display_name))
                 logging.debug("admin removed")
-
-    async def get_admins(self):
-        logger.debug("getting list of admins")
-
-        try:
-            return self.bot.admins
-
-        except AttributeError:
-            admins = self.db.query(db.Admin).all()
-            self.bot.admins = [a.user_id for a in admins]
-
-        logger.debug(self.bot.admins)
 
 
 def setup(bot):
