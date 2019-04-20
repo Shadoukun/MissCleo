@@ -58,21 +58,62 @@ img.avatar {
     margin: 0 auto;
   }
 
-.timestamp {
-    font-size:80%;
-}
 
 .quote-card {
-    background: $fg-color;
-    color: #e1e1e1;
-    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
-    -webkit-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
-    -moz-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+  background: $fg-color;
+  color: #e1e1e1;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+  -webkit-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+
+  .quote-dropdown {
+    color: #6c757d;
+
+    &:hover, &:focus, &:active {
+      box-shadow: none;
+      color: white;
+      background: none;
+      border: none;
+    }
+  }
+
+  .dropdown-menu {
+    background: $nav-color;
+    min-width: 5rem;
+
+    li {
+      padding: 0.3em 0 0 0.5em;
+    }
+
+    li a {
+      color: #6c757d;
+
+      &:hover, &:focus, &:active {
+      color: white;
+      text-decoration: none;
+      }
+    }
+
+  }
 }
 
 .quote-heading {
     background: #36393f;
     height: 3em;
+    justify-content: center;
+    flex-direction: row;
+    text-align: center;
+
+  .quote-username {
+    color: #e1e1e1;
+    font-weight: bold;
+  }
+
+  .timestamp {
+    font-size: 90%;
+    margin: auto;
+  }
+
 }
 
 .quote-dropdown {
@@ -107,6 +148,12 @@ img.avatar {
     border-radius: 5%;
     border: 1px solid lighten($nav-color, 0%);
     color: white;
+
+    &:focus {
+
+      box-shadow: 0 0 0.1rem 1px white;
+
+    }
   }
 
   .page-item:first-child .page-link, .page-item:last-child .page-link {

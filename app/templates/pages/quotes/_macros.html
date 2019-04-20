@@ -65,11 +65,11 @@
       <div class="card-title quote-heading d-flex p-2 align-items-center rounded-top">
 
           <div class="avatar"><img class="avatar" src="{{ quote.user.avatar_url }}"></div>
-          <a class="p-1 ml-2 text-white" href="{{ url }}">{{ quote.user.display_name}}</a>
-          <div class="timestamp ml-2 text-muted">{{ quote.timestamp }}</div>
+          <a class="p-1 ml-2 quote-username" href="{{ url }}">{{ quote.user.display_name}}</a>
+          <div class="timestamp ml-2 text-muted">{{ quote.timestamp|formatdatetime }}</div>
 
           <div class="dropdown ml-auto">
-            <button class="btn btn-primary dropdown-toggle quote-dropdown h-100 text-muted" type="button" data-toggle="dropdown"></button>
+            <button class="btn dropdown-toggle quote-dropdown" type="button" data-toggle="dropdown"></button>
 
             <ul class="dropdown-menu">
               <li><a href="#">Copy ID</a></li>

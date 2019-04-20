@@ -39,6 +39,11 @@ def add_user(app):
         print('User added.')
 
 
+def format_datetime(value, format="%m/%d/%Y"):
+    if value is None:
+        return ""
+    return value.strftime(format)
+
 def create_app(config_filename):
     app = Flask(__name__)
     app.config.from_object(config_filename)
@@ -59,6 +64,7 @@ def create_app(config_filename):
     add_user(app)
 
     app.jinja_env.add_extension('jinja2.ext.do')
+    app.jinja_env.filters['formatdatetime'] = format_datetime
     app.wsgi_app = SassMiddleware(app.wsgi_app, {
         'app': ('static/scss', 'static/css', 'static/css')
     })
