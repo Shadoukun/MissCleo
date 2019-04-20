@@ -96,7 +96,7 @@ def admin_only():
     return commands.check(predicate)
 
 
-def add_user(db, member):
+async def add_user(db, member):
     logger.debug(f"Add user: {member.name}")
 
     user = db.query(User).filter_by(id=member.id)
@@ -127,5 +127,5 @@ async def update_user(db, before, after):
 
     else:
         # add new users if they arent the database for whatever reason. shouldn't ever be necessary.
-        add_user(db, after)
+        await add_user(db, after)
         logger.debug(f'{after.name} joined {after.guild.name}.')
