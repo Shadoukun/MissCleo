@@ -29,6 +29,25 @@ async def findUser(ctx, arg:str):
     return user
 
 
+async def add_users(bot, user=None):
+    '''Adds users to the database.
+    if user=None, checks and adds all Users the bot can see.'''
+
+    if user:
+        users = [user]
+    else:
+        users = bot.users
+
+    db_users = [u.id for u in bot.db.query(User).all()]
+
+    for u in users:
+        if u.id not in db_users:
+            logger.debug(f"Adding user: ({u.id}) {u.name}")
+            new_user = User(u)
+            bot.db.add(new_user)
+
+    bot.db.commit()
+
 async def update_database(self):
     '''Checks that all Guilds, Channels, and Users are in database.
        This only runs on startup. Adding guilds/channels/users is otherwise handled by events'''
@@ -39,7 +58,9 @@ async def update_database(self):
 
     guilds = [g.id for g in self.db.query(Guild).all()]
     channels = [c.id for c in self.db.query(Channel).all()]
-    users = [u.id for u in self.db.query(User).all()]
+
+    logger.debug("Updating users.")
+    await add_users(self)
 
     logger.debug("Updating guilds")
     for guild in self.guilds:
@@ -54,13 +75,14 @@ async def update_database(self):
                 new_channel = Channel(channel)
                 self.db.add(new_channel)
 
-        logger.debug("Updating members.")
-        for user in guild.members:
-            if user.id not in users:
-                new_user = User(user)
-                self.db.add(new_user)
+        db_guildmembers = [m.user_id for m in self.db.query(GuildMember).filter_by(guild_id=guild.id).all()]
+        for member in guild.members:
+            if member.id not in db_guildmembers:
+                logger.debug(f"Adding Member for '{guild.name}': ({member.id}) {member.name} - {member.display_name}")
+                new_member = GuildMember(member)
+                self.db.add(new_member)
 
-        self.db.commit()
+    self.db.commit()
 
 async def update_user_info(self):
     '''update user avatar and display name info
@@ -94,17 +116,6 @@ def admin_only():
             return True
 
     return commands.check(predicate)
-
-
-async def add_user(db, member):
-    logger.debug(f"Add user: {member.name}")
-
-    user = db.query(User).filter_by(id=member.id)
-
-    if not db.query(user.exists()):
-        new_user = User(member)
-        db.add(new_user)
-        db.commit()
 
 
 async def update_user(db, before, after):
