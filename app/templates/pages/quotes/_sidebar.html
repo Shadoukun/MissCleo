@@ -25,11 +25,11 @@
   {% if data.current_guild is not none %}
   <h6 class="text-muted d-flex">Users</h6>
   <ul class="nav nav-pills flex-column d-flex">
-    {% for user in data.users %}
+    {% for member in data.members %}
       <li class="nav-item">
-        <a class="nav-link user-link text-white d-flex align-items-center" id="{{user.id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild.id, user=user.id)}}">
-          <div class="avatar"><img class="avatar mr-2 " src="{{user.avatar_url}}"></div>
-          <div class="name text-light">{{ user.display_name }}</div>
+        <a class="nav-link user-link text-white d-flex align-items-center" id="{{member.user_id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild.id, user=member.user_id)}}">
+          <div class="avatar"><img class="avatar mr-2 " src="{{member.user.avatar_url}}"></div>
+          <div class="name text-light">{{ member.display_name }}</div>
         </a>
       </li>
     {% endfor %}
@@ -38,9 +38,9 @@
   {# {% if data.current_guild is not none %}
   <div class="card users-card mb-4">
       <h6 class="text-muted">Users</h6>
-      {% for user in data.users %}
-        <div class="user-entry{%if user.id==data.current_user.id%} active {%endif%} mb-2">
-          <a class="user d-flex align-items-center" id="{{user.id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild.id, user=user.id)}}">
+      {% for member in data.members %}
+        <div class="user-entry{%if user.user_id==data.current_user.id%} active {%endif%} mb-2">
+          <a class="user d-flex align-items-center" id="{{member.user_id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild.id, user=member.user_id)}}">
 
             <div class="avatar"><img class="avatar mr-2 " src="{{user.avatar_url}}"></div>
             <div class="name text-light">{{ user.display_name }}</div>

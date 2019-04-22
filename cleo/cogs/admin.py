@@ -77,7 +77,6 @@ class Admin(commands.Cog):
             return
 
         admins = self.db.query(db.Admin).all()
-
         for admin in admins:
             if admin.user_id == user.id:
                 self.db.delete(admin)

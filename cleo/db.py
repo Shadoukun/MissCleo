@@ -17,6 +17,7 @@ channel_members = Table('channel_members',
                         Column('user_id', Integer, ForeignKey('users.id'))
                        )
 
+
 class Guild(Base):
     '''Discord Servers/Guilds'''
 
@@ -84,8 +85,8 @@ class User(Base):
 class GuildMember(Base):
     __tablename__ = "guild_members"
 
-    guild_id        = Column(String, ForeignKey("guilds.id"), primary_key=True)
-    user_id         = Column(String, ForeignKey("users.id"), primary_key=True)
+    guild_id        = Column(Integer, ForeignKey("guilds.id"), primary_key=True)
+    user_id         = Column(Integer, ForeignKey("users.id"), primary_key=True)
     display_name    = Column(String)
 
     user            = relationship("User")
