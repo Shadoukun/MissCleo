@@ -59,10 +59,7 @@ def edit_macros(operation, macro_id=None):
 
     elif (request.method == 'GET') and (macro_id):
         if operation == 'delete':
-            db.session.query(Macro).filter_by(id=macro_id).delete()
-            db.session.commit()
-
-            requests.get('http://127.0.0.1:10000/update_macros')
+                requests.get(f'http://127.0.0.1:10000/remove_macro', params=[('id', int(macro_id))])
 
     return redirect(url_for('macros.macros'))
 
@@ -85,7 +82,7 @@ def responses(resp_id=None):
 @blueprint.route('/macros/responses/<int:resp_id>/<string:operation>', methods=['POST', 'GET'])
 @blueprint.route('/macros/responses/<string:operation>', methods=['POST', 'GET'])
 def edit_responses(operation, resp_id=None):
-    
+
     if request.method == 'POST':
         form = CommandForm(request.form)
 

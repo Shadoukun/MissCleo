@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/ico/apple-touch-icon-72-precomposed.png">
   <link rel="apple-touch-icon-precomposed" href="/static/ico/apple-touch-icon-57-precomposed.png">
   <link rel="shortcut icon" href="/static/ico/favicon.png">
-  
+
   <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/main.scss.css') }}">
   {% block custom_css %}{% endblock %}
 
@@ -61,7 +61,7 @@
           {# <a class="nav-link" id="stats" href="{{url_for('stats.stats')}}">Stats</a> #}
         {% endfor %}
       </ul>
-    
+
       <div class="ml-auto navbar-nav">
         {% if current_user.is_authenticated %}
           <li class="nav-item">
@@ -87,9 +87,9 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-    
-    {% block content %}{% endblock %}
 
+    {% block content %}{% endblock %}
+    {% block custom_js %}{% endblock %}
 </body>
 
 <script defer src="/static/js/plugins.js"></script>

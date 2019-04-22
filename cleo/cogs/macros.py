@@ -58,18 +58,6 @@ class Macros(commands.Cog):
             nonlocal macro
             await ctx.channel.send(macro.response)
 
-        # # Chooses a response at random.
-        # TODO: figure out how to handle both random single-line responses/macros and multi-line ones. Thx Noku.
-        # async def _multimacro(ctx):
-        #     nonlocal macro
-        #     randresponse = [r.rstrip() for r in macro.response.split('\n')]
-        #     random.shuffle(randresponse)
-        #     randresponse = randresponse[0]
-        #     await ctx.channel.send(randresponse)
-        # if '\n' in macro.response:
-        #     return _multimacro
-        # else:
-
         return _macro
 
     async def _load_macro_commands(self, macro=None):
@@ -149,7 +137,16 @@ class Macros(commands.Cog):
                 if macro.modified_flag == 1:
                     macro.modified_flag = 0
                     self.db.commit()
-                    self._load_macro_commands(macro)
+                    await self._load_macro_commands(macro)
+
+    async def remove_macro(self, macro_id):
+        macro = self.db.query(Macro).filter_by(id=macro_id).one()
+
+        macro_cmd = self.bot.get_command(macro.command)
+        self.bot.remove_command(macro.command)
+        self.db.query(Macro).filter_by(id=macro_id).delete()
+        self.db.commit()
+
 
     async def update_responses(self):
         '''Add macro responses from database'''
@@ -182,7 +179,6 @@ class Macros(commands.Cog):
 
     async def handle(self, request):
         '''crappy rest API'''
-
         name = request.match_info.get('name', "Anonymous")
         if name == "update_macros":
             await self.update_macros()
@@ -190,6 +186,8 @@ class Macros(commands.Cog):
             await self.update_responses()
         elif name == "update_reactions":
             await self.update_reactions()
+        elif name== "remove_macro":
+            await self.remove_macro(request.rel_url.query['id'])
 
         text = "Hello, " + name
         return web.Response(text=text)

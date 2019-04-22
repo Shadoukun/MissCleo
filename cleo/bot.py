@@ -87,7 +87,7 @@ class MissCleo(commands.Bot):
 
     async def on_ready(self):
         # database background tasks
-        logger.debug("Client ready")
+        logger.info("Client ready")
 
         await utils.update_database(self)
         await utils.update_user_info(self)
