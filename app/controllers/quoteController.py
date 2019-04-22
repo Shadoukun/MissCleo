@@ -11,42 +11,51 @@ from flask_sqlalchemy import BaseQuery
 from flask_login import login_required
 
 from .. import db
-from cleo.db import Quote, User, Channel, Guild
+from cleo.db import Quote, User, Channel, Guild, GuildMember
 from ..forms import *
 
 
 blueprint = Blueprint('quotes', __name__)
 
+
 @dataclass
 class PageData:
-    current_guild: Any = None
-    current_user: Any = None
+    current_guild: int = None
+    current_member: int = None
     current_page: int = 1
 
     guilds: Any = None
-    users: Any = None
+    members: Any = None
     quotes: Any = None
     pages: Any = None
 
     def __post_init__(self):
-        self.current_guild = db.session.query(Guild).filter_by(id=self.current_guild).first()
-        self.current_user = db.session.query(User).filter_by(id=self.current_user).first()
+        query = db.session.query(Guild, GuildMember)
+
+        if self.current_guild and self.current_member:
+            if self.current_guild:
+                query.filter(Guild.id == self.current_guild)
+            if self.current_member:
+                query.filter(GuildMember.user_id == self.current_member)
+
+            self.current_guild, self.current_member = query.one()
+
+
         guilds = db.session.query(Guild)
-        users = db.session.query(User)
-        quotes = db.session.query(Quote)
+        members = db.session.query(GuildMember)
+        quotes = db.session.query(Quote).order_by(Quote.timestamp.desc())
 
         if self.current_guild:
-            users = users.filter_by(guild_id=self.current_guild.id)
+            members.filter_by(guild_id=self.current_guild)
+            quotes.filter_by(guild_id=self.current_guild)
 
-            quotes = quotes.filter_by(guild_id=self.current_guild.id)
-
-        if self.current_user:
-            quotes = quotes.filter_by(user_id=self.current_user.id)
+        if self.current_member:
+            members.filter_by(user_id=self.current_member)
+            quotes.filter_by(user_id=self.current_member)
 
         self.guilds = guilds.all()
-        self.users = users.filter(User.quotes.any()).all()
-        self.quotes = quotes.order_by(Quote.timestamp.desc())
-        self.pages = self.quotes.paginate(self.current_page, 10, False)
+        self.members = members.all()
+        self.pages = quotes.paginate(self.current_page, 10, False)
 
 
 @blueprint.route('/quotes')

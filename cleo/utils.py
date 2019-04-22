@@ -3,6 +3,7 @@ from cleo.db import *
 from difflib import get_close_matches
 from discord.channel import TextChannel
 from discord.ext import commands
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,6 @@ async def add_users(bot, user=None):
         users = bot.users
 
     db_users = [u.id for u in bot.db.query(User).all()]
-
     for u in users:
         if u.id not in db_users:
             logger.debug(f"Adding user: ({u.id}) {u.name}")
@@ -50,37 +50,39 @@ async def add_users(bot, user=None):
 
 async def update_database(self):
     '''Checks that all Guilds, Channels, and Users are in database.
-       This only runs on startup. Adding guilds/channels/users is otherwise handled by events'''
 
-    logger.info("Updating database")
+       This only runs once on startup.
+    '''
 
     await self.wait_until_ready()
-
-    guilds = [g.id for g in self.db.query(Guild).all()]
-    channels = [c.id for c in self.db.query(Channel).all()]
-
+    logger.info("Updating database")
     logger.debug("Updating users.")
+
     await add_users(self)
 
-    logger.debug("Updating guilds")
-    for guild in self.guilds:
-        if guild.id not in guilds:
-            new_guild = Guild(guild)
-            self.db.add(new_guild)
+    missing_guilds = self.db.query(Guild).filter(Guild.id.notin_(i.id for i in self.guilds)).all()
+    channels = [c.id for c in self.db.query(Channel).all()]
 
-        logger.debug("Updating channels")
-        # only updates text channels
+    logger.debug("Updating guilds")
+    for guild in missing_guilds:
+        new_guild = Guild(guild)
+        self.db.add(new_guild)
+
+    # only updates text channels
+    for guild in self.guilds:
+        logger.debug(f"Updating channels for {guild.name}")
         for channel in guild.channels:
             if (channel.id not in channels) and (isinstance(channel, TextChannel)):
                 new_channel = Channel(channel)
                 self.db.add(new_channel)
 
-        db_guildmembers = [m.user_id for m in self.db.query(GuildMember).filter_by(guild_id=guild.id).all()]
+        dbmembers = [g.user_id for g in self.db.query(GuildMember).filter_by(guild_id=guild.id).all()]
         for member in guild.members:
-            if member.id not in db_guildmembers:
-                logger.debug(f"Adding Member for '{guild.name}': ({member.id}) {member.name} - {member.display_name}")
+            if member.id not in dbmembers:
                 new_member = GuildMember(member)
                 self.db.add(new_member)
+
+                logger.debug(f"Adding Member for '{guild.name}': ({member.id}) {member.name} - {member.display_name}")
 
     self.db.commit()
 
@@ -90,10 +92,10 @@ async def update_user_info(self):
        by events'''
 
     members = sorted(self.get_all_members(), key=lambda x: x.id)
-    users = sorted(self.db.query(User).filter(User.id.in_(x.id for x in members)).all(), key=lambda x: x.id)
+    users = sorted(self.db.query(GuildMember).filter(GuildMember.user_id.in_(x.id for x in members)).all(), key=lambda x: x.user_id)
 
     for u,m in zip(users, members):
-        u.avatar_url = str(m.avatar_url)
+        u.user.avatar_url = str(m.avatar_url)
         u.display_name = m.display_name
 
     self.db.commit()
@@ -103,7 +105,6 @@ def admin_only():
     '''Admin check decorator cog commands'''
 
     # TODO: role check
-
     async def predicate(ctx):
         logger.debug(f"checking if {ctx.author.name} is an admin")
         app_info = await ctx.bot.application_info()
@@ -123,12 +124,6 @@ async def update_user(db, before, after):
 
     user = db.query(User).filter_by(id=before.id).first()
 
-    # print("BEFORE", before)
-    # print ("AFTER", after)
-    # print(db)
-    # print(user)
-    # print(str(after.avatar_url))
-    # print(after.display_name)
     if user and after:
         user.avatar_url = str(after.avatar_url)
         user.display_name = after.display_name
@@ -137,6 +132,7 @@ async def update_user(db, before, after):
         logger.debug(f' Member info updated.\n Before: {before.display_name}, {before.avatar_url}\n After: {after.display_name}, {after.avatar_url}')
 
     else:
-        # add new users if they arent the database for whatever reason. shouldn't ever be necessary.
-        await add_user(db, after)
+        # add new users if they arent the database for whatever reason.
+        # shouldn't ever be necessary.
+        await add_users(db, after)
         logger.debug(f'{after.name} joined {after.guild.name}.')
