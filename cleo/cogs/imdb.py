@@ -1,10 +1,7 @@
-import asyncio
 import json
-import discord
 import logging
-from discord.ext import commands
 from discord import Embed
-import urllib.parse
+from discord.ext import commands
 
 NORESULTS_MSG = "No results found."
 

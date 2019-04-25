@@ -1,12 +1,9 @@
 import random
-import discord
 import logging
-from discord.ext import commands
-from cleo.db import Macro, MacroReaction, MacroResponse
-
-import asyncio
 from aiohttp import web
-import code
+from discord.ext import commands
+
+from cleo.db import Macro, MacroReaction, MacroResponse
 
 logger = logging.getLogger(__name__)
 

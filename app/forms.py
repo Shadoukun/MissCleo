@@ -1,11 +1,10 @@
-from flask import request
 from flask_wtf import FlaskForm as Form
 from wtforms import TextField, PasswordField, StringField, TextAreaField
-from wtforms.validators import DataRequired, EqualTo, Length, Required
+from wtforms.validators import Length, Required
 from flask_bcrypt import check_password_hash
 
-from . import db
 from cleo.db import FlaskUser
+from . import db
 
 class LoginForm(Form):
     username = TextField('Username', [Required()])

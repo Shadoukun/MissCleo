@@ -1,18 +1,11 @@
-import sys
-import json
-import discord
 from dataclasses import dataclass
-from datetime import datetime
-from pprint import pprint
 from typing import Any
-from sqlalchemy import func, desc, and_
+from sqlalchemy import and_
 from flask import render_template, Blueprint, request, redirect, url_for
-from flask_sqlalchemy import BaseQuery
 from flask_login import login_required
 
+from cleo.db import Quote, Guild, GuildMember
 from .. import db
-from cleo.db import Quote, User, Channel, Guild, GuildMember
-from ..forms import *
 
 
 blueprint = Blueprint('quotes', __name__)

@@ -1,9 +1,8 @@
-import discord
-from discord import Embed
-from wordnik import swagger, WordApi
-from discord.ext import commands
-import logging
 import asyncio
+import logging
+from discord import Embed
+from discord.ext import commands
+from wordnik import swagger, WordApi
 
 logger = logging.getLogger(__name__)
 

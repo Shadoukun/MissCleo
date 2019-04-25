@@ -15,26 +15,24 @@ db = SQLAlchemy(model_class=Base)
 
 from app.controllers import quoteController
 from app.controllers import loginController
-from app.controllers import statsController
 from app.controllers import macroController
 from app.controllers import indexController
 
 
 def add_user(app):
     '''Create Flask admin user'''
+
+    # check if user table is empty.
     with app.app_context():
         if db.session.query(FlaskUser).all():
             return
 
-        print('Enter Username: ')
-        username = input()
-
+        username = input("Enter Username: ")
         password = getpass()
         assert password == getpass('Password (again):')
-        password = generate_password_hash(password)
+        hashed = generate_password_hash(password)
 
-        user = FlaskUser(username=username, password=password)
-        db.session.add(user)
+        db.session.add(FlaskUser(username=username, password=hashed))
         db.session.commit()
         print('User added.')
 
@@ -43,6 +41,7 @@ def format_datetime(value, format="%m/%d/%Y"):
     if value is None:
         return ""
     return value.strftime(format)
+
 
 def create_app(config_filename):
     app = Flask(__name__)
@@ -57,7 +56,6 @@ def create_app(config_filename):
     app.register_blueprint(indexController.blueprint)
     app.register_blueprint(quoteController.blueprint)
     app.register_blueprint(macroController.blueprint)
-    app.register_blueprint(statsController.blueprint)
     app.register_blueprint(loginController.blueprint)
 
     # add initial admin user if there isn't one.

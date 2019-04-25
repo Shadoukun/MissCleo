@@ -2,12 +2,13 @@ import aiohttp
 import itertools
 import urllib
 import logging
+import wolframalpha
 from discord import Embed
 from discord.ext import commands
-import wolframalpha
-from wolframalpha import Result
+
 
 logger = logging.getLogger(__name__)
+
 
 class Client(wolframalpha.Client):
 
@@ -24,7 +25,7 @@ class Client(wolframalpha.Client):
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
                 r = await resp.text()
-                return Result(r)
+                return wolframalpha.Result(r)
 
 
 class WolframAlpha(commands.Cog):

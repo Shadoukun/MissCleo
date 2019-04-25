@@ -3,9 +3,6 @@ from sqlalchemy.orm import relationship, backref, sessionmaker, Query
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from flask_sqlalchemy import Pagination
-from datetime import datetime
-from cachetools import cachedmethod
-import dateutil.parser
 
 
 engine = create_engine('sqlite:///database.db')
@@ -141,22 +138,6 @@ class FlaskUser(Base):
         return False
 
 
-class MessageStat(Base):
-    '''Total messages sent over time (Hourly)'''
-
-    __tablename__ = "message_stats"
-
-    id              = Column(Integer, primary_key=True)
-    channel_id      = Column(Integer, ForeignKey('channels.id'))
-    timestamp       = Column(DateTime, default=datetime.utcnow)
-    messagecount    = Column(Integer)
-
-    def __init__(self, timestamp, messagecount, channel_id):
-        self.timestamp = timestamp
-        self.messagecount = messagecount
-        self.channelid = channel_id
-
-
 class Quote(Base):
     '''User quotes'''
 
@@ -225,6 +206,7 @@ class MacroReaction(Base):
         self.reaction = reaction
 
 
+
 class CustomQuery(Query):
     def paginate(self, page=1, per_page=25, show_all=False):
         """Paginate a query object.
@@ -253,11 +235,12 @@ class CustomQuery(Query):
         return Pagination(self, page, per_page, total, items)
 
 
-Session = sessionmaker(bind=engine, query_cls=CustomQuery)
-session = Session()
-
 def fix_timestamps(db, query):
     for q in query:
         new_quote = Quote(q)
         db.session.add(new_quote)
     db.session.commit()
+
+
+Session = sessionmaker(bind=engine, query_cls=CustomQuery)
+session = Session()

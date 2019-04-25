@@ -1,16 +1,12 @@
 import os
-import glob
-import asyncio
 import aiohttp
-import discord
 import logging
-import yaml
 import itertools
 from pathlib import Path
 from discord.ext import commands
 
 import cleo.utils as utils
-from cleo.db import Channel, Guild, User, Base, engine, session
+from cleo.db import Channel, Guild, Base, engine, session
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -22,8 +18,6 @@ HELP_COG = "Command"
 
 class CustomHelpCommand(commands.DefaultHelpCommand):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     async def send_bot_help(self, mapping):
         ctx = self.context

@@ -1,12 +1,9 @@
 import discord
-import random
 import logging
 from discord.ext import commands
-from cleo.utils import findUser, admin_only
 from sqlalchemy.sql.expression import func
-import dateutil.parser
-from datetime import datetime, timedelta
-import cleo.db as db
+
+from cleo.utils import findUser, admin_only
 from cleo.db import GuildMember, User, Quote
 
 NORESULTS_MSG = "Message not found."

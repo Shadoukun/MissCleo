@@ -1,4 +1,3 @@
-import discord
 import logging
 from discord.ext import commands
 from cleo.utils import findUser, admin_only

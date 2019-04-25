@@ -1,11 +1,10 @@
-import json
-import yaml
 import logging
 from discord.ext import commands
-from cleo.db import Channel
 from discord.ext.commands import guild_only
-from cleo.utils import admin_only
 from functools import lru_cache
+
+from cleo.db import Channel
+from cleo.utils import admin_only
 
 logger = logging.getLogger(__name__)
 

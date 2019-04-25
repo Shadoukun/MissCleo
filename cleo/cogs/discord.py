@@ -1,8 +1,10 @@
+import logging
+from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import guild_only
-import discord
+
 from cleo.utils import findUser
-import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +25,7 @@ class Discord(commands.Cog):
             user = await findUser(ctx, username)
 
         if user:
-            embed = discord.Embed().from_dict({
+            embed = Embed().from_dict({
                 "title": f"Avatar:  {user.display_name}",
                 "image": {"url": user.avatar_url.split("?")[0]}
             })
@@ -59,7 +61,7 @@ class Discord(commands.Cog):
             permissions = ', '.join(permissions)
 
             logger.debug(f"Name:{user.display_name}\nUsername:{user.name}\nJoin:{joindate}\nRoles:{roles}\nPermissions:{permissions}")
-            embed = discord.Embed().from_dict({
+            embed = Embed().from_dict({
                 "title": "\n",
                 "thumbnail": {"url": str(user.avatar_url)},
                 "fields": [

@@ -1,29 +1,28 @@
 import logging
-from cleo.db import *
 from difflib import get_close_matches
 from discord.channel import TextChannel
 from discord.ext import commands
 from sqlalchemy import func
+from cleo.db import Guild, Channel, User, GuildMember
 
 logger = logging.getLogger(__name__)
 
 
 async def findUser(ctx, arg:str):
 
+    user = None
     memberconverter = commands.MemberConverter()
 
-    arg_caps = arg.upper()   # capitalized string
-    arg_lower = arg.lower() # lowercase string
-    arg_upper = arg.capitalize() if (not arg[0].isdigit() and not arg[0].isupper()) else arg # all uppercase string
+    name_list = [arg.upper(), arg.lower()]
+    if (not arg[0].isdigit() and not arg[0].isupper()):
+        name_list += [arg.capitalize()]
 
     logger.debug(f"Looking for user: {arg}")
 
     # Try to get member from discord.py's member converter
-    user = None
-
-    for a in [arg_caps, arg_upper, arg_lower, arg]:
+    for name in name_list:
         try:
-            user = await memberconverter.convert(ctx, a)
+            user = await memberconverter.convert(ctx, name)
         except:
             logger.debug(f"User not found.")
 
@@ -34,12 +33,9 @@ async def add_users(bot, user=None):
     '''Adds users to the database.
     if user=None, checks and adds all Users the bot can see.'''
 
-    if user:
-        users = [user]
-    else:
-        users = bot.users
-
+    users = [user] if user else bot.users
     db_users = [u.id for u in bot.db.query(User).all()]
+
     for u in users:
         if u.id not in db_users:
             logger.debug(f"Adding user: ({u.id}) {u.name}")
@@ -47,6 +43,7 @@ async def add_users(bot, user=None):
             bot.db.add(new_user)
 
     bot.db.commit()
+
 
 async def update_database(self):
     '''Checks that all Guilds, Channels, and Users are in database.
@@ -56,8 +53,8 @@ async def update_database(self):
 
     await self.wait_until_ready()
     logger.info("Updating database")
-    logger.debug("Updating users.")
 
+    logger.debug("Updating users.")
     await add_users(self)
 
     guilds = [g.id for g in self.db.query(Guild).all()]
@@ -85,6 +82,7 @@ async def update_database(self):
                 logger.debug(f"Adding Member for '{guild.name}': ({member.id}) {member.name} - {member.display_name}")
 
     self.db.commit()
+
 
 async def update_user_info(self):
     '''update user avatar and display name info
@@ -122,15 +120,13 @@ def admin_only():
 async def update_user(db, before, after):
     logger.debug(f"update user: {before.name}")
 
-    user = db.query(User).filter_by(id=before.id).first()
+    user = db.query(User).filter_by(id=before.id).one_or_none()
 
     if user and after:
         user.avatar_url = str(after.avatar_url)
         user.display_name = after.display_name
         db.commit()
-
         logger.debug(f' Member info updated.\n Before: {before.display_name}, {before.avatar_url}\n After: {after.display_name}, {after.avatar_url}')
-
     else:
         # add new users if they arent the database for whatever reason.
         # shouldn't ever be necessary.
