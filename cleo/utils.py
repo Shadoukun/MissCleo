@@ -44,6 +44,14 @@ async def add_users(bot, user=None):
 
     bot.db.commit()
 
+async def add_members(bot, member):
+    dbmember = bot.db.query(GuildMember).filter_by(user_id=member.id) \
+                                       .filter_by(guild_id=member.guild.id) \
+                                       .one_or_none()
+    if not dbmember:
+        new_member = GuildMember(member)
+
+    bot.db.commit()
 
 async def update_database(self):
     '''Checks that all Guilds, Channels, and Users are in database.
@@ -117,18 +125,19 @@ def admin_only():
     return commands.check(predicate)
 
 
-async def update_user(db, before, after):
+async def update_user(self, before, after):
     logger.debug(f"update user: {before.name}")
 
-    user = db.query(User).filter_by(id=before.id).one_or_none()
+    member = self.db.query(GuildMember).filter_by(user_id=before.id).one_or_none()
 
-    if user and after:
-        user.avatar_url = str(after.avatar_url)
-        user.display_name = after.display_name
-        db.commit()
+    if member and after:
+        member.user.avatar_url = str(after.avatar_url)
+        member.display_name = after.display_name
+        self.db.commit()
         logger.debug(f' Member info updated.\n Before: {before.display_name}, {before.avatar_url}\n After: {after.display_name}, {after.avatar_url}')
     else:
         # add new users if they arent the database for whatever reason.
         # shouldn't ever be necessary.
-        await add_users(db, after)
+        await add_users(self, after)
+        await add_members(self, after)
         logger.debug(f'{after.name} joined {after.guild.name}.')

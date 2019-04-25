@@ -94,10 +94,11 @@ class MissCleo(commands.Bot):
         # TODO: Figure out if this runs when new users join
 
         if (str(before.avatar_url) != str(after.avatar_url)) or (before.display_name != after.display_name):
-            await utils.update_user(self.db, before, after)
+            await utils.update_user(self, before, after)
 
     async def on_member_join(self, member):
         await utils.add_users(self.db, member)
+        await uitls.add_member(self.db, member)
         logger.debug(f'{member.name} joined {member.guild.name}.')
 
     async def on_guild_channel_create(self, channel):
