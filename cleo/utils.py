@@ -60,16 +60,16 @@ async def update_database(self):
 
     await add_users(self)
 
-    missing_guilds = self.db.query(Guild).filter(Guild.id.notin_(i.id for i in self.guilds)).all()
+    guilds = [g.id for g in self.db.query(Guild).all()]
     channels = [c.id for c in self.db.query(Channel).all()]
 
     logger.debug("Updating guilds")
-    for guild in missing_guilds:
-        new_guild = Guild(guild)
-        self.db.add(new_guild)
-
     # only updates text channels
     for guild in self.guilds:
+        if guild.id not in guilds:
+            new_guild = Guild(guild)
+            self.db.add(new_guild)
+
         logger.debug(f"Updating channels for {guild.name}")
         for channel in guild.channels:
             if (channel.id not in channels) and (isinstance(channel, TextChannel)):

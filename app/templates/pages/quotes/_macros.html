@@ -56,16 +56,20 @@
 {% endwith %}
 {% endmacro %}
 
-{% macro quote_entry(data, quote, current_member) -%}
-{% with url=url_for('quotes.quotes', guild=data.current_guild.id,user=quote.user.id), delete_url=url_for('.delete_quote',id=quote.message_id) %}
+{% macro quote_entry(data, quote, current_user) -%}
+{% with member = quote[0],
+        quote = quote[1],
+        url=url_for('quotes.quotes', guild=data.current_guild,user=quote[0].user_id),
+        delete_url=url_for('.delete_quote',id=quote[1].message_id)
+        %}
   <div class="card quote-card p-2 mb-4 rounded pb-2" id="{{ quote.message_id }}">
 
     <div class="card-block quote-block pr-0 pl-0 pt-0 pb-2">
 
       <div class="card-title quote-heading d-flex p-2 align-items-center rounded-top">
 
-          <div class="avatar"><img class="avatar" src="{{ quote.user.avatar_url }}"></div>
-          <a class="p-1 ml-2 quote-username" href="{{ url }}">{{ quote.user.display_name}}</a>
+          <div class="avatar"><img class="avatar" src="{{ member.user.avatar_url }}"></div>
+          <a class="p-1 ml-2 quote-username" href="{{ url }}">{{ member.display_name}}</a>
           <div class="timestamp ml-2 text-muted">{{ quote.timestamp|formatdatetime }}</div>
 
           <div class="dropdown ml-auto">

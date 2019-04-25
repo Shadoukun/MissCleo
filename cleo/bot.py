@@ -103,7 +103,7 @@ class MissCleo(commands.Bot):
             await utils.update_user(self.db, before, after)
 
     async def on_member_join(self, member):
-        await utils.add_user(self.db, member)
+        await utils.add_users(self.db, member)
         logger.debug(f'{member.name} joined {member.guild.name}.')
 
     async def on_guild_channel_create(self, channel):

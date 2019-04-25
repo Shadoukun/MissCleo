@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pprint import pprint
 from typing import Any
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, and_
 from flask import render_template, Blueprint, request, redirect, url_for
 from flask_sqlalchemy import BaseQuery
 from flask_login import login_required
@@ -30,39 +30,34 @@ class PageData:
     pages: Any = None
 
     def __post_init__(self):
-        query = db.session.query(Guild, GuildMember)
 
-        if self.current_guild and self.current_member:
-            if self.current_guild:
-                query.filter(Guild.id == self.current_guild)
-            if self.current_member:
-                query.filter(GuildMember.user_id == self.current_member)
-
-            self.current_guild, self.current_member = query.one()
-
-
-        guilds = db.session.query(Guild)
-        members = db.session.query(GuildMember)
-        quotes = db.session.query(Quote).order_by(Quote.timestamp.desc())
+        member_filters = [GuildMember.quotes.any()]
+        quote_filters = []
 
         if self.current_guild:
-            members.filter_by(guild_id=self.current_guild)
-            quotes.filter_by(guild_id=self.current_guild)
+            member_filters += [GuildMember.guild_id == self.current_guild]
+            quote_filters += [Quote.guild_id == self.current_guild, GuildMember.guild_id == self.current_guild]
 
-        if self.current_member:
-            members.filter_by(user_id=self.current_member)
-            quotes.filter_by(user_id=self.current_member)
+            if self.current_member:
+                member_filters += [GuildMember.user_id == self.current_member]
+                quote_filters += [Quote.user_id == self.current_member, GuildMember.user_id == self.current_member]
 
-        self.guilds = guilds.all()
-        self.members = members.all()
-        self.pages = quotes.paginate(self.current_page, 10, False)
+        self.guilds = db.session.query(Guild).all()
+        self.members = db.session.query(GuildMember).filter(and_(*member_filters)).all()
+        self.pages = db.session.query(GuildMember, Quote).filter(and_(*quote_filters)) \
+                                                         .join(GuildMember) \
+                                                         .order_by(Quote.timestamp.desc()) \
+                                                         .paginate(self.current_page, 10, False)
 
 
 @blueprint.route('/quotes')
 def quotes():
 
     guild = request.args.get('guild', None)
-    user = request.args.get('user', None) if guild else None
+    if guild:
+        user = request.args.get('user', None)
+    else:
+        user = None
 
     page = int(request.args.get('page', 1))
     data = PageData(guild, user, page)
@@ -72,8 +67,7 @@ def quotes():
 @blueprint.route("/delete_quote/<id>")
 @login_required
 def delete_quote(id):
-    quote = db.session.query(Quote).filter_by(message_id=id)
-    db.session.remove(quote)
+    db.session.query(Quote).filter_by(message_id=id).delete()
     db.session.commit()
 
     return redirect(url_for('quotes.quotes'))

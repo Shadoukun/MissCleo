@@ -34,7 +34,7 @@ class Guild(Base):
     def __init__(self, guild):
         self.id = guild.id
         self.name = guild.name
-        self.icon_url = str(guild.icon_url)
+        self.icon_url = str(guild.icon_url) if guild.icon_url else ""
 
 
 class Channel(Base):
@@ -165,15 +165,19 @@ class Quote(Base):
     guild_id        = Column(Integer, ForeignKey("guilds.id"))
     channel_id      = Column(Integer, ForeignKey('channels.id'))
     user_id         = Column(Integer, ForeignKey('users.id'))
+    member_id       = Column(Integer, ForeignKey('guild_members.user_id'))
     message_id      = Column(Integer, primary_key=True)
     message         = Column(String)
     timestamp       = Column(DateTime)
+
+    member = relationship("GuildMember", backref=backref("quotes", lazy="joined"))
 
     def __init__(self, message):
         self.message_id = message.id
         self.message = message.content
         self.timestamp = message.created_at
         self.user_id = message.author.id
+        self.member_id = message.author.id
         self.channel_id = message.channel.id
         self.guild_id = message.guild.id
 
