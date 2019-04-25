@@ -69,11 +69,11 @@ class Quotes(commands.Cog):
         else:
             await ctx.channel.send("Failed.")
 
-    def _create_embed(self, user, message):
+    def _create_embed(self, user, member, message):
         embed = discord.Embed().from_dict({
             "title": "\n",
             "color": 0x006FFA,
-            "author": {"name": user.display_name, "icon_url": str(user.avatar_url)},
+            "author": {"name": member.display_name, "icon_url": str(user.avatar_url)},
             "fields": [{"name": "\u200b", "value": message}]
         })
         return embed
@@ -91,10 +91,11 @@ class Quotes(commands.Cog):
                 return
 
         quote = await self._get_quote(ctx, user)
+        member = self.db.query(GuildMember).filter_by(user_id=quote.user_id).one()
 
         if quote:
             user = user if user else self.db.query(User).filter_by(id=quote.user_id).one()
-            embed = self._create_embed(user, quote.message)
+            embed = self._create_embed(user, member, quote.message)
             await ctx.channel.send(embed=embed)
         else:
             await ctx.channel.send(NOQUOTE_MSG)
