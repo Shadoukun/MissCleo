@@ -46,11 +46,19 @@ img.avatar {
       top: 3.5rem;
       z-index: 1000;
       height: calc(100vh - 3.5rem);
+      }
     }
-}
     .card {
         background: none;
         border: none;
+    }
+
+    .guild-link {
+      align-items: center;
+    }
+
+    .avatar.default-icon {
+      background: lighten($fg-color, 10%)
     }
 }
 

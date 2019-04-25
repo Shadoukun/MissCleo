@@ -1,7 +1,6 @@
-import discord
 import wikipedia
-from discord.ext import commands
 from discord import Embed
+from discord.ext import commands
 
 NORESULTS_MSG = "No results found."
 
@@ -25,8 +24,6 @@ class Wikipedia(commands.Cog):
         })
 
         return embed
-
-
 
     @commands.group(name="wiki", help=wiki_help)
     async def wiki_search(self, ctx, *, query: str):

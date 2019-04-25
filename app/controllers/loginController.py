@@ -1,8 +1,5 @@
-import sys
-from flask import render_template, Blueprint, redirect, url_for, flash, request
-from flask.views import MethodView
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-from wtforms import TextField, PasswordField, validators
+from flask import render_template, Blueprint, redirect, url_for
+from flask_login import login_required, login_user, logout_user, current_user
 from flask_bcrypt import check_password_hash
 
 from cleo.db import FlaskUser
@@ -18,9 +15,9 @@ login_manager.login_view = "login.login"
 def login():
     """For GET requests, display the login form. For POSTS, login the current user
     by processing the form."""
-    
+
     form = LoginForm()
-    
+
     if form.validate_on_submit():
         user = db.session.query(FlaskUser).filter_by(username=form.username.data).first()
         if user:

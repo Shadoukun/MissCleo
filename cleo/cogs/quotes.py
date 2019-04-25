@@ -1,12 +1,10 @@
 import discord
-import random
 import logging
 from discord.ext import commands
-from cleo.utils import findUser, admin_only
 from sqlalchemy.sql.expression import func
-import cleo.db as db
-import dateutil.parser
-from datetime import datetime, timedelta
+
+from cleo.utils import findUser, admin_only
+from cleo.db import GuildMember, User, Quote
 
 NORESULTS_MSG = "Message not found."
 NOQUOTE_MSG = "No quotes found."
@@ -26,15 +24,8 @@ class Quotes(commands.Cog):
         '''Add a quote to the database.'''
 
         logger.debug("adding quote")
-        quote = db.Quote(message)
 
-        user = self.db.query(db.User).filter_by(id=message.author.id).one()
-        # In case user isn't in the server anymore, and for whatever reason isn't in the database.
-        if not user:
-            logger.debug("User not found. adding to database")
-            newuser = db.User(message.author)
-            self.db.add(newuser)
-
+        quote = Quote(message)
         self.db.add(quote)
         self.db.commit()
 
@@ -45,7 +36,7 @@ class Quotes(commands.Cog):
         '''Remove a quote from the database.'''
         logger.debug("removing quote")
 
-        quote = self.db.query(db.Quote) \
+        quote = self.db.query(Quote) \
                 .filter_by(channel_id=ctx.channel.id) \
                 .filter_by(message_id=message.id).first()
 
@@ -56,8 +47,6 @@ class Quotes(commands.Cog):
         else:
             await ctx.channel.send("Failed.")
 
-
-
     async def _get_quote(self, ctx, user=None):
         '''Get quote by the user from the current server.
            If 'user' is provided, gets quote by that user.
@@ -65,13 +54,13 @@ class Quotes(commands.Cog):
 
         if user:
             logger.debug("getting quote")
-            quote = self.db.query(db.Quote) \
+            quote = self.db.query(Quote) \
                     .filter_by(guild_id=ctx.guild.id) \
                     .filter_by(user_id=user.id) \
                     .order_by(func.random()).first()
         else:
             logger.debug("getting random quote")
-            quote = self.db.query(db.Quote) \
+            quote = self.db.query(Quote) \
                     .filter_by(guild_id=ctx.guild.id) \
                     .order_by(func.random()).first()
 
@@ -89,23 +78,22 @@ class Quotes(commands.Cog):
         })
         return embed
 
-
     @commands.guild_only()
     @commands.command(name='quote', invoke_without_command=True)
     async def quote(self, ctx, *, username:str=None):
+
+        user = None
 
         if username:
             user = await findUser(ctx, username)
             if not user:
                 await ctx.channel.send("User not found.")
                 return
-        else:
-            user = None
 
         quote = await self._get_quote(ctx, user)
 
         if quote:
-            user = user if user else self.db.query(db.User).filter_by(id=quote.user_id).one()
+            user = user if user else self.db.query(User).filter_by(id=quote.user_id).one()
             embed = self._create_embed(user, quote.message)
             await ctx.channel.send(embed=embed)
         else:
@@ -114,25 +102,11 @@ class Quotes(commands.Cog):
     @commands.guild_only()
     @admin_only()
     @commands.command(name="add_quote")
-    async def quote_add(self, ctx, message_id:int=None, date:str=None):
-        print(message_id)
-        print(date)
+    async def quote_add(self, ctx, message_id:int=None):
+
         if not message_id:
             await ctx.channel.send("No message id given.")
             return
-
-        before = None
-        after = None
-        if date:
-            try:
-                date = dateutil.parser.parse(date)
-                before = date - timedelta(days=1)
-                after = date + timedelta(days=1)
-                print(before)
-                print(after)
-            except:
-                await ctx.channel.send("Invalid date.")
-                return
 
         message = await ctx.channel.fetch_message(message_id)
         if message:
@@ -144,7 +118,7 @@ class Quotes(commands.Cog):
     @admin_only()
     @commands.command(name="remove_quote")
     async def remove(self, ctx, *, message_id:int):
-        message = ctx.get_message(message_id)
+        message = ctx.channel.fetch_message(message_id)
         if message:
             await self._remove_quote(ctx, message)
         else:

@@ -1,4 +1,3 @@
-import discord
 import logging
 from discord.ext import commands
 from cleo.utils import findUser, admin_only
@@ -77,7 +76,6 @@ class Admin(commands.Cog):
             return
 
         admins = self.db.query(db.Admin).all()
-
         for admin in admins:
             if admin.user_id == user.id:
                 self.db.delete(admin)

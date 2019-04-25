@@ -1,14 +1,10 @@
-import sys
-import discord
-import json
+import requests
 from flask import render_template, Blueprint, request, redirect, url_for, flash
-from flask.views import MethodView
 from flask_login import login_required
 from app.forms import CommandForm
-import requests
 
-from .. import db
 from cleo.db import Macro, MacroResponse, MacroReaction
+from .. import db
 
 blueprint = Blueprint('macros', __name__)
 
@@ -25,7 +21,10 @@ def macros(macro_id=None):
 
     if macro_id:
         macro = db.session.query(Macro).filter_by(id=macro_id).first()
-        return render_template('pages/macros/macros.html', macros=macros, form=form, current_macro=macro)
+        return render_template('pages/macros/macros.html',
+                               macros=macros,
+                               form=form,
+                               current_macro=macro)
     else:
         return render_template('pages/macros/macros.html', macros=macros, form=form)
 
@@ -59,7 +58,8 @@ def edit_macros(operation, macro_id=None):
 
     elif (request.method == 'GET') and (macro_id):
         if operation == 'delete':
-                requests.get(f'http://127.0.0.1:10000/remove_macro', params=[('id', int(macro_id))])
+            requests.get('http://127.0.0.1:10000/remove_macro',
+                         params=[('id', int(macro_id))])
 
     return redirect(url_for('macros.macros'))
 
@@ -122,9 +122,14 @@ def reactions(react_id=None):
 
     if react_id:
         reaction = db.session.query(MacroReaction).filter_by(id=react_id).first()
-        return render_template('pages/macros/reactions.html', reactions=reaction_list, form=form, current_react=reaction)
+        return render_template('pages/macros/reactions.html',
+                               reactions=reaction_list,
+                               form=form,
+                               current_react=reaction)
     else:
-        return render_template('pages/macros/reactions.html', reactions=reaction_list, form=form)
+        return render_template('pages/macros/reactions.html',
+                               reactions=reaction_list,
+                               form=form)
 
 @login_required
 @blueprint.route('/macros/reactions/<int:react_id>/<string:operation>', methods=['POST', 'GET'])
