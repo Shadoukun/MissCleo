@@ -57,9 +57,11 @@ img.avatar {
       align-items: center;
     }
 
-    .avatar.default-icon {
-      background: lighten($fg-color, 10%)
-    }
+
+}
+
+.avatar.default-icon {
+  background: lighten($fg-color, 10%)
 }
 
 #content {

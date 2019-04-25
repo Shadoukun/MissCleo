@@ -67,8 +67,11 @@
     <div class="card-block quote-block pr-0 pl-0 pt-0 pb-2">
 
       <div class="card-title quote-heading d-flex p-2 align-items-center rounded-top">
-
+          {% if member.user.avatar_url == '' %}
+          <div class="avatar"><img class="avatar default-icon" src="{{url_for('static',filename='img/discord_icon.png')}}"></div>
+          {% else %}
           <div class="avatar"><img class="avatar" src="{{ member.user.avatar_url }}"></div>
+          {% endif %}
           <a class="p-1 ml-2 quote-username" href="{{ url }}">{{ member.display_name}}</a>
           <div class="timestamp ml-2 text-muted">{{ quote.timestamp|formatdatetime }}</div>
 

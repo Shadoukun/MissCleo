@@ -24,20 +24,22 @@ class PageData:
 
     def __post_init__(self):
 
-        member_filters = [GuildMember.quotes.any()]
-        quote_filters = []
+        self.guilds = db.session.query(Guild).all()
 
         if self.current_guild:
-            member_filters += [GuildMember.guild_id == self.current_guild]
-            quote_filters += [Quote.guild_id == self.current_guild, GuildMember.guild_id == self.current_guild]
+            member_filters = [GuildMember.guild_id == self.current_guild,
+                              GuildMember.quotes.any(Quote.guild_id == self.current_guild)]
+
+            quote_filters = [Quote.guild_id == self.current_guild,
+                             GuildMember.guild_id == self.current_guild]
 
             if self.current_member:
                 member_filters += [GuildMember.user_id == self.current_member]
-                quote_filters += [Quote.user_id == self.current_member, GuildMember.user_id == self.current_member]
+                quote_filters += [Quote.user_id == self.current_member,
+                                  GuildMember.user_id == self.current_member]
 
-        self.guilds = db.session.query(Guild).all()
-        self.members = db.session.query(GuildMember).filter(and_(*member_filters)).all()
-        self.pages = db.session.query(GuildMember, Quote).filter(and_(*quote_filters)) \
+            self.members = db.session.query(GuildMember).filter(and_(*member_filters)).all()
+            self.pages = db.session.query(GuildMember, Quote).filter(and_(*quote_filters)) \
                                                          .join(GuildMember) \
                                                          .order_by(Quote.timestamp.desc()) \
                                                          .paginate(self.current_page, 10, False)

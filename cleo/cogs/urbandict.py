@@ -62,6 +62,8 @@ class UrbanDictionary(commands.Cog):
                 firstrun = False
                 embed = self.createEmbed(data[page-1])
                 msg = await ctx.channel.send(embed=embed)
+                # pagination disabled for the moment. immature people abusing it.
+                break
 
             if maxpage == 1 and page == 1:
                 break

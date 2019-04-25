@@ -22,32 +22,15 @@
     {% for member in data.members %}
       <li class="nav-item">
         <a class="nav-link user-link text-white d-flex align-items-center" id="{{member.user_id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild, user=member.user_id)}}">
-          <div class="avatar"><img class="avatar mr-2 " src="{{member.user.avatar_url}}"></div>
+          {% if member.user.avatar_url == '' %}
+          <img class="avatar mr-2 default-icon" src="{{url_for('static',filename='img/discord_icon.png')}}">
+          {% else %}
+          <img class="avatar mr-2" src="{{member.user.avatar_url}}">
+          {% endif %}
           <div class="name text-light">{{ member.display_name }}</div>
         </a>
       </li>
     {% endfor %}
   {% endif %}
 
-  {# {% if data.current_guild is not none %}
-  <div class="card users-card mb-4">
-      <h6 class="text-muted">Users</h6>
-      {% for member in data.members %}
-        <div class="user-entry{%if user.user_id==data.current_user.id%} active {%endif%} mb-2">
-          <a class="user d-flex align-items-center" id="{{member.user_id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild.id, user=member.user_id)}}">
-
-            <div class="avatar"><img class="avatar mr-2 " src="{{user.avatar_url}}"></div>
-            <div class="name text-light">{{ user.display_name }}</div>
-
-            {% if user.id|string == filter_user|string %}
-              <a class="remove-link" href="{{url_for('quotes.quotes')}}">
-                <i class="fa fa-times remove" aria-hidden="true"></i>
-              </a>
-            {% endif %}
-
-          </a>
-        </div>
-      {% endfor %}
-      </div>
-  {% endif %} #}
 </div>
