@@ -29,7 +29,7 @@ class Quotes(commands.Cog):
         self.db.add(quote)
         self.db.commit()
 
-        embed = self._create_embed(message.author, message.content)
+        embed = self._create_embed(message.author, message.author, message.content)
         await ctx.channel.send(embed=embed)
 
     async def _remove_quote(self, ctx, message):
@@ -91,7 +91,8 @@ class Quotes(commands.Cog):
                 return
 
         quote = await self._get_quote(ctx, user)
-        member = self.db.query(GuildMember).filter_by(user_id=quote.user_id).one()
+        member = self.db.query(GuildMember).filter_by(user_id=quote.user_id) \
+                                           .filter_by(guild_id=quote.guild_id).one()
 
         if quote:
             user = user if user else self.db.query(User).filter_by(id=quote.user_id).one()

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from flask import render_template, Blueprint, request, redirect, url_for
 from flask_login import login_required
 
@@ -38,7 +38,9 @@ class PageData:
                 quote_filters += [Quote.user_id == self.current_member,
                                   GuildMember.user_id == self.current_member]
 
-            self.members = db.session.query(GuildMember).filter(and_(*member_filters)).all()
+            self.members = db.session.query(GuildMember).filter(and_(*member_filters)) \
+                                                        .order_by(func.lower(GuildMember.display_name)) \
+                                                        .all()
             self.pages = db.session.query(GuildMember, Quote).filter(and_(*quote_filters)) \
                                                          .join(GuildMember) \
                                                          .order_by(Quote.timestamp.desc()) \
