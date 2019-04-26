@@ -4,7 +4,7 @@ from discord.ext import commands
 from sqlalchemy.sql.expression import func
 
 from cleo.utils import findUser, admin_only
-from cleo.db import GuildMember, User, Quote
+from cleo.db import GuildMembership, User, Quote
 
 NORESULTS_MSG = "Message not found."
 NOQUOTE_MSG = "No quotes found."
@@ -29,7 +29,7 @@ class Quotes(commands.Cog):
         self.db.add(quote)
         self.db.commit()
 
-        embed = self._create_embed(message.author, message.author, message.content)
+        embed = self._create_embed(quote)
         await ctx.channel.send(embed=embed)
 
     async def _remove_quote(self, ctx, message):
@@ -55,8 +55,7 @@ class Quotes(commands.Cog):
         if user:
             logger.debug("getting quote")
             quote = self.db.query(Quote) \
-                    .filter_by(guild_id=ctx.guild.id) \
-                    .filter_by(user_id=user.id) \
+                    .filter_by(guild_id=ctx.guild.id, user_id=user.id) \
                     .order_by(func.random()).first()
         else:
             logger.debug("getting random quote")
@@ -69,12 +68,12 @@ class Quotes(commands.Cog):
         else:
             await ctx.channel.send("Failed.")
 
-    def _create_embed(self, user, member, message):
+    def _create_embed(self, quote):
         embed = discord.Embed().from_dict({
             "title": "\n",
             "color": 0x006FFA,
-            "author": {"name": member.display_name, "icon_url": str(user.avatar_url)},
-            "fields": [{"name": "\u200b", "value": message}]
+            "author": {"name": quote.member.display_name, "icon_url": str(quote.member.user.avatar_url)},
+            "fields": [{"name": "\u200b", "value": quote.message}]
         })
         return embed
 
@@ -91,12 +90,8 @@ class Quotes(commands.Cog):
                 return
 
         quote = await self._get_quote(ctx, user)
-        member = self.db.query(GuildMember).filter_by(user_id=quote.user_id) \
-                                           .filter_by(guild_id=quote.guild_id).one()
-
         if quote:
-            user = user if user else self.db.query(User).filter_by(id=quote.user_id).one()
-            embed = self._create_embed(user, member, quote.message)
+            embed = self._create_embed(quote)
             await ctx.channel.send(embed=embed)
         else:
             await ctx.channel.send(NOQUOTE_MSG)

@@ -4,7 +4,7 @@ from sqlalchemy import and_, func
 from flask import render_template, Blueprint, request, redirect, url_for
 from flask_login import login_required
 
-from cleo.db import Quote, Guild, GuildMember
+from cleo.db import Quote, Guild, GuildMembership
 from .. import db
 
 
@@ -27,22 +27,19 @@ class PageData:
         self.guilds = db.session.query(Guild).all()
 
         if self.current_guild:
-            member_filters = [GuildMember.guild_id == self.current_guild,
-                              GuildMember.quotes.any(Quote.guild_id == self.current_guild)]
+            member_filters = [GuildMembership.guild_id == self.current_guild,
+                              GuildMembership.quotes.any(Quote.guild_id == self.current_guild)]
 
-            quote_filters = [Quote.guild_id == self.current_guild,
-                             GuildMember.guild_id == self.current_guild]
+            quote_filters = [Quote.guild_id == self.current_guild]
 
             if self.current_member:
-                member_filters += [GuildMember.user_id == self.current_member]
-                quote_filters += [Quote.user_id == self.current_member,
-                                  GuildMember.user_id == self.current_member]
+                member_filters += [GuildMembership.user_id == self.current_member]
+                quote_filters += [Quote.user_id == self.current_member]
 
-            self.members = db.session.query(GuildMember).filter(and_(*member_filters)) \
-                                                        .order_by(func.lower(GuildMember.display_name)) \
+            self.members = db.session.query(GuildMembership).filter(and_(*member_filters)) \
+                                                        .order_by(func.lower(GuildMembership.display_name)) \
                                                         .all()
-            self.pages = db.session.query(GuildMember, Quote).filter(and_(*quote_filters)) \
-                                                         .join(GuildMember) \
+            self.pages = db.session.query(Quote).filter(and_(*quote_filters)) \
                                                          .order_by(Quote.timestamp.desc()) \
                                                          .paginate(self.current_page, 10, False)
 

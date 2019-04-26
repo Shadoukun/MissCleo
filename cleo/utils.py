@@ -3,30 +3,29 @@ from difflib import get_close_matches
 from discord.channel import TextChannel
 from discord.ext import commands
 from sqlalchemy import func
-from cleo.db import Guild, Channel, User, GuildMember
+from cleo.db import Guild, Channel, User, GuildMembership
 
 logger = logging.getLogger(__name__)
 
 
 async def findUser(ctx, arg:str):
 
-    user = None
-    memberconverter = commands.MemberConverter()
-
-    name_list = [arg.upper(), arg.lower()]
-    if (not arg[0].isdigit() and not arg[0].isupper()):
-        name_list += [arg.capitalize()]
-
     logger.debug(f"Looking for user: {arg}")
 
+    memberconverter = commands.MemberConverter()
+    name_list = [arg, arg.upper(), arg.lower(), arg.lower().capitalize()]
+
     # Try to get member from discord.py's member converter
+    user = None
     for name in name_list:
         try:
+            print(name)
             user = await memberconverter.convert(ctx, name)
+            if user:
+                return user
         except:
             logger.debug(f"User not found.")
 
-    return user
 
 
 async def add_users(bot, user=None):
@@ -44,14 +43,6 @@ async def add_users(bot, user=None):
 
     bot.db.commit()
 
-async def add_members(bot, member):
-    dbmember = bot.db.query(GuildMember).filter_by(user_id=member.id) \
-                                       .filter_by(guild_id=member.guild.id) \
-                                       .one_or_none()
-    if not dbmember:
-        new_member = GuildMember(member)
-
-    bot.db.commit()
 
 async def update_database(self):
     '''Checks that all Guilds, Channels, and Users are in database.
@@ -81,10 +72,10 @@ async def update_database(self):
                 new_channel = Channel(channel)
                 self.db.add(new_channel)
 
-        dbmembers = [g.user_id for g in self.db.query(GuildMember).filter_by(guild_id=guild.id).all()]
+        dbmembers = [g.user_id for g in self.db.query(GuildMembership).filter_by(guild_id=guild.id).all()]
         for member in guild.members:
             if member.id not in dbmembers:
-                new_member = GuildMember(member)
+                new_member = GuildMembership(member)
                 self.db.add(new_member)
 
                 logger.debug(f"Adding Member for '{guild.name}': ({member.id}) {member.name} - {member.display_name}")
@@ -98,7 +89,7 @@ async def update_user_info(self):
        by events'''
 
     members = sorted(self.get_all_members(), key=lambda x: x.id)
-    users = sorted(self.db.query(GuildMember).filter(GuildMember.user_id.in_(x.id for x in members)).all(), key=lambda x: x.user_id)
+    users = sorted(self.db.query(GuildMembership).filter(GuildMembership.user_id.in_(x.id for x in members)).all(), key=lambda x: x.user_id)
 
     for u,m in zip(users, members):
         u.user.avatar_url = str(m.avatar_url)
@@ -128,7 +119,7 @@ def admin_only():
 async def update_user(self, before, after):
     logger.debug(f"update user: {before.name}")
 
-    member = self.db.query(GuildMember).filter_by(user_id=before.id).one_or_none()
+    member = self.db.query(GuildMembership).filter_by(user_id=before.id).one_or_none()
 
     if member and after:
         member.user.avatar_url = str(after.avatar_url)
