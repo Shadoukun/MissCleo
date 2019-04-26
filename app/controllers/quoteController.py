@@ -40,7 +40,7 @@ class PageData:
                                                         .order_by(func.lower(GuildMembership.display_name)) \
                                                         .all()
             self.pages = db.session.query(Quote).filter(and_(*quote_filters)) \
-                                                         .order_by(Quote.timestamp.desc()) \
+                                                         .order_by(Quote.timestamp.desc()).join(Quote.member) \
                                                          .paginate(self.current_page, 10, False)
 
 
