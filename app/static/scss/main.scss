@@ -21,6 +21,7 @@ html, body {
 
 img.avatar {
     height: 2.5em;
+    min-width: 2.5em;
     border-radius: 50%;
 }
 
@@ -35,12 +36,29 @@ img.avatar {
 }
 
 #sidebar {
-  background: $fg-color;
+  background: $nav-color;
   padding: 0;
-  box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
-  -webkit-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
-
+  // box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
+  // -webkit-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
+  // -moz-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
+  &:before, &:after {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    top: 0;
+    right: -5em;
+    width:5em;
+    height:5em;
+  }
+  &:before {
+    background: $nav-color;
+  }
+  &:after {
+  /* All pseudo elements are
+     abs. positioned and on bottom */
+  border-top-left-radius: 50%;
+  background: $bg-color;
+}
   @include media-breakpoint-up(md) {
   @supports (position: sticky) {
     position: sticky;
@@ -65,9 +83,8 @@ img.avatar {
 
   img.avatar {
   height: 3em;
-}
-
-
+  min-width: 3em;
+  }
 }
 
 .avatar.default-icon {
