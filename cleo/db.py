@@ -17,9 +17,9 @@ class Guild(Base):
     name        = Column(String)
     icon_url    = Column(String)
 
-    members     = relationship("GuildMembership", lazy="joined")
+    members     = relationship("GuildMembership")
     channels    = relationship("Channel", backref=backref("guild"))
-    quotes = relationship("Quote", primaryjoin="foreign(Quote.guild_id) == Guild.id", lazy="joined")
+    quotes = relationship("Quote", primaryjoin="foreign(Quote.guild_id) == Guild.id")
 
     def __init__(self, guild):
         self.id = guild.id
