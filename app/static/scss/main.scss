@@ -17,6 +17,9 @@ html, body {
 
 .navbar {
     background: $nav-color;
+    box-shadow: 18em 1px 1px 0px rgba(0, 0, 0, 0.75);
+    -webkit-box-shadow: 18em 1px 1px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 18em 1px 1px 0px rgba(0, 0, 0, 0.75);
 }
 
 img.avatar {
@@ -38,18 +41,27 @@ img.avatar {
 #sidebar {
   background: $nav-color;
   padding: 0;
-  // box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
-  // -webkit-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
-  // -moz-box-shadow: 0px 10px 8px 0px rgba(0,0,0,0.75);
+  box-shadow: 1px 0px 1px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 1px 0px 1px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 1px 0px 1px 0px rgba(0, 0, 0, 0.75);
   &:before, &:after {
     content: '';
     position: absolute;
-    z-index: -2;
     top: 0;
-    right: -5em;
-    width:5em;
-    height:5em;
+    right: -3em;
+    width:3em;
+    height:3em;
   }
+
+  .sidebar {
+    margin-top: 1.5em;
+
+    .nav {
+      margin-bottom: 2em !important;
+    }
+  }
+
+
   &:before {
     background: $nav-color;
   }
@@ -58,6 +70,7 @@ img.avatar {
      abs. positioned and on bottom */
   border-top-left-radius: 50%;
   background: $bg-color;
+  box-shadow: inset 1px 1px 1px 0px rgba(0,0,0,0.75)
 }
   @include media-breakpoint-up(md) {
   @supports (position: sticky) {
@@ -87,6 +100,11 @@ img.avatar {
   }
 }
 
+.user-link .name, .guild-link {
+  color: gray !important;
+  font-weight: bold;
+}
+
 .avatar.default-icon {
   background: lighten($fg-color, 10%)
 }
@@ -102,6 +120,7 @@ img.avatar {
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
   -webkit-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
   -moz-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+  z-index: 1000;
 
   .quote-dropdown {
     color: #6c757d;
