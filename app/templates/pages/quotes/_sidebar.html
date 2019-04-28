@@ -1,9 +1,9 @@
 <div class="sidebar-inner d-flex flex-column">
-  <h6 class="text-muted mt-2 d-flex">Servers</h6>
-  <ul class="nav nav-pills flex-column d-flex">
+  <h6 class="sidebar-header d-flex">Servers</h6>
+  <ul class="guild-nav sidebar-nav nav nav-pills flex-column d-flex">
     {% for guild in data.guilds %}
     <li class="nav-item">
-      <a class="nav-link guild-link d-flex" href="{{url_for('quotes.quotes', guild=guild.id)}}">
+      <a class="nav-link guild-link d-flex{%if guild.id|string == data.current_guild %} active{%endif%}" href="{{url_for('quotes.quotes', guild=guild.id)}}">
         {% if guild.icon_url != '' %}
           <img class="avatar" src="{{guild.icon_url}}">
         {% else %}
@@ -17,17 +17,17 @@
 
 
   {% if data.current_guild is not none %}
-  <h6 class="text-muted d-flex">Users</h6>
-  <ul class="nav nav-pills flex-column d-flex">
+  <h6 class="sidebar-header d-flex">Users</h6>
+  <ul class="user-nav sidebar-nav nav nav-pills flex-column d-flex">
     {% for member in data.members %}
       <li class="nav-item">
-        <a class="nav-link user-link text-white d-flex align-items-center" id="{{member.user_id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild, user=member.user_id)}}">
+        <a class="nav-link user-link d-flex align-items-center" id="{{member.user_id|string}}" href="{{url_for('quotes.quotes', guild=data.current_guild, user=member.user_id)}}">
           {% if member.user.avatar_url == '' %}
-          <img class="avatar mr-2 default-icon" src="{{url_for('static',filename='img/discord_icon.png')}}">
+          <img class="avatar default-icon" src="{{url_for('static',filename='img/discord_icon.png')}}">
           {% else %}
-          <img class="avatar mr-2" src="{{member.user.avatar_url}}">
+          <img class="avatar" src="{{member.user.avatar_url}}">
           {% endif %}
-          <div class="name text-light">{{ member.display_name }}</div>
+          <div class="name">{{ member.display_name }}</div>
         </a>
       </li>
     {% endfor %}

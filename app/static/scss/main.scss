@@ -4,74 +4,32 @@ $nav-color: #202225;
 $bg-color: #2f3136;
 $fg-color: #36393f;
 
-
 @media (min-width: 1200px) {
   #sidebar {
     flex: 0 1 320px;
   }
 }
 
-html, body {
-    background: $bg-color;
+html,
+body {
+  background: $bg-color;
 }
 
 .navbar {
-    background: $nav-color;
-    box-shadow: 18em 1px 1px 0px rgba(0, 0, 0, 0.75);
-    -webkit-box-shadow: 18em 1px 1px 0px rgba(0, 0, 0, 0.75);
-    -moz-box-shadow: 18em 1px 1px 0px rgba(0, 0, 0, 0.75);
-}
-
-img.avatar {
-    height: 2.5em;
-    min-width: 2.5em;
-    border-radius: 50%;
-}
-
-.navbar {
-    @include media-breakpoint-up(md) {
-    @supports (position: sticky) {
-      position: sticky;
-      top: 0;
-      z-index: 1071; // over everything in bootstrap
+  @include media-breakpoint-up(md) {
+  @supports (position: sticky) {
+    position: sticky;
+    top: 0;
+    z-index: 2000; // over everything in bootstrap
     }
   }
+  background: $nav-color;
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.75);
 }
 
 #sidebar {
-  background: $nav-color;
-  padding: 0;
-  box-shadow: 1px 0px 1px 0px rgba(0, 0, 0, 0.75);
-  -webkit-box-shadow: 1px 0px 1px 0px rgba(0, 0, 0, 0.75);
-  -moz-box-shadow: 1px 0px 1px 0px rgba(0, 0, 0, 0.75);
-  &:before, &:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -3em;
-    width:3em;
-    height:3em;
-  }
-
-  .sidebar-inner {
-    margin-top: 1.5em;
-
-    .nav {
-      margin-bottom: 2em !important;
-    }
-  }
-
-  &:before {
-    background: $nav-color;
-  }
-  &:after {
-    /* All pseudo elements are
-     abs. positioned and on bottom */
-    border-top-left-radius: 50%;
-    background: $bg-color;
-    box-shadow: inset 1px 1px 1px 0px rgba(0,0,0,0.75)
-  }
-
   @include media-breakpoint-up(md) {
   @supports (position: sticky) {
     position: sticky;
@@ -80,39 +38,85 @@ img.avatar {
     height: calc(100vh - 3.5rem);
     flex: 0 1 240px
     }
+    font-weight: bold;
+  }
+  background: $nav-color;
+  padding: 0;
+  z-index: 2000 !important;
+  box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.75);
+
+  &:before,
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -3em;
+    width:3em;
+    height:3em;
+  }
+  &:before {
+    background: $nav-color;
+  }
+  &:after {
+    border-top-left-radius: 50%;
+    background: $bg-color;
+    box-shadow: inset 1px 1px 1px 0px rgba(0,0,0,0.75)
   }
 
-  h6 {
-    padding-left: 1em;
+  .sidebar-inner {
+    margin-top: 1.5em;
   }
-  .card {
-      background: none;
-      border: none;
+
+  .sidebar-header {
+    color: darken(gray, 5%);
+    padding-left: 1em;
+    margin-bottom: 10px;
+  }
+
+  .guild-nav
+  .nav-link.active {
+    color: lighten(gray, 25%) !important;
+    background: none;
+    &:before {
+      content: "";
+      background: white;
+      position: absolute;
+      width: 5px;
+      height: 45px;
+      left: 0;
+      border-top-right-radius:10px;
+      border-bottom-right-radius: 10px;
+    }
+    .avatar {
+      border-radius: 15px;
+    }
+  }
+
+  .sidebar-nav {
+    margin-bottom: 2em !important;
+  }
+
+  .user-link,
+  .guild-link {
+    color: gray;
+
+    :first-child {
+      margin-right: 0.75em;
+    }
   }
 
   .guild-link {
     align-items: center;
   }
-
-  img.avatar {
-  height: 3em;
-  min-width: 3em;
-  }
 }
 
-.user-link .name, .guild-link {
-  color: gray !important;
-  font-weight: bold;
-}
-
-.avatar.default-icon {
-  background: lighten($fg-color, 10%)
-}
 
 #content {
-    margin-top: 2em !important;
-    margin: 0 auto;
-  }
+  margin-top: 2em !important;
+  margin: 0 auto;
+}
 
 
 .quote-card {
@@ -129,7 +133,9 @@ img.avatar {
   .quote-dropdown {
     color: #6c757d;
 
-    &:hover, &:focus, &:active {
+    &:hover,
+    &:focus,
+    &:active {
       box-shadow: none;
       color: white;
       background: none;
@@ -148,36 +154,41 @@ img.avatar {
     li a {
       color: #6c757d;
 
-      &:hover, &:focus, &:active {
-      color: white;
-      text-decoration: none;
+      &:hover,
+      &:focus,
+      &:active {
+        color: white;
+        text-decoration: none;
       }
     }
-
   }
 }
 
 .quote-heading {
     background: #36393f;
-    height: 3em;
     justify-content: center;
     flex-direction: row;
     text-align: center;
 
+  .timestamp, .quote-username {
+    margin-top: 5px;
+  }
+  .avatar {
+    margin-right:.75em;
+  }
+
   .quote-username {
+    margin-right: .5em;
     color: #e1e1e1;
     font-weight: bold;
+    line-height: 20px;
   }
-
   .timestamp {
     font-size: 90%;
-    margin-top: 0.4em;
   }
-
 }
 
 .quote-dropdown {
-
     display: flex;
     background: none;
     border: none;
@@ -186,37 +197,53 @@ img.avatar {
     &::after {
     margin-left: 0;
     }
-
 }
 
-#paginator.pagination .page-item {
+.quote-body {
+  padding-top: 0;
+  margin-left: 2.2em;
+}
 
-  &.active .page-link {
-    background:lighten($bg-color, 10%);
-    pointer-events: none;
-    cursor: default;
+.avatar.default-icon {
+  background: lighten($fg-color, 10%)
+}
+
+img.avatar {
+  height: 2.5em;
+  min-width: 2.5em;
+  border-radius: 50%;
+
+  #sidebar & {
+    height: 3em;
+    min-width: 3em;
   }
+}
 
-  &.disabled .page-link {
-    background: $bg-color;
-    pointer-events: none;
-    cursor: default;
-  }
 
-  .page-link {
-    background:none;
-    border-radius: 5%;
-    border: 1px solid lighten($nav-color, 0%);
-    color: white;
-
-    &:focus {
-
-      box-shadow: 0 0 0.1rem 1px white;
-
+#paginator.pagination {
+  .page-item {
+    &.active .page-link {
+      background:lighten($bg-color, 10%);
+      pointer-events: none;
+      cursor: default;
     }
-  }
-
-  .page-item:first-child .page-link, .page-item:last-child .page-link {
+    &.disabled .page-link {
+      background: $bg-color;
+      pointer-events: none;
+      cursor: default;
+    }
+    &:first-child .page-link,
+    &:last-child .page-link {
       background: $fg-color;
     }
+    .page-link {
+      background:none;
+      border-radius: 5%;
+      border: 1px solid lighten($nav-color, 0%);
+      color: white;
+    }
+    .page-link:focus {
+        box-shadow: 0 0 0.1rem 1px white;
+    }
+  }
 }

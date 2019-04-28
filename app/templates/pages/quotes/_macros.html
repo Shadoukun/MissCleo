@@ -65,14 +65,14 @@
 
     <div class="card-block quote-block">
 
-      <div class="card-title quote-heading d-flex">
+      <div class="quote-heading d-flex">
           {% if member.user.avatar_url == '' %}
-          <div class="avatar"><img class="avatar default-icon" src="{{url_for('static',filename='img/discord_icon.png')}}"></div>
+          <img class="avatar default-icon" src="{{url_for('static',filename='img/discord_icon.png')}}">
           {% else %}
-          <div class="avatar"><img class="avatar" src="{{ member.user.avatar_url }}"></div>
+          <img class="avatar" src="{{ member.user.avatar_url }}">
           {% endif %}
-          <a class="p-1 ml-2 quote-username" href="{{ url }}">{{ member.display_name}}</a>
-          <div class="timestamp ml-2 text-muted">{{ quote.timestamp|formatdatetime }}</div>
+          <a class="quote-username" href="{{ url }}">{{ member.display_name}}</a>
+          <div class="timestamp text-muted">{{ quote.timestamp|formatdatetime }}</div>
 
           <div class="dropdown ml-auto">
             <button class="btn dropdown-toggle quote-dropdown" type="button" data-toggle="dropdown"></button>
