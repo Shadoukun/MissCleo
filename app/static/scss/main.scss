@@ -53,7 +53,7 @@ img.avatar {
     height:3em;
   }
 
-  .sidebar {
+  .sidebar-inner {
     margin-top: 1.5em;
 
     .nav {
@@ -61,17 +61,17 @@ img.avatar {
     }
   }
 
-
   &:before {
     background: $nav-color;
   }
   &:after {
-  /* All pseudo elements are
+    /* All pseudo elements are
      abs. positioned and on bottom */
-  border-top-left-radius: 50%;
-  background: $bg-color;
-  box-shadow: inset 1px 1px 1px 0px rgba(0,0,0,0.75)
-}
+    border-top-left-radius: 50%;
+    background: $bg-color;
+    box-shadow: inset 1px 1px 1px 0px rgba(0,0,0,0.75)
+  }
+
   @include media-breakpoint-up(md) {
   @supports (position: sticky) {
     position: sticky;
@@ -110,6 +110,7 @@ img.avatar {
 }
 
 #content {
+    margin-top: 2em !important;
     margin: 0 auto;
   }
 
@@ -117,9 +118,12 @@ img.avatar {
 .quote-card {
   background: $fg-color;
   color: #e1e1e1;
-  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
-  -webkit-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.75);
+  padding: 1em;
+  margin: 0 0 0.75em 0;
+  border-radius: 15px;
+  box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.80);
+  -webkit-box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.80);
+  -moz-box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.80);
   z-index: 1000;
 
   .quote-dropdown {
@@ -167,7 +171,7 @@ img.avatar {
 
   .timestamp {
     font-size: 90%;
-    margin: auto;
+    margin-top: 0.4em;
   }
 
 }

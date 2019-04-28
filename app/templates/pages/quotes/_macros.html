@@ -61,11 +61,11 @@
         url=url_for('quotes.quotes', guild=data.current_guild,user=quote.user_id),
         delete_url=url_for('.delete_quote',id=quote.user_id)
         %}
-  <div class="card quote-card p-2 mb-4 rounded pb-2" id="{{ quote.message_id }}">
+  <div class="card quote-card" id="{{ quote.message_id }}">
 
-    <div class="card-block quote-block pr-0 pl-0 pt-0 pb-2">
+    <div class="card-block quote-block">
 
-      <div class="card-title quote-heading d-flex p-2 align-items-center rounded-top">
+      <div class="card-title quote-heading d-flex">
           {% if member.user.avatar_url == '' %}
           <div class="avatar"><img class="avatar default-icon" src="{{url_for('static',filename='img/discord_icon.png')}}"></div>
           {% else %}
