@@ -1,0 +1,76 @@
+@media (min-width: 1200px) {
+  #sidebar {
+    flex: 0 1 320px;
+  }
+}
+
+#sidebar {
+  @include media-breakpoint-up(md) {
+  @supports (position: sticky) {
+    position: sticky;
+    top: 3.5rem;
+    height: calc(100vh - 3.5rem);
+    flex: 0 1 240px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    }
+  }
+  font-weight: bold;
+  background: $nav-color;
+  padding: 0;
+  z-index: 1000 !important;
+  box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.75);
+}
+
+.sidebar-inner {
+    margin-top: 1.5em;
+}
+
+.sidebar-header {
+  color: darken(gray, 5%);
+  padding-left: 1em;
+  margin-bottom: 10px;
+}
+
+.sidebar .avatar {
+  border-radius: 15px;
+  height: 3em;
+  min-width: 3em;
+}
+
+.sidebar-nav {
+  margin-bottom: 2em !important;
+
+  .nav-link.active {
+    color: lighten(gray, 25%) !important;
+    background: none;
+
+    &:before {
+      content: "";
+      background: white;
+      position: absolute;
+      width: 5px;
+      height: 45px;
+      left: 0;
+      border-top-right-radius:10px;
+      border-bottom-right-radius: 10px;
+    }
+  }
+
+  .user-link,
+  .guild-link {
+    @extend .align-items-center;
+    color: gray;
+
+    :first-child {
+      @extend .mr-2;
+      // margin-right: 0.75em;
+    }
+  }
+
+  .guild-link {
+    align-items: center;
+  }
+}

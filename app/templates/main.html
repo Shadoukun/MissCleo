@@ -1,5 +1,5 @@
 <!doctype html>
-
+<html>
 <head>
   <meta charset="utf-8">
   <title>{% block title %}{% endblock %}</title>
@@ -7,19 +7,9 @@
   <!-- styles -->
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
-  {# <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> #}
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
-    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-
-  <link rel="shortcut icon" href="/static/ico/favicon.png">
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/static/ico/apple-touch-icon-144-precomposed.png">
-  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/ico/apple-touch-icon-114-precomposed.png">
-  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/ico/apple-touch-icon-72-precomposed.png">
-  <link rel="apple-touch-icon-precomposed" href="/static/ico/apple-touch-icon-57-precomposed.png">
-  <link rel="shortcut icon" href="/static/ico/favicon.png">
-
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/main.scss.css') }}">
+
   {% block custom_css %}{% endblock %}
 
   <!-- scripts -->
@@ -36,63 +26,59 @@
   {% block scripts %}{% endblock %}
 </head>
 
-<body>
-  {# (url_for('index.home'), 'home', 'Home'), #}
-  {% set navigation_bar = [
+{% set navigation_bar = [
     (url_for('quotes.quotes'), 'quotes', 'Quotes'),
     (url_for('macros.macros'), 'macros', 'Macros'),
   ] -%}
 
-  {% set active_page = active_page|default('home') -%}
+{% set active_page = active_page|default('home') -%}
+
+<body>
 
   <nav class="navbar navbar-expand-lg navbar-dark">
     <a class="navbar-brand" href="#">Miss Cleo</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02"
-      aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#NavbarToggler"
+      aria-controls="NavbarToggler" aria-expanded="false">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+    <div class="collapse navbar-collapse" id="NabarToggler">
       <ul id="nav" class="nav navbar-nav">
         {% for href, id, caption in navigation_bar %}
-          <li {% if id == active_page %}class="nav-item active"{% else %}class="nav-item"{% endif %}>
-          <a class="nav-link" id="{{ id }}", href="{{ href }}">{{ caption }}</a>
-          </li>
-          {# <a class="nav-link" id="stats" href="{{url_for('stats.stats')}}">Stats</a> #}
+        <li class="nav-item {%if id == active_page%}active{% endif %}">
+        <a class="nav-link" id="{{id}}", href="{{href}}">{{caption}}</a>
+        </li>
         {% endfor %}
       </ul>
 
       <div class="ml-auto navbar-nav">
         {% if current_user.is_authenticated %}
-          <li class="nav-item">
-            <a class="logout nav-link logout-btn" href="{{url_for('login.logout')}}">Logout</a>
-          </li>
+        <li class="nav-item">
+          <a class="nav-link button-logout" href="{{url_for('login.logout')}}">Logout</a>
+        </li>
         {% else %}
-          <li class="nav-item">
-            <a class="login nav-link login-btn" href="{{url_for('login.login')}}">Login</a>
-          </li>
+        <li class="nav-item">
+          <a class="nav-link button-login" href="{{url_for('login.login')}}">Login</a>
+        </li>
         {% endif %}
       </div>
     </div>
   </nav>
 
-  <!-- <main class="" id="content" role="main"> -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-block alert-danger">
-            <a class="close" data-dismiss="alert">&times;</a>
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-block alert-danger">
+      <a class="close" data-dismiss="alert">&times;</a>
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+  {% endwith %}
 
-    {% block content %}{% endblock %}
-    {% block custom_js %}{% endblock %}
+  {% block content %}{% endblock %}
+
+  {% block custom_js %}{% endblock %}
+
 </body>
-
-<script defer src="/static/js/plugins.js"></script>
-<script defer src="/static/js/script.js"></script>
-
 </html>
