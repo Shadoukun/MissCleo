@@ -83,8 +83,9 @@
             </ul>
         </div>
       </div>
-
-      <div class="quote-body p-2 pl-3 rounded">{{ quote.message }}</div>
+      {% autoescape false %}
+      <div class="quote-body p-2 pl-3 rounded">{{ quote.message | replace("\n", "<br />") }}</div>
+      {% endautoescape %}
     </div>
   </div>
 {% endwith %}

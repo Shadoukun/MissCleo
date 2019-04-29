@@ -5,6 +5,7 @@ from sqlalchemy.sql.expression import func
 
 from cleo.utils import findUser, admin_only
 from cleo.db import GuildMembership, User, Quote
+from collections import OrderedDict
 
 NORESULTS_MSG = "Message not found."
 NOQUOTE_MSG = "No quotes found."
@@ -20,12 +21,11 @@ class Quotes(commands.Cog):
         self.db = self.bot.db
 
     # TODO: Multi-message quotes
-    async def _add_quote(self, ctx, message):
+    async def _add_quote(self, ctx, quote:OrderedDict):
         '''Add a quote to the database.'''
 
         logger.debug("adding quote")
-
-        quote = Quote(message)
+        quote = Quote(**quote)
         self.db.add(quote)
         self.db.commit()
 
@@ -99,17 +99,51 @@ class Quotes(commands.Cog):
     @commands.guild_only()
     @admin_only()
     @commands.command(name="add_quote")
-    async def quote_add(self, ctx, message_id:int=None):
+    async def quote_add(self, ctx, *args):
+        '''Takes arbitrary number of message IDs and adds them as quotes in the database'''
 
-        if not message_id:
+        if not args:
             await ctx.channel.send("No message id given.")
             return
+        logger.debug(args)
+        messages = []
 
-        message = await ctx.channel.fetch_message(message_id)
-        if message:
-            await self._add_quote(ctx, message)
-        else:
-            await ctx.channel.send(NORESULTS_MSG)
+        for a in args:
+            logger.debug(a)
+            try:
+                a = int(a)
+                logger.debug("int")
+                msg = await ctx.channel.fetch_message(a)
+                logger.debug(msg)
+            except:
+                await ctx.channel.send(NORESULTS_MSG)
+                return
+
+            if msg:
+                messages.append(msg)
+            else:
+                await ctx.channel.send(NORESULTS_MSG)
+                return
+
+        root_msg = messages[0]
+        logger.debug(root_msg.created_at)
+        # all messages must have the same author.
+        if len(messages) > 1:
+            for m in messages[1:]:
+                if m.author.id != root_msg.author.id:
+                    await ctx.channel.send("All messages must be from the same user.")
+                    return
+
+        quote = OrderedDict(
+            message_id=root_msg.id,
+            message="\n".join([m.content for m in messages]),
+            timestamp=root_msg.created_at,
+            user_id=root_msg.author.id,
+            channel_id=root_msg.channel.id,
+            guild_id=root_msg.guild.id,
+        )
+
+        await self._add_quote(ctx, quote)
 
     @commands.guild_only()
     @admin_only()

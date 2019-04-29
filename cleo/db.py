@@ -122,22 +122,13 @@ class Quote(Base):
                                        'foreign(GuildMembership.guild_id) == Quote.guild_id)'),
                           uselist=False, lazy='joined')
 
-    # def __init__(self, message):
-    #     self.message_id = message.id
-    #     self.message = message.message
-    #     self.timestamp = message.created_at
-    #     self.user_id = message.user_id
-    #     self.channel_id = message.channel_id
-    #     self.guild_id = message.guild_id
-
-    def __init__(self, message):
-        self.message_id = message.id
-        self.message = message.content
-        self.timestamp = message.created_at
-        self.user_id = message.author.id
-        self.member_id = message.author.id
-        self.channel_id = message.channel.id
-        self.guild_id = message.guild.id
+    # def __init__(self, quote):
+    #     self.message_id = quote['id']
+    #     self.message = quote['content']
+    #     self.timestamp = quote['created_at']
+    #     self.user_id = quote['user_id']
+    #     self.channel_id = quote['channel.id']
+    #     self.guild_id = quote['guild.id']
 
 
 class Macro(Base):
