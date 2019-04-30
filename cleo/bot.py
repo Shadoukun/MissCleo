@@ -81,13 +81,11 @@ class MissCleo(commands.Bot):
 
     async def on_ready(self):
         # database background tasks
-        logger.info("Client ready")
 
         await utils.update_database(self)
         await utils.update_user_info(self)
 
-        logger.info(f'Logged in as: {self.user.name}')
-        logger.info(f'User ID: {self.user.id}')
+        logger.info(f'Client ready\nLogged in as: {self.user.name}\nUser ID: {self.user.id}')
 
     async def on_member_update(self, before, after):
         # Update a user's info in the database when they change it.

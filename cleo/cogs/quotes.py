@@ -1,11 +1,11 @@
 import discord
 import logging
 from discord.ext import commands
-from sqlalchemy.sql.expression import func
-
+from sqlalchemy import func, and_
 from cleo.utils import findUser, admin_only
 from cleo.db import GuildMembership, User, Quote
 from collections import OrderedDict
+from cachetools import TTLCache
 
 NORESULTS_MSG = "Message not found."
 NOQUOTE_MSG = "No quotes found."
@@ -19,6 +19,11 @@ class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db = self.bot.db
+
+        # Used to prevent duplicate messages being sent in quick succession.
+        self.cache = TTLCache(ttl=300, maxsize=120)
+
+
 
     # TODO: Multi-message quotes
     async def _add_quote(self, ctx, quote:OrderedDict):
@@ -52,21 +57,36 @@ class Quotes(commands.Cog):
            If 'user' is provided, gets quote by that user.
            Otherwise, gets a random quote from any user.'''
 
+        filters = [Quote.guild_id == ctx.guild.id]
         if user:
-            logger.debug("getting quote")
-            quote = self.db.query(Quote) \
-                    .filter_by(guild_id=ctx.guild.id, user_id=user.id) \
-                    .order_by(func.random()).first()
-        else:
-            logger.debug("getting random quote")
-            quote = self.db.query(Quote) \
-                    .filter_by(guild_id=ctx.guild.id) \
-                    .order_by(func.random()).first()
+            filters.append(Quote.user_id == user.id)
+
+        logger.debug("getting quote")
+        all_seen = False
+
+        for i in range(20):
+            print(self.cache)
+            quote = self.db.query(Quote).filter(and_(*filters)) \
+                                        .order_by(func.random()).first()
+            # should always return a quote
+            if quote:
+                cached_quote = self.cache.get(quote.message_id, None)
+            else:
+                break
+
+            # not in cache
+            if not cached_quote:
+                self.cache[quote.message_id] = quote
+                break
+            else:
+                all_seen = True
+                quote = None
 
         if quote:
             return quote
-        else:
-            await ctx.channel.send("Failed.")
+        elif all_seen:
+            await ctx.channel.send("All quotes have already been seen.")
+
 
     def _create_embed(self, quote):
         embed = discord.Embed().from_dict({
