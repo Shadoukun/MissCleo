@@ -27,7 +27,7 @@ class Discord(commands.Cog):
         if user:
             embed = Embed().from_dict({
                 "title": f"Avatar:  {user.display_name}",
-                "image": {"url": user.avatar_url.split("?")[0]}
+                "image": {"url": str(user.avatar_url)}
             })
             await ctx.message.channel.send(embed=embed)
         else:
