@@ -8,7 +8,7 @@ from sqlalchemy import and_, func
 
 from cleo.db import GuildMembership, Quote, User
 from cleo.utils import admin_only, findUser
-
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +20,12 @@ ADDED_MSG = "Quote added."
 
 def _create_embed(quote):
     embed = discord.Embed().from_dict({
-        "title": "\u200b",
+        "title": "\n",
+        "description": quote.message,
         "color": 0x006FFA,
         "author": {"name": quote.member.display_name,
                     "icon_url": str(quote.member.user.avatar_url)},
-        "fields": [{"name": "\u200b", "value": quote.message}]
+        "footer": {'text': quote.timestamp.strftime("%b %d %Y")}
     })
     return embed
 
