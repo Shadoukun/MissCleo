@@ -5,14 +5,12 @@ import werkzeug.serving
 import logging.config
 import logging
 import yaml
-import warnings
 from pathlib import Path
 from threading import Thread
 
 from cleo.bot import MissCleo
-from app import create_app
+from app import app
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 def setup_logging():
@@ -33,7 +31,6 @@ def main():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    app = create_app('config')
     http = gevent.pywsgi.WSGIServer(('0.0.0.0', 5000), app.wsgi_app, log=app.logger)
     Thread(target=http.serve_forever).start()
 
