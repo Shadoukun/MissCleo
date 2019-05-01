@@ -5,8 +5,14 @@
     {% for guild in data.guilds %}
     {% with id=guild.id|string,
             name=guild.name,
-            url=url_for('quotes.quotes', guild=guild.id),
-            icon=guild.icon_url %}
+            url=url_for('quotes.quotes', guild=guild.id) %}
+
+    {% if guild.icon_url == '' %}
+      {% set icon = url_for('static',filename='img/discord_icon.png') %}
+    {% else %}
+      {% set icon = guild.icon_url %}
+    {% endif %}
+
 
       <li class="nav-item">
         <a class="nav-link guild-link d-flex {%if guild.id|string == data.current_guild%}active{%endif%}" href="{{url}}">
@@ -25,11 +31,12 @@
   {% for member in data.members %}
     {% with id=member.user_id|string,
             name=member.display_name,
-            url=url_for('quotes.quotes', guild=data.current_guild, user=member.user_id),
-            avatar=member.user.avatar_url %}
+            url=url_for('quotes.quotes', guild=data.current_guild, user=member.user_id) %}
 
-    {% if avatar == '' %}
+    {% if member.user.avatar_url == '' %}
       {% set avatar = url_for('static',filename='img/discord_icon.png') %}
+    {% else %}
+      {% set avatar = member.user.avatar_url %}
     {% endif %}
 
     <li class="nav-item d-flex{%if id == data.current_member%} active{%endif%}">

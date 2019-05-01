@@ -13,6 +13,7 @@
     flex: 0 1 240px;
     overflow-y: auto;
     scrollbar-width: none;
+    color: gray;
     }
   }
   font-weight: bold;
@@ -43,16 +44,33 @@
 .sidebar-nav {
   margin-bottom: 2em !important;
 
+  &:first-child {
+    margin-top: 2em;
+  }
+
+  .nav-item {
+    height: 3.5em;
+  }
+
+  .nav-link {
+    @extend .align-items-center;
+    display: flex;
+    align-items: center;
+    height:inherit;
+    color: gray;
+
+  }
+
   .nav-link.active {
     color: lighten(gray, 25%) !important;
     background: none;
 
-    &:before {
+    &:after {
       content: "";
       background: white;
       position: absolute;
       width: 5px;
-      height: 45px;
+      height: inherit;
       left: 0;
       border-top-right-radius:10px;
       border-bottom-right-radius: 10px;
@@ -73,4 +91,24 @@
   .guild-link {
     align-items: center;
   }
+}
+
+.macro-nav{
+  @extend .nav;
+  @extend .nav-pills;
+  @extend .flex-column;
+  @extend .d-flex;
+
+  .nav-item {
+    height:2.5em;
+    margin-bottom:0.5em;
+  }
+}
+
+.sidebar-card {
+  margin: 1em 0;
+
+    h6 {
+      margin-left: 1em;
+    }
 }

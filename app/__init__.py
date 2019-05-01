@@ -18,6 +18,10 @@ from app.controllers import loginController
 from app.controllers import macroController
 from app.controllers import indexController
 
+# ignore sassutils strip_extension FutureWarning
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def add_user(app):
     '''Create Flask admin user'''
@@ -34,6 +38,7 @@ def add_user(app):
 
         db.session.add(FlaskUser(username=username, password=hashed))
         db.session.commit()
+
         print('User added.')
 
 
@@ -43,28 +48,26 @@ def format_datetime(value, format="%m/%d/%Y"):
     return value.strftime(format)
 
 
-def create_app(config_filename):
-    app = Flask(__name__)
-    app.config.from_object(config_filename)
-    app.debug = os.getenv("DEBUG", False)
-    app.url_map.strict_slashes = False
+app = Flask(__name__)
+app.config.from_object('config')
+app.debug = os.getenv("DEBUG", False)
+app.url_map.strict_slashes = False
 
-    CSRFProtect(app)
-    db.init_app(app)
-    login_manager.init_app(app)
+CSRFProtect(app)
+db.init_app(app)
+login_manager.init_app(app)
 
-    app.register_blueprint(indexController.blueprint)
-    app.register_blueprint(quoteController.blueprint)
-    app.register_blueprint(macroController.blueprint)
-    app.register_blueprint(loginController.blueprint)
+app.register_blueprint(indexController.blueprint)
+app.register_blueprint(quoteController.blueprint)
+app.register_blueprint(macroController.blueprint)
+app.register_blueprint(loginController.blueprint)
 
-    # add initial admin user if there isn't one.
-    add_user(app)
+# add initial admin user if there isn't one.
+add_user(app)
 
-    app.jinja_env.add_extension('jinja2.ext.do')
-    app.jinja_env.filters['formatdatetime'] = format_datetime
-    app.wsgi_app = SassMiddleware(app.wsgi_app, {
-        'app': ('static/scss', 'static/css', 'static/css')
-    })
+app.jinja_env.add_extension('jinja2.ext.do')
+app.jinja_env.filters['formatdatetime'] = format_datetime
+app.wsgi_app = SassMiddleware(app.wsgi_app, {
+    'app': ('static/scss', 'static/css', 'static/css')
+})
 
-    return app

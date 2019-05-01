@@ -1,60 +1,56 @@
 {% extends 'main.html' %}
+{% set active_page = "macros" %}
+
 {% block title %}Macros{% endblock %}
 
-{% block css %}
-{{ super() }}
-<link href="{{ url_for('static', filename='css/macros.scss.css') }}" rel="stylesheet" type="text/css">
-{% endblock %}
-
-{% block scripts %}
-<script>
-$( document ).ready(function() {
-$("#nav li").removeClass("active");
-$('#nav #macros').addClass('active');
-});
-</script>
-{% endblock %}
+{% set macro_types = {
+    "macros": ["Command", "Command"],
+    "responses": ["Trigger", "Response"],
+  } %}
+{% set trigger_type, macro_type = macro_types[request.endpoint.split('.')[1]] %}
 
 {% block content %}
 <div class="container-fluid">
-  <div class="row" id="main">
-    <div class="col-2" id="sidebar">
-      <nav id="macro_nav" class="nav nav-pills nav-fill">
-        <a id="macros" class="text-sm-center nav-link" href="{{url_for('macros.macros')}}">Macros</a>
-        <a id="responses" class="text-sm-center nav-link" href="{{ url_for('macros.responses') }}">Responses</a>
-        <a id="reactions" class="text-sm-center nav-link" href="{{ url_for('macros.reactions') }}">Reactions</a>
-      </nav>
+  <div class="row d-flex flex-xl-nowrap">
+    <div class="col-12 col-md-3 col-xl-2" id="sidebar">
+    <div class="sidebar-inner">
+      <ul class="macro-nav sidebar-nav nav flex-column nav-pills">
 
-      {% block macro_sidebar %}
-      {% endblock %}
+        <li class="nav-item">
+        <a id="macros" class="nav-link {%if request.url_rule.endpoint == 'macros.macros'%}active{%endif%}" href="{{url_for('macros.macros')}}">Commands</a>
+        </li>
+        <li class="nav-item"><a id="responses" class="nav-link {%if request.url_rule.endpoint == 'macros.responses'%}active{%endif%}" href="{{ url_for('macros.responses') }}">Responses</a></li>
+        {% block macro_sidebar %}{% endblock %}
+      </ul>
+    </div>
     </div>
 
-    <div class="col-10" id="page">
-      {% block macro_content %}
-      {% endblock %}
-      {% block custom_js %}
-      <script>
-      $("input#save").click(function (e) {
-          e.preventDefault();
-          var url = "/macros/" + $(".macro-card form").id + "/edit"
-          $.ajax({
-            type: "POST",
-            url: url,
-            data: {
-              id: $(this).val(), // < note use of 'this' here
-              access_token: $("#access_token").val()
-            },
-            success: function (result) {
-              alert('ok');
-            },
-            error: function (result) {
-              alert('error');
-            }
-          });
-        });
-      </script>
-      {% endblock %}
+    <div class="col-12 col-md-7 col-lg-8 col-xl-10" id="content">
+      {% block macro_content %}{% endblock %}
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+  $("input#save").click(function (e) {
+    e.preventDefault();
+    var url = "/macros/" + $(".macro-card form").id + "/edit"
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: {
+        id: $(this).val()
+        access_token: $("#access_token").val()
+      },
+      success: function (result) {
+        alert('ok');
+      },
+      error: function (result) {
+        alert('error');
+      }
+    });
+  });
+</script>
 {% endblock %}

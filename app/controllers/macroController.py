@@ -18,15 +18,11 @@ def index():
 def macros(macro_id=None):
     form = CommandForm(request.form)
     macros = db.session.query(Macro).all()
-
+    current_macro = None
     if macro_id:
-        macro = db.session.query(Macro).filter_by(id=macro_id).first()
-        return render_template('pages/macros/macros.html',
-                               macros=macros,
-                               form=form,
-                               current_macro=macro)
-    else:
-        return render_template('pages/macros/macros.html', macros=macros, form=form)
+        current_macro = db.session.query(Macro).filter_by(id=macro_id).first()
+
+    return render_template('pages/macros/macros.html', macros=macros, form=form, current_macro=current_macro)
 
 @login_required
 @blueprint.route('/macros/macros/<int:macro_id>/<string:operation>', methods=['POST', 'GET'])
@@ -65,23 +61,23 @@ def edit_macros(operation, macro_id=None):
 
 
 @blueprint.route('/macros/responses')
-@blueprint.route('/macros/responses/<int:resp_id>')
+@blueprint.route('/macros/responses/<int:macro_id>')
 @login_required
-def responses(resp_id=None):
+def responses(macro_id=None):
     form = CommandForm(request.form)
     resp_list = db.session.query(MacroResponse).all()
 
-    if resp_id:
-        resp = db.session.query(MacroResponse).filter_by(id=resp_id).first()
+    if macro_id:
+        resp = db.session.query(MacroResponse).filter_by(id=macro_id).first()
     else:
         resp = None
 
-    return render_template('pages/macros/responses.html', responses=resp_list, form=form, resp=resp)
+    return render_template('pages/macros/responses.html', responses=resp_list, form=form, current_macro=resp)
 
 @login_required
-@blueprint.route('/macros/responses/<int:resp_id>/<string:operation>', methods=['POST', 'GET'])
+@blueprint.route('/macros/responses/<int:macro_id>/<string:operation>', methods=['POST', 'GET'])
 @blueprint.route('/macros/responses/<string:operation>', methods=['POST', 'GET'])
-def edit_responses(operation, resp_id=None):
+def edit_responses(operation, macro_id=None):
 
     if request.method == 'POST':
         form = CommandForm(request.form)
@@ -97,16 +93,16 @@ def edit_responses(operation, resp_id=None):
             requests.get('http://127.0.0.1:10000/update_responses')
 
         elif operation == 'edit':
-            resp = db.session.query(MacroResponse).filter_by(id=resp_id).first()
+            resp = db.session.query(MacroResponse).filter_by(id=macro_id).first()
             resp.trigger = form['command'].data
             resp.response = form['response'].data
             db.session.commit()
 
             requests.get('http://127.0.0.1:10000/update_responses')
 
-    elif (request.method == 'GET') and (resp_id):
+    elif (request.method == 'GET') and (macro_id):
         if operation == 'delete':
-            db.session.query(MacroResponse).filter_by(id=resp_id).delete()
+            db.session.query(MacroResponse).filter_by(id=macro_id).delete()
             db.session.commit()
 
             requests.get('http://127.0.0.1:10000/update_responses')
@@ -114,27 +110,28 @@ def edit_responses(operation, resp_id=None):
     return redirect(url_for('macros.responses'))
 
 @blueprint.route('/macros/reactions')
-@blueprint.route('/macros/reactions/<int:react_id>')
+@blueprint.route('/macros/reactions/<int:macro_id>')
 @login_required
-def reactions(react_id=None):
+def reactions(macro_id=None):
     form = CommandForm(request.form)
     reaction_list = db.session.query(MacroReaction).all()
+    print(reaction_list)
 
-    if react_id:
-        reaction = db.session.query(MacroReaction).filter_by(id=react_id).first()
+    if macro_id:
+        reaction = db.session.query(MacroReaction).filter_by(id=macro_id).first()
         return render_template('pages/macros/reactions.html',
                                reactions=reaction_list,
                                form=form,
-                               current_react=reaction)
+                               current_macro=reaction)
     else:
         return render_template('pages/macros/reactions.html',
-                               reactions=reaction_list,
+                               current_macro=reaction_list,
                                form=form)
 
 @login_required
-@blueprint.route('/macros/reactions/<int:react_id>/<string:operation>', methods=['POST', 'GET'])
+@blueprint.route('/macros/reactions/<int:macro_id>/<string:operation>', methods=['POST', 'GET'])
 @blueprint.route('/macros/reactions/<string:operation>', methods=['POST', 'GET'])
-def edit_reactions(operation, react_id=None):
+def edit_reactions(operation, macro_id=None):
     if request.method == 'POST':
         form = CommandForm(request.form)
 
@@ -149,16 +146,16 @@ def edit_reactions(operation, react_id=None):
             requests.get('http://127.0.0.1:10000/update_reactions')
 
         elif operation == 'edit':
-            reaction = db.session.query(MacroReaction).filter_by(id=react_id).first()
+            reaction = db.session.query(MacroReaction).filter_by(id=macro_id).first()
             reaction.trigger = form['command'].data
             reaction.reaction = form['response'].data
             db.session.commit()
 
             requests.get('http://127.0.0.1:10000/update_reactions')
 
-    elif (request.method == 'GET') and (react_id):
+    elif (request.method == 'GET') and (macro_id):
         if operation == 'delete':
-            reaction = db.session.query(MacroReaction).filter_by(id=react_id).delete()
+            reaction = db.session.query(MacroReaction).filter_by(id=macro_id).delete()
             db.session.commit()
 
             requests.get('http://127.0.0.1:10000/update_reactions')

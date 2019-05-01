@@ -1,42 +1,54 @@
 {% extends 'pages/macros/index.html' %}
-{% from "pages/macros/partials/_macro.html" import macroEntry %}
 
 
 {% block macro_sidebar %}
-  <script>
-    $( document ).ready(function() {
-    $("#macro_nav li").removeClass("active");
-    $('#macro_nav #macros').addClass('active');
-    });
-  </script>
+<div class="sidebar-card">
+<h6>{{ trigger_type + " List" }}</h6>
+<ul class="macro-nav sidebar-nav">
+  <li class="nav-item"><a class="nav-link d-flex" href="{{ url_for(request.endpoint) }}">New</a></li>
 
-
-  <h5>Macros</h5>
-  <div class="card">
-    <a href="/macros/macros">New</a>
-  </div>
-
-  <div class="card macrolist-card">
-    {% for macro in macros %}
-      <a href="/macros/macros/{{ macro.id }}">{{ macro.command }}</a>
-    {% endfor %}
-  </div>
+{% for macro in macros %}
+    <li class="nav-item">
+    <a class="nav-link {%if current_macro == macro%} active{%endif%}" href="{{url_for(request.endpoint, macro_id=macro.id)}}">{{ macro.command }}</a>
+    </li>
+{% endfor %}
+</ul>
+</div>
 {% endblock %}
 
 
 {% block macro_content %}
-  {% if not current_macro %}
-  {% set current_macro = 0 %}
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
   {% endif %}
+{% endwith %}
 
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for message in messages %}
-        {{ message }}
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+{% if not current_macro.macro_id %}
+<form class="form-macro" action="/macros/macros/new" method="post">
+{% else %}
+<form class="form-macro" id="{{current_macro.macro_id}}" action="/macros/macros/{{current_macro.macro_id}}/edit" method="post">
+{% endif %}
 
-  {{ macroEntry(macro=current_macro, form=form) }}
+  <h5>{{ trigger_type }}</h5>
+  {{ form.command(class='form-control', value=current_macro.command, id=current_macro.macro_id) }}
+
+  <h5>Response</h5>
+  {% set response = form.response.process_data(current_macro.response) %}
+  {{ form.response(class='form-control', rows='6', label=response, id=current_macro.macro_id) }}
+  {{ form.hidden_tag() }}
+
+  <div id="macro-form-buttons">
+  {% if current_macro.id %}
+  <input id="save" class="button btn btn-success" type="submit" value="Submit" />
+    <a href="/macros/macros/{{current_macro.id}}/delete" id="delete" class="button btn btn-danger">Delete</a>
+  {% else %}
+  <input id="new" class="button btn btn-success" type="submit" value="Submit" />
+  {% endif %}
+  </div>
+</form>
 
 {% endblock %}
