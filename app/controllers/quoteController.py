@@ -39,9 +39,11 @@ class PageData:
             # self.members = db.session.query(GuildMembership).filter(and_(*member_filters)) \
                                                         # .order_by(func.lower(GuildMembership.display_name)) \
                                                         # .all()
+
             self.members = db.session.query(GuildMembership).filter(GuildMembership.quotes.any(Quote.guild_id == self.current_guild)) \
                                                             .order_by(func.lower(GuildMembership.display_name)) \
-                                                            .all()
+                                                            .join(GuildMembership.top_role).all()
+
             self.pages = db.session.query(Quote).filter(and_(*quote_filters)) \
                                                          .order_by(Quote.timestamp.desc()).join(Quote.member) \
                                                          .paginate(self.current_page, 10, False)

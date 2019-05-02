@@ -1,4 +1,5 @@
 import os
+import asyncio
 import logging
 from getpass import getpass
 from flask import Flask
@@ -7,7 +8,6 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
 from sassutils.wsgi import SassMiddleware
-
 from cleo.db import Base, FlaskUser
 
 login_manager = LoginManager()
@@ -47,6 +47,8 @@ def format_datetime(value, format="%m/%d/%Y"):
         return ""
     return value.strftime(format)
 
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 app = Flask(__name__)
 app.config.from_object('config')

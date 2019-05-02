@@ -81,11 +81,14 @@ class GuildMembership(Base):
     user_id         = Column(Integer, ForeignKey("users.id"), primary_key=True)
     display_name    = Column('display_name', String, nullable=True)
     joined_at       = Column('joined_at', DateTime, nullable=True)
+    top_role_id = Column(Integer, ForeignKey('roles.id', name="fk_top_role_id"))
+
+
 
     guild = relationship("Guild", uselist=False, lazy="joined")
     user = relationship("User", primaryjoin='foreign(User.id) == GuildMembership.user_id',
                         uselist=False, lazy='joined')
-
+    top_role = relationship("Role", uselist=False)
     quotes = relationship('Quote', primaryjoin=(
                           'and_(foreign(Quote.user_id) == GuildMembership.user_id,'
                           'foreign(Quote.guild_id) == GuildMembership.guild_id)'),
@@ -97,6 +100,27 @@ class GuildMembership(Base):
         self.user_id = member.id
         self.display_name = member.display_name
         self.joined_at = member.joined_at
+
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    color = Column(Integer)
+    raw_permissions = Column(Integer)
+    guild_id = Column(Integer, ForeignKey('guilds.id'))
+    position = Column(Integer)
+
+    guild = relationship("Guild", uselist=False, backref=backref("roles"))
+
+    def __init__(self, role):
+        self.id = role.id
+        self.name = role.name
+        self.color = role.color.value if role.color else 8421504
+        self.raw_permissions = role.permissions.value
+        self.guild_id = role.guild.id
+        self.position = role.position
 
 
 class Quote(Base):
@@ -121,14 +145,6 @@ class Quote(Base):
                           primaryjoin=('and_(foreign(GuildMembership.user_id) == Quote.user_id,'
                                        'foreign(GuildMembership.guild_id) == Quote.guild_id)'),
                           uselist=False, lazy='joined')
-
-    # def __init__(self, quote):
-    #     self.message_id = quote['id']
-    #     self.message = quote['content']
-    #     self.timestamp = quote['created_at']
-    #     self.user_id = quote['user_id']
-    #     self.channel_id = quote['channel.id']
-    #     self.guild_id = quote['guild.id']
 
 
 class Macro(Base):
@@ -245,7 +261,7 @@ class CustomQuery(Query):
         return Pagination(self, page, per_page, total, items)
 
 #engine = create_engine('sqlite:///database.db')
-Base.metadata.create_all(engine)
+#Base.metadata.create_all(engine)
 session = sessionmaker(bind=engine, query_cls=CustomQuery)()
 
 # from collections import namedtuple

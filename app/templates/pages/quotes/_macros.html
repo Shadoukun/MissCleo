@@ -71,7 +71,7 @@
           {% else %}
           <img class="avatar" src="{{ member.user.avatar_url }}">
           {% endif %}
-          <a class="quote-username" href="{{ url }}">{{ member.display_name}}</a>
+          <a class="quote-username" style="color: {{ '#%6x'|format( member.top_role.color | int ) }};" href="{{ url }}">{{ member.display_name}}</a>
           <div class="timestamp text-muted">{{ quote.timestamp|formatdatetime }}</div>
 
           <div class="dropdown ml-auto">

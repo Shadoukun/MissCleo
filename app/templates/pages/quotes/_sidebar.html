@@ -42,7 +42,7 @@
     <li class="nav-item d-flex{%if id == data.current_member%} active{%endif%}">
       <a class="nav-link user-link d-flex {%if id == data.current_member%}active{%endif%}" href="{{url}}">
         <img class="avatar{%if avatar == ''%}-default{%endif%}" src="{{avatar}}">
-        <div class="name">{{name}}</div>
+        <div class="name" style="color: {{ '#%6x'|format( member.top_role.color | int ) }};">{{name}}</div>
       </a>
     </li>
     {% endwith %}

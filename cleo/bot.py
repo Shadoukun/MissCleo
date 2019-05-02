@@ -1,12 +1,14 @@
 import os
 import aiohttp
+import asyncio
 import logging
 import itertools
 from pathlib import Path
 from discord.ext import commands
 
-import cleo.utils as utils
-from cleo.db import Channel, Guild, Base, engine, session
+from . import utils
+from .tasks import update_guilds, update_user_info
+from cleo.db import Base, engine, session
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,10 +16,7 @@ logger.setLevel(logging.INFO)
 if not os.path.isfile('database.db'):
     Base.metadata.create_all(engine)
 
-HELP_COG = "Command"
-
 class CustomHelpCommand(commands.DefaultHelpCommand):
-
 
     async def send_bot_help(self, mapping):
         ctx = self.context
@@ -28,6 +27,7 @@ class CustomHelpCommand(commands.DefaultHelpCommand):
             self.paginator.add_line(bot.description, empty=True)
 
         no_category = '\u200b{0.no_category}:'.format(self)
+
         def get_category(command, *, no_category=no_category):
             cog = getattr(command, 'cog', None)
 
@@ -42,14 +42,14 @@ class CustomHelpCommand(commands.DefaultHelpCommand):
 
             return category + ':' if category else no_category
 
-        filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
-        max_size = self.get_max_size(filtered)
-        to_iterate = itertools.groupby(filtered, key=get_category)
-
-        # Now we can add the commands to the page.
         custom_category = "Custom:"
         custom_commands = None
 
+        filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
+        to_iterate = itertools.groupby(filtered, key=get_category)
+        max_size = self.get_max_size(filtered)
+
+        # Now we can add the commands to the page.
         for category, commands in to_iterate:
             if category == custom_category:
                 custom_commands = sorted(commands, key=lambda c: c.name) if self.sort_commands else list(commands)
@@ -72,67 +72,61 @@ class CustomHelpCommand(commands.DefaultHelpCommand):
 class MissCleo(commands.Bot):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        # idk why I need to do this
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        super().__init__(*args, loop=loop, **kwargs)
+
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.db = session
         self.tokens = kwargs.get('tokens')
-
         self.help_command = CustomHelpCommand()
+
+        self.load_cogs()
+        self.loop.create_task(update_guilds(self))
+        self.loop.create_task(update_user_info(self))
 
     async def on_ready(self):
         # database background tasks
-
-        await utils.update_database(self)
-        await utils.update_user_info(self)
-
-        logger.info(f'Client ready\nLogged in as: {self.user.name}\nUser ID: {self.user.id}')
+        logger.info(f"Client ready\n"
+                    f"Logged in as: {self.user.name}\n"
+                    f"User ID: {self.user.id}")
 
     async def on_member_update(self, before, after):
         # Update a user's info in the database when they change it.
-        # TODO: Figure out if this runs when new users join
 
-        if (str(before.avatar_url) != str(after.avatar_url)) or (before.display_name != after.display_name):
+        if (str(before.avatar_url) != str(after.avatar_url)) \
+        or (before.display_name != after.display_name):
+
             await utils.update_user(self, before, after)
 
     async def on_member_join(self, member):
 
         # GuildMembership rows are created automatically.
-        await utils.add_users(self, member)
-
+        await utils.add_user(self, member)
         logger.debug(f'{member.name} joined {member.guild.name}.')
 
     async def on_guild_channel_create(self, channel):
         # Add new channels to the database.
-
-        new_channel = Channel(channel)
-        self.db.add(new_channel)
-        self.db.commit()
-
+        await utils.add_channel(self, channel)
         logging.debug(f"Channel {channel.name} created")
 
     async def on_guild_join(self, guild):
         # Add new guilds to the database.
-
-        new_guild = Guild(guild)
-        self.db.add(new_guild)
-        self.db.commit()
-
-        logging.debug(f"Guild {guild.name} created")
+        await utils.add_guild(self, guild)
 
     def load_cogs(self):
         """Load cogs from cogs folder."""
 
         logger.info("Loading Cogs...")
-
         cog_path = Path('cleo/cogs').glob('*.py')
-        extensions = [f'cleo.cogs.{f.stem}' for f in cog_path]
 
-        for extension in extensions:
+        for extension in [f'cleo.cogs.{f.stem}' for f in cog_path]:
             try:
                 self.load_extension(extension)
-                logger.info("Loaded Cog: " + extension)
+                logger.debug("Loaded Cog: " + extension)
             except Exception as e:
-                logger.info(f'Failed to load extension {extension}\n{type(e).__name__}: {e}')
+                logger.error(f'Failed to load extension {extension}\n{type(e).__name__}: {e}')
 
 
 
