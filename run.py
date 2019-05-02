@@ -1,16 +1,15 @@
 from gevent import monkey; monkey.patch_all()
-import asyncio
-import gevent.pywsgi
 import werkzeug.serving
 import logging.config
 import logging
 import yaml
 from pathlib import Path
 from threading import Thread
+from gevent.pywsgi import WSGIServer
 
 from cleo.bot import MissCleo
+from cleo.tasks import update_guilds, update_user_info
 from app import app
-
 
 
 def setup_logging():
@@ -22,23 +21,20 @@ def setup_logging():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    with open('config/tokens.yaml', 'r') as tokefile:
-        globals()['TOKENS'] = yaml.load(tokefile, Loader=yaml.FullLoader)
-
 @werkzeug.serving.run_with_reloader
 def main():
     setup_logging()
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
 
-    http = gevent.pywsgi.WSGIServer(('0.0.0.0', 5000), app.wsgi_app, log=app.logger)
-    Thread(target=http.serve_forever).start()
+    # load tokens
+    with open('config/tokens.yaml', 'r') as tokenfile:
+        globals()['TOKENS'] = yaml.load(tokenfile, Loader=yaml.FullLoader)
+
+    http = WSGIServer(('0.0.0.0', 5000), app.wsgi_app, log=app.logger)
+    web_thread = Thread(target=http.serve_forever)
+    web_thread.start()
 
     client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=TOKENS)
-    client.load_cogs()
     client.run(TOKENS['discord'])
-
-
 
 if __name__ == "__main__":
     main()

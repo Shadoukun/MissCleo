@@ -61,7 +61,6 @@ async def add_guild(self, guild):
         self.db.add(Role(role))
         logger.debug((f"Adding Role for '{guild.name}': "
                       f"({role.id}) {role.name} - {role.color.value}"))
-
     # members
     for member in guild.members:
         new_member = GuildMembership(member)
@@ -78,7 +77,7 @@ async def add_channel(self, channel):
     self.db.commit()
 
 
-async def update_user(self, before, after):
+async def update_member(self, before, after):
     logger.debug(f"update user: {before.name}")
 
     member = self.db.query(GuildMembership) \
@@ -93,6 +92,28 @@ async def update_user(self, before, after):
         logger.debug((f"Member info updated.\n"
                       f"Before: {before.display_name}, {before.avatar_url}\n"
                       f"After: {after.display_name}, {after.avatar_url}"))
+
+
+async def add_role(self, role):
+    new_role = Role(role)
+    self.db.add(new_role)
+    self.db.commit()
+
+async def delete_role(self, role):
+    dbrole = self.db.query(Role).filter_by(id=role.id).delete()
+    self.db.commit()
+
+
+
+async def update_role(self, role):
+    dbrole = self.db.query(Role).filter_by(id=role.id).one()
+
+    dbrole.name = role.name
+    dbrole.color = role.color.value
+    dbrole.raw_permissions = role.permissions.value
+    dbrole.position = role.position
+
+    self.db.commit()
 
 
 def admin_only():

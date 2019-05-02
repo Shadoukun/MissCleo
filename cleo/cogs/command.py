@@ -35,6 +35,8 @@ class Command(commands.Cog):
         # Check if command is either auto_enabled or enabled for the channel.
         if (command in self.bot.auto_enable) or (command in enabled_commands):
             return True
+        else:
+            raise commands.DisabledCommand
 
     @lru_cache(maxsize=None)
     def _get_channel(self, guild_id, channel_id):

@@ -1,4 +1,5 @@
 import os
+import sys
 import aiohttp
 import asyncio
 import logging
@@ -93,34 +94,52 @@ class MissCleo(commands.Bot):
                     f"User ID: {self.user.id}")
 
     async def on_member_update(self, before, after):
-        # Update a user's info in the database when they change it.
-
+        # User and GuildMembership are updated together.
         if (str(before.avatar_url) != str(after.avatar_url)) \
         or (before.display_name != after.display_name):
 
-            await utils.update_user(self, before, after)
+            await utils.update_member(self, before, after)
 
     async def on_member_join(self, member):
-
         # GuildMembership rows are created automatically.
         await utils.add_user(self, member)
         logger.debug(f'{member.name} joined {member.guild.name}.')
 
     async def on_guild_channel_create(self, channel):
-        # Add new channels to the database.
         await utils.add_channel(self, channel)
         logging.debug(f"Channel {channel.name} created")
 
     async def on_guild_join(self, guild):
-        # Add new guilds to the database.
         await utils.add_guild(self, guild)
+
+    async def on_guild_role_create(self, role):
+        await utils.add_role(self, role)
+        logger.debug(f"Role {role.name} created.")
+
+    async def on_guild_role_delete(self, role):
+        #TODO: add scheduling of update_user_info to change top_role of Members. (if I have to...?)
+        await utils.delete_role(self, role)
+        logger.debug(f"Role {role.name} deleted.")
+
+    async def on_guild_role_update(self, before, after):
+        await utils.update_role(self, after)
+        logger.debug(f"Role updated.\n"
+                     f"{before.id} - {before.name}"
+                     f"{after.id} - {after.name}")
+
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.DisabledCommand):
+            await ctx.channel.send('This command is disabled.')
+        elif isinstance(error, commands.CommandInvokeError):
+            print(f'In {ctx.command.qualified_name}:', file=sys.stderr)
+            traceback.print_tb(error.original.__traceback__)
+            print(f'{error.original.__class__.__name__}: {error.original}', file=sys.stderr)
 
     def load_cogs(self):
         """Load cogs from cogs folder."""
 
         logger.info("Loading Cogs...")
         cog_path = Path('cleo/cogs').glob('*.py')
-
         for extension in [f'cleo.cogs.{f.stem}' for f in cog_path]:
             try:
                 self.load_extension(extension)
