@@ -9,9 +9,12 @@ logger = logging.Logger(__name__)
 
 async def add_user(self, user):
     logger.debug(f"Adding user: ({user.id}) {user.name}")
-    new_user = User(user)
-    self.db.add(new_user)
-    self.db.commit()
+
+    q = self.db.query(User.id).filter(User.id == user.id)
+    if not self.db.query(q.exists()).scalar():
+        new_user = User(user)
+        self.db.add(new_user)
+        self.db.commit()
 
 
 async def add_missing_users(self):
@@ -34,7 +37,7 @@ async def add_guild(self, guild):
 
     # channels
     for channel in guild.channels:
-        if (isinstance(channel, TextChannel)):
+        if isinstance(channel, TextChannel):
             self.db.add(Channel(channel))
     # roles
     for role in guild.roles:
