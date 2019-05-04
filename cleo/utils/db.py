@@ -1,30 +1,10 @@
 import logging
 from discord import TextChannel
-from discord.ext import commands
-from cleo.db import Guild, Channel, User, GuildMembership, Role
+
+from ..db import User, Guild, Channel, Role, GuildMembership, Channel
 
 
-logger = logging.getLogger(__name__)
-
-
-async def findUser(ctx, arg:str):
-
-    logger.debug(f"Looking for user: {arg}")
-
-    name_list = [arg, arg.upper(),
-                arg.lower(),
-                arg.lower().capitalize()]
-
-    # Try to get member from discord.py's member converter
-    user = None
-    memberconverter = commands.MemberConverter()
-    for name in name_list:
-        try:
-            user = await memberconverter.convert(ctx, name)
-            if user:
-                return user
-        except:
-            logger.debug(f"User not found.")
+logger = logging.Logger(__name__)
 
 
 async def add_user(self, user):
@@ -81,8 +61,8 @@ async def update_member(self, before, after):
     logger.debug(f"update user: {before.name}")
 
     member = self.db.query(GuildMembership) \
-                            .filter_by(user_id=before.id) \
-                            .one_or_none()
+        .filter_by(user_id=before.id) \
+        .one_or_none()
 
     if member and after:
         member.user.avatar_url = str(after.avatar_url)
@@ -99,10 +79,10 @@ async def add_role(self, role):
     self.db.add(new_role)
     self.db.commit()
 
+
 async def delete_role(self, role):
     dbrole = self.db.query(Role).filter_by(id=role.id).delete()
     self.db.commit()
-
 
 
 async def update_role(self, role):
@@ -114,24 +94,3 @@ async def update_role(self, role):
     dbrole.position = role.position
 
     self.db.commit()
-
-
-def admin_only():
-    '''Admin check decorator cog commands'''
-
-    # TODO: role check
-    async def predicate(ctx):
-        logger.debug(f"checking if {ctx.author.name} is an admin")
-        app_info = await ctx.bot.application_info()
-        try:
-            if (app_info.owner.id == ctx.author.id) \
-            or (ctx.author.id in ctx.bot.admins):
-                return True
-            else:
-                return False
-        except:
-            return True
-
-    return commands.check(predicate)
-
-

@@ -4,6 +4,7 @@ import aiohttp
 import asyncio
 import logging
 import itertools
+import traceback
 from pathlib import Path
 from discord.ext import commands
 
