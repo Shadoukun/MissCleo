@@ -39,12 +39,9 @@ class Command(commands.Cog):
     @lru_cache(maxsize=None)
     def _get_channel(self, guild_id, channel_id):
         '''Retrieves channel from database. Uses lru_cache'''
-
-        channel = self.db.query(Channel).filter_by(guild_id=guild_id).filter_by(id=channel_id).one()
-        if channel:
-            return channel
-        else:
-            return None
+        return self.db.query(Channel).filter_by(guild_id=guild_id) \
+                                        .filter_by(id=channel_id) \
+                                        .one_or_none()
 
     def _get_enabled_commands(self, ctx):
         '''Get all commands that are enabled for the current channel'''
@@ -186,7 +183,6 @@ class Command(commands.Cog):
             await ctx.channel.send("Disabled: ```{0}```".format('\n'.join(to_disable)))
         else:
             await ctx.channel.send("Failed.")
-
 
 
 def setup(bot):

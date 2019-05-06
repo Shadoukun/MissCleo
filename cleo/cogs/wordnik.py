@@ -65,13 +65,14 @@ class Wordnik(commands.Cog):
             firstrun = True
 
             # check function for wait_for
-            _check = lambda reaction, user: reaction.emoji.startswith(('⏪', '⏩'))
+            # _check = lambda reaction, user: reaction.emoji.startswith(('⏪', '⏩'))
 
             while True:
                 if firstrun:
                     firstrun = False
                     embed = self.createEmbed(lookup, defs[p - 1])
                     msg = await ctx.channel.send(embed=embed)
+                    # pagination disabled for the moment. immature people abusing it.
                     break
 
                 # if maxpage == 1 and p == 1:

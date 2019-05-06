@@ -41,6 +41,7 @@ class Quotes(commands.Cog):
         quote = Quote(**quote)
         self.db.add(quote)
         self.db.commit()
+        self.db.refresh(quote)
         return quote
 
     async def _remove_quote(self, ctx, message):

@@ -1,6 +1,7 @@
 import logging
 from discord.channel import TextChannel
-from cleo.db import Guild, Channel, User, GuildMembership, Role
+from cleo.db import Guild, Channel, GuildMembership, Role
+from cleo.utils import add_missing_users
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,8 @@ async def update_guilds(self):
 
     db_guilds = [g.id for g in self.db.query(Guild.id).all()]
     db_channels = [c.id for c in self.db.query(Channel.id).all()]
+
+    await add_missing_users(self)
 
     for guild in self.guilds:
         db_members = [g.user_id for g in self.db.query(GuildMembership.user_id)

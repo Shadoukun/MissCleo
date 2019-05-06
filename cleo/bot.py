@@ -98,11 +98,9 @@ class MissCleo(commands.Bot):
         # User and GuildMembership are updated together.
         if (str(before.avatar_url) != str(after.avatar_url)) \
         or (before.display_name != after.display_name):
-
             await utils.update_member(self, before, after)
 
     async def on_member_join(self, member):
-        # GuildMembership rows are created automatically.
         await utils.add_user(self, member)
         logger.debug(f'{member.name} joined {member.guild.name}.')
 

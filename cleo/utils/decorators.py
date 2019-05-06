@@ -16,8 +16,6 @@ def admin_only():
             if (app_info.owner.id == ctx.author.id) \
                     or (ctx.author.id in ctx.bot.admins):
                 return True
-            else:
-                return False
         except:
             return True
 

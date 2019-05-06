@@ -10,11 +10,18 @@ logger = logging.Logger(__name__)
 async def add_user(self, user):
     logger.debug(f"Adding user: ({user.id}) {user.name}")
 
-    q = self.db.query(User.id).filter(User.id == user.id)
-    if not self.db.query(q.exists()).scalar():
+    user_q = self.db.query(User.id).filter(User.id == user.id)
+    member_q = self.db.query(GuildMembership.user_id).filter_by(user_id=user.id)
+
+    if not self.db.query(user_q.exists()).scalar():
         new_user = User(user)
         self.db.add(new_user)
-        self.db.commit()
+
+    if not self.db.query(member_q.exists()).scalar():
+        new_member = GuildMembership(user)
+        self.db.add(new_member)
+
+    self.db.commit()
 
 
 async def add_missing_users(self):
@@ -64,8 +71,9 @@ async def update_member(self, before, after):
     logger.debug(f"update user: {before.name}")
 
     member = self.db.query(GuildMembership) \
-        .filter_by(user_id=before.id) \
-        .one_or_none()
+                    .filter_by(user_id=before.id) \
+                    .filter_by(guild_id=before.guild.id) \
+                    .one_or_none()
 
     if member and after:
         member.user.avatar_url = str(after.avatar_url)

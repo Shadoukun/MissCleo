@@ -58,7 +58,7 @@ class UrbanDictionary(commands.Cog):
         orig_user = ctx.message.author
 
         # check function for wait_for
-        _check = lambda reaction, user: reaction.emoji.startswith(('⏪', '⏩'))
+        # _check = lambda reaction, user: reaction.emoji.startswith(('⏪', '⏩'))
 
         while True:
             if firstrun:
