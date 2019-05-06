@@ -6,9 +6,8 @@ from cachetools import TTLCache
 from discord.ext import commands
 from sqlalchemy import and_, func
 
-from cleo.db import GuildMembership, Quote, User
+from cleo.db import Quote
 from cleo.utils import admin_only, findUser
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,8 @@ class Quotes(commands.Cog):
         '''Remove a quote from the database.'''
 
         quote = self.db.query(Quote).filter_by(guild_id=ctx.guild.id) \
-                                    .filter_by(message_id=message.id).one_or_none()
+                                    .filter_by(message_id=message.id) \
+                                    .one_or_none()
         if quote:
             self.db.remove(quote)
             self.db.commit()
@@ -71,35 +71,36 @@ class Quotes(commands.Cog):
     @commands.command(name='quote')
     async def quote(self, ctx, *, username:str=None):
 
+        # search for a user if a name is given.
         user = None
+        quote = None
+
         if username:
             user = await findUser(ctx, username)
             if not user:
                 await ctx.channel.send("User not found.")
                 return
 
+        # range limit retries from cached duplicates.
         for _ in range(20):
             quote = await self._get_quote(ctx, user)
             if not quote:
                 await ctx.channel.send(NORESULTS_MSG)
                 return
 
-            # check cache to see if quote was recently
+            # check to see if quote was already sent recently
             cached_quote = self.cache.get(quote.message_id, None)
             if not cached_quote:
                 self.cache[quote.message_id] = quote
                 break
             else:
-                all_seen = True
                 quote = None
 
         if quote:
             embed = _create_embed(quote)
             await ctx.channel.send(embed=embed)
-        elif all_seen:
-            await ctx.channel.send("All quotes have already been seen.")
         else:
-            await ctx.channel.send(NORESULTS_MSG)
+            await ctx.channel.send("All quotes have already been seen.")
 
     @commands.guild_only()
     @admin_only()
@@ -117,8 +118,6 @@ class Quotes(commands.Cog):
             for a in args:
                 msg = await ctx.channel.fetch_message(int(a))
                 messages += [msg]
-            if not messages:
-                raise Exception
         except:
             await ctx.channel.send(NORESULTS_MSG)
             return

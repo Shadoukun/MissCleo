@@ -23,19 +23,17 @@ class Command(commands.Cog):
         self.bot = bot
         self.db = bot.db
         self.bot.auto_enable = AUTO_ENABLE
-        self.enabled_cache = {}
 
     async def bot_check(self, ctx):
-        #Checks that a command is enabled for the current channel.
-        # Enabled commands are listed in the 'channels' table of the db.
-
+        '''Checks if a command is enabled for the current channel.'''
         command = ctx.command.qualified_name.split(' ')[0]
         enabled_commands = self._get_enabled_commands(ctx)
 
-        # Check if command is either auto_enabled or enabled for the channel.
-        if (command in self.bot.auto_enable) or (command in enabled_commands):
+        if (command in self.bot.auto_enable) \
+        or (command in enabled_commands):
             return True
         else:
+            # don't remember why I used an exception.
             raise commands.DisabledCommand
 
     @lru_cache(maxsize=None)
@@ -53,7 +51,8 @@ class Command(commands.Cog):
 
         channel = self._get_channel(ctx.guild.id, ctx.channel.id)
         if channel:
-            return channel.enabled_commands + self.bot.auto_enable
+            enabled = channel.enabled_commands + self.bot.auto_enable
+            return enabled
 
     def _enable(self, ctx, commands, **kwargs):
         '''Takes a list of commands to enable for the current channel.'''
@@ -66,7 +65,6 @@ class Command(commands.Cog):
         for ch in channels:
             enabled = ch.enabled_commands
             commands = [c for c in commands if c in bot_cmds]
-
             ch.enabled_commands = set(enabled + commands)
 
         self.db.commit()
@@ -90,19 +88,6 @@ class Command(commands.Cog):
 
         self.db.commit()
         self._get_channel.cache_clear()
-
-
-    @commands.command(name="test", hidden=True)
-    async def test(self, ctx, *args, **kwargs):
-        await ctx.channel.send("Test.")
-
-
-    @guild_only()
-    @admin_only()
-    @commands.command(name="list", hidden=True)
-    async def listcommands(self, ctx):
-        cmds = " ".join(self._get_enabled_commands(ctx))
-        await ctx.channel.send(cmds)
 
     @guild_only()
     @admin_only()
@@ -161,9 +146,9 @@ class Command(commands.Cog):
     @commands.command(name="guild_enable", hidden=True)
     async def guild_enable(self, ctx, *, commands:str=None):
 
-        channels = self.db.query(Channel).filter_by(guild_id=ctx.guild.id).all()
         cmds = commands.split(" ")
         to_enable = []
+        channels = self.db.query(Channel).filter_by(guild_id=ctx.guild.id).all()
 
         valid_cmds = [c.name for c in self.bot.commands]
         if cmds[0] == 'all':
@@ -184,9 +169,9 @@ class Command(commands.Cog):
     @commands.command(name="guild_disable", hidden=True)
     async def guild_disable(self, ctx, *, commands:str=None):
 
-        channels = self.db.query(Channel).filter_by(guild_id=ctx.guild.id).all()
         cmds = commands.split(" ")
         to_disable = []
+        channels = self.db.query(Channel).filter_by(guild_id=ctx.guild.id).all()
 
         valid_cmds = [c.name for c in self.bot.commands]
         if cmds[0] == 'all':

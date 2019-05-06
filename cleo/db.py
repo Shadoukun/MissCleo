@@ -260,39 +260,5 @@ class CustomQuery(Query):
 
         return Pagination(self, page, per_page, total, items)
 
-#engine = create_engine('sqlite:///database.db')
-#Base.metadata.create_all(engine)
+
 session = sessionmaker(bind=engine, query_cls=CustomQuery)()
-
-# from collections import namedtuple
-# from datetime import datetime
-
-# guildt = namedtuple("guild", ['id', 'name', 'icon_url'])
-# usert = namedtuple("user", ['id', 'name', 'avatar_url'])
-# GuildMembershipt = namedtuple("guild_member", ['guild_id', 'user_id', 'display_name', 'joined_at'])
-# quotet = namedtuple("quote", ['id', 'message', 'created_at', 'guild_id', 'channel_id', 'user_id'])
-
-# g = Guild(guildt(id=394188309087256587, name="testguild1", icon_url=""))
-# session.add(g)
-# session.commit()
-
-# g2 = Guild(guildt(570071281542627379, "Testguild2", ""))
-# session.add(g2)
-# session.commit()
-
-# u1 = User(usert(482920312233656320, "User1", ""))
-# session.add(u1)
-# session.commit()
-
-# gm1 = GuildMembership(GuildMembershipt(394188309087256587, 482920312233656320, "UserDisplay1", datetime.utcnow()))
-# session.add(gm1)
-# session.commit()
-
-# gm2 = GuildMembership(GuildMembershipt(482920312233656320, 570071281542627379, "UserDisplay2", datetime.utcnow()))
-# session.add(gm2)
-# session.commit()
-
-# q1 = Quote(quotet(571329245205364742, "Test Message", datetime.utcnow(), 394188309087256587, 394188309087256587, 482920312233656320))
-# session.add(q1)
-# session.commit()
-

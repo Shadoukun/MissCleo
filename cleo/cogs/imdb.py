@@ -15,21 +15,17 @@ class IMDB(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='imdb')
-    async def imdb_search(self, ctx, *, title: str):
+    async def imdb_search(self, ctx, *, title:str):
         """!imdb <title>      | lookup a movie on IMDB. """
 
         if not title:
             return
 
-        logger.debug(title)
-
         async with self.bot.session.get(self.url + title) as resp:
             data = await resp.text()
             movie = json.loads(data)
 
-        logger.debug(movie)
         if movie['Response'] == "True":
-
             embed = Embed().from_dict({
                 "title": "\n",
                 "color": 0x006FFA,

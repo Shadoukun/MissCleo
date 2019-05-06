@@ -32,6 +32,7 @@ class Wikipedia(commands.Cog):
         try:
             page = wikipedia.page(query)
             if page:
+                # limit summary to discord character limit
                 summary = (page.summary[:1021] + '...') if len(page.summary) > 1024 else page.summary
 
                 embed = Embed().from_dict({

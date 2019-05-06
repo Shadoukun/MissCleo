@@ -28,7 +28,6 @@ class Admin(commands.Cog):
     @commands.command(name="find", hidden=False)
     async def find(self, ctx, *, arg:str):
         user = await findUser(ctx, arg)
-
         if user:
             await ctx.channel.send(f"{user.id}\n{user.name}\n{user.display_name}")
         else:
@@ -46,7 +45,6 @@ class Admin(commands.Cog):
         logger.debug("!admin add")
 
         user = await findUser(ctx, username)
-
         if not user:
             await ctx.channel.send(NOTFOUND_MSG)
             return
@@ -70,7 +68,6 @@ class Admin(commands.Cog):
         logger.debug("!admin remove")
 
         user = await findUser(ctx, username)
-
         if not user:
             await ctx.channel.send(NOTFOUND_MSG)
             return

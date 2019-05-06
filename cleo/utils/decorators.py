@@ -10,6 +10,7 @@ def admin_only():
     # TODO: role check
     async def predicate(ctx):
         logger.debug(f"checking if {ctx.author.name} is an admin")
+
         app_info = await ctx.bot.application_info()
         try:
             if (app_info.owner.id == ctx.author.id) \

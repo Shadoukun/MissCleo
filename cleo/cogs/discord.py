@@ -12,7 +12,6 @@ class Discord(commands.Cog):
 
     def __init__(self, bot):
         """Commands related to discord and discord users"""
-
         self.bot = bot
 
     @guild_only()
@@ -35,7 +34,7 @@ class Discord(commands.Cog):
 
     @guild_only()
     @commands.command(name="uinfo", brief="!uinfo <username>    | Post a user's information.")
-    async def userInfo(self, ctx, username: str = None, ):
+    async def userInfo(self, ctx, username:str=None,):
 
         if username:
             user = await findUser(ctx, username)
@@ -43,10 +42,11 @@ class Discord(commands.Cog):
             user = ctx.message.author
 
         if user:
+            roles = []
+            permissions = []
             joindate = str(user.joined_at).split(' ', 1)[0]
 
-            roles = []
-            # Only add 'Roles' field if there are roles
+            # only add 'Roles' field if there are roles
             if len(user.roles) > 1:
                 for role in user.roles:
                     if 'everyone' not in role.name:
@@ -54,13 +54,11 @@ class Discord(commands.Cog):
                 roles = ', '.join(roles)
 
             # get permissions
-            permissions = []
             for permission in ctx.channel.permissions_for(user):
                 if permission[1]:
                     permissions.append(permission[0])
             permissions = ', '.join(permissions)
 
-            logger.debug(f"Name:{user.display_name}\nUsername:{user.name}\nJoin:{joindate}\nRoles:{roles}\nPermissions:{permissions}")
             embed = Embed().from_dict({
                 "title": "\n",
                 "thumbnail": {"url": str(user.avatar_url)},
@@ -74,8 +72,16 @@ class Discord(commands.Cog):
             })
 
             await ctx.channel.send(embed=embed)
+
+            logger.debug((f"Name:{user.display_name}\n"
+                          f"Username:{user.name}\n"
+                          f"Join:{joindate}\n"
+                          f"Roles:{roles}\n"
+                          f"Permissions:{permissions}"))
         else:
             await ctx.channel.send("No Results Found.")
+
+
 
 
 def setup(bot):

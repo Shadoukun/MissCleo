@@ -39,14 +39,17 @@ class UrbanDictionary(commands.Cog):
             data = await resp.text()
 
         try:
-            data = json.loads(data)
-            data = data['list']
+            data = json.loads(data)['list']
         except:
             await ctx.channel.send(NORESULTS_MSG)
             return
 
         for i, d in enumerate(data):
-            entry = {"word": d['word'], "entry": f"{d['definition']}\n\n*{d['example']}*", "permalink": d['permalink']}
+            entry = {
+                "word": d['word'],
+                "entry": f"{d['definition']}\n\n*{d['example']}*",
+                "permalink": d['permalink']
+            }
             data[i] = entry
 
         page = 1
@@ -65,37 +68,37 @@ class UrbanDictionary(commands.Cog):
                 # pagination disabled for the moment. immature people abusing it.
                 break
 
-            if maxpage == 1 and page == 1:
-                break
-            elif page == 1:
-                toReact = ['⏩']
-            elif page == maxpage:
-                toReact = ['⏪']
-            elif page > 1 and page < maxpage:
-                toReact = ['⏪', '⏩']
+            # if maxpage == 1 and page == 1:
+            #     break
+            # elif page == 1:
+            #     toReact = ['⏩']
+            # elif page == maxpage:
+            #     toReact = ['⏪']
+            # elif page > 1 and page < maxpage:
+            #     toReact = ['⏪', '⏩']
 
-            for r in toReact:
-                await msg.add_reaction(r)
-                await asyncio.sleep(0.25)
+            # for r in toReact:
+            #     await msg.add_reaction(r)
+            #     await asyncio.sleep(0.25)
 
-            try:
-                reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=_check)
-            except:
-                break
+            # try:
+            #     reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=_check)
+            # except:
+            #     break
 
-            if user == orig_user:
-                if '⏪' in str(reaction.emoji):
-                    page = page - 1
-                elif '⏩' in str(reaction.emoji):
-                    page = page + 1
+            # if user == orig_user:
+            #     if '⏪' in str(reaction.emoji):
+            #         page = page - 1
+            #     elif '⏩' in str(reaction.emoji):
+            #         page = page + 1
 
-                await msg.clear_reactions()
-                embed = self.createEmbed(data[page-1])
-                await msg.edit(embed=embed)
-            else:
-                await reaction.remove(user)
+            #     await msg.clear_reactions()
+            #     embed = self.createEmbed(data[page-1])
+            #     await msg.edit(embed=embed)
+            # else:
+            #     await reaction.remove(user)
 
-            await asyncio.sleep(0.25)
+            # await asyncio.sleep(0.25)
 
 
 

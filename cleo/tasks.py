@@ -45,6 +45,7 @@ async def update_guilds(self):
 
     self.db.commit()
 
+
 async def update_user_info(self):
     '''update user avatar and display name info
        Only runs at bot startup. Otherwise this is handled
@@ -60,7 +61,7 @@ async def update_user_info(self):
                           .all(), key=lambda x: x.user_id)
 
     for u, m in zip(users, members):
-        print(m.avatar_url, m.name)
+        logger.debug(f"{m.avatar_url} {m.name}")
         u.user.avatar_url = str(m.avatar_url) if m.avatar_url else ""
         u.display_name = m.display_name
         u.top_role_id = m.top_role.id if m.top_role else 0

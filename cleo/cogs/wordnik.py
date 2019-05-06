@@ -72,40 +72,41 @@ class Wordnik(commands.Cog):
                     firstrun = False
                     embed = self.createEmbed(lookup, defs[p - 1])
                     msg = await ctx.channel.send(embed=embed)
-
-                if maxpage == 1 and p == 1:
-                    break
-                elif p == 1:
-                    toReact = ['⏩']
-                elif p == maxpage:
-                    toReact = ['⏪']
-                elif p > 1 and p < maxpage:
-                    toReact = ['⏪', '⏩']
-
-                for r in toReact:
-                    await msg.add_reaction(r)
-
-                await asyncio.sleep(0.5)
-
-                try:
-               	    reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=_check)
-                except:
                     break
 
-                if user == orig_user:
-                    if '⏪' in str(reaction.emoji):
-                        p = p - 1
-                        await msg.clear_reactions()
-                        embed = self.createEmbed(lookup, defs[p - 1])
-                        await msg.edit(embed=embed)
+                # if maxpage == 1 and p == 1:
+                #     break
+                # elif p == 1:
+                #     toReact = ['⏩']
+                # elif p == maxpage:
+                #     toReact = ['⏪']
+                # elif p > 1 and p < maxpage:
+                #     toReact = ['⏪', '⏩']
 
-                    elif '⏩' in str(reaction.emoji):
-                        p = p + 1
-                        await msg.clear_reactions()
-                        embed = self.createEmbed(lookup, defs[p - 1])
-                        await msg.edit(embed=embed)
-                else:
-                    reaction.remove(user)
+                # for r in toReact:
+                #     await msg.add_reaction(r)
+
+                # await asyncio.sleep(0.5)
+
+                # try:
+               	#     reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=_check)
+                # except:
+                #     break
+
+                # if user == orig_user:
+                #     if '⏪' in str(reaction.emoji):
+                #         p = p - 1
+                #         await msg.clear_reactions()
+                #         embed = self.createEmbed(lookup, defs[p - 1])
+                #         await msg.edit(embed=embed)
+
+                #     elif '⏩' in str(reaction.emoji):
+                #         p = p + 1
+                #         await msg.clear_reactions()
+                #         embed = self.createEmbed(lookup, defs[p - 1])
+                #         await msg.edit(embed=embed)
+                # else:
+                #     reaction.remove(user)
 
 def setup(bot):
     bot.add_cog(Wordnik(bot))
