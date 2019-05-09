@@ -82,6 +82,7 @@ class MissCleo(commands.Bot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.db = session
         self.tokens = kwargs.get('tokens')
+        self.host = kwargs.get('host', None)
         self.help_command = CustomHelpCommand()
 
         self.load_cogs()
@@ -145,7 +146,3 @@ class MissCleo(commands.Bot):
                 logger.debug("Loaded Cog: " + extension)
             except Exception as e:
                 logger.error(f'Failed to load extension {extension}\n{type(e).__name__}: {e}')
-
-
-
-

@@ -11,6 +11,8 @@ from cleo.bot import MissCleo
 from cleo.tasks import update_guilds, update_user_info
 from app import app
 
+# this is ugly and I hate it.
+HOST = "https://127.0.0.1:5000/"
 
 def setup_logging():
     # logging setup
@@ -33,7 +35,7 @@ def main():
     web_thread = Thread(target=http.serve_forever)
     web_thread.start()
 
-    client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=TOKENS)
+    client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=TOKENS, host=HOST)
     client.run(TOKENS['discord'])
 
 if __name__ == "__main__":

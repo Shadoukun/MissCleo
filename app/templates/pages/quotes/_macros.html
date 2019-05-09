@@ -71,7 +71,7 @@
           {% else %}
           <img class="avatar" src="{{ member.user.avatar_url }}">
           {% endif %}
-          <a class="quote-username" style="color: {{ '#%6x'|format( member.top_role.color | int ) }};" href="{{ url }}">{{ member.display_name}}</a>
+          <a class="quote-username" style="color: {{'#%6x'|format( member.top_role.color | int )}};" href="{{url}}">{{ member.display_name}}</a>
           <div class="timestamp text-muted">{{ quote.timestamp|formatdatetime }}</div>
 
           <div class="dropdown ml-auto">
@@ -79,14 +79,17 @@
 
             <ul class="dropdown-menu">
               <li><a href="#">Copy ID</a></li>
-              {% if current_user.is_authenticated %}<li><a href="{{ delete_url }}">Delete</a><li>{% endif %}
+              {% if current_user.is_authenticated %}<li><a href="{{delete_url}}">Delete</a><li>{% endif %}
             </ul>
         </div>
       </div>
       {% autoescape false %}
       <div class="quote-body p-2 pl-3 rounded">{{ quote.message | replace("\n", "<br />") }}</div>
       {% endautoescape %}
-    </div>
+      {% if quote.attachments %}
+        <img src="{{url_for('static', filename='img/' + quote.attachments[0])}}"\>
+      {% endif %}
+      </div>
   </div>
 {% endwith %}
 {% endmacro %}

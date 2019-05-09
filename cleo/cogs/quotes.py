@@ -1,13 +1,13 @@
 import logging
-from collections import OrderedDict
-
+import os
 import discord
 from cachetools import TTLCache
 from discord.ext import commands
 from sqlalchemy import and_, func
-
+from pathlib import Path
 from cleo.db import Quote
 from cleo.utils import admin_only, findUser
+import urllib.parse
 
 logger = logging.getLogger(__name__)
 
@@ -16,18 +16,14 @@ NOQUOTE_MSG = "No quotes found."
 REMOVED_MSG = "Quote removed."
 ADDED_MSG = "Quote added."
 
+HOST = "http://127.0.0.1:5000/"
 
-def _create_embed(quote):
-    embed = discord.Embed().from_dict({
-        "title": "\n",
-        "description": quote.message,
-        "color": 0x006FFA,
-        "author": {"name": quote.member.display_name,
-                    "icon_url": str(quote.member.user.avatar_url)},
-        "footer": {'text': quote.timestamp.strftime("%b %d %Y")}
-    })
-    return embed
-
+class QuoteAttachmentError(Exception):
+    pass
+class QuoteAuthorError(Exception):
+    pass
+class QuoteResultError(Exception):
+    pass
 
 class Quotes(commands.Cog):
 
@@ -37,7 +33,24 @@ class Quotes(commands.Cog):
         # Used to prevent duplicate messages in quick succession.
         self.cache = TTLCache(ttl=300, maxsize=120)
 
-    async def _add_quote(self, ctx, quote:OrderedDict):
+    def _create_embed(quote):
+    embed = discord.Embed().from_dict({
+        "title": "\n",
+        "description": quote.message,
+        "color": 0x006FFA,
+        "author": {"name": quote.member.display_name,
+                   "icon_url": str(quote.member.user.avatar_url)},
+        "footer": {'text': quote.timestamp.strftime("%b %d %Y")}
+    })
+
+    if quote.attachments:
+        embed.set_image(url=urllib.parse.urljoin(
+            self.bot.HOST + "static/img/", quote.attachments[0]))
+
+    return embed
+
+
+    async def _add_quote(self, ctx, quote:dict):
         quote = Quote(**quote)
         self.db.add(quote)
         self.db.commit()
@@ -49,13 +62,9 @@ class Quotes(commands.Cog):
 
         quote = self.db.query(Quote).filter_by(guild_id=ctx.guild.id) \
                                     .filter_by(message_id=message.id) \
-                                    .one_or_none()
-        if quote:
-            self.db.remove(quote)
-            self.db.commit()
-            await ctx.channel.send(REMOVED_MSG)
-        else:
-            await ctx.channel.send("Failed.")
+                                    .delete()
+        self.db.commit()
+        await ctx.channel.send(REMOVED_MSG)
 
     async def _get_quote(self, ctx, user=None):
         '''Get quote by the user on the current server.
@@ -72,10 +81,10 @@ class Quotes(commands.Cog):
     @commands.command(name='quote')
     async def quote(self, ctx, *, username:str=None):
 
-        # search for a user if a name is given.
         user = None
         quote = None
 
+        # search for a user if a name is given.
         if username:
             user = await findUser(ctx, username)
             if not user:
@@ -110,45 +119,68 @@ class Quotes(commands.Cog):
         '''Takes an arbitrary number of message IDs
            and adds them as quotes in the database'''
 
+        # no message ids given
         if not args:
-            await ctx.channel.send("No message id given.")
             return
 
-        messages = []
         try:
-            for a in args:
-                msg = await ctx.channel.fetch_message(int(a))
-                messages += [msg]
-        except:
-            await ctx.channel.send(NORESULTS_MSG)
-            return
+            messagelist = []
+            # group all messages.
+            for arg in args:
+                m = await ctx.channel.fetch_message(int(arg))
+                messagelist += [m]
 
-        # Check that all messages retrieved are from the same user.
-        root_msg = messages[0]
-        if len(messages) > 1:
-            for m in messages[1:]:
-                if m.author.id != root_msg.author.id:
-                    await ctx.channel.send("All messages must be from the same user.")
-                    return
+            root_msg = messagelist.pop(0)
 
-        quote = OrderedDict(
-            message_id=root_msg.id,
-            message="\n".join([m.content for m in messages]),
-            timestamp=root_msg.created_at,
-            user_id=root_msg.author.id,
-            channel_id=root_msg.channel.id,
-            guild_id=root_msg.guild.id,
-        )
+            # if there are multiple messages being quoted
+            if messagelist:
+                if root_msg.attachments:
+                    # no attachments
+                    raise QuoteAttachmentError
 
-        quote = await self._add_quote(ctx, quote)
-        embed = _create_embed(quote)
-        await ctx.channel.send(embed=embed)
+                for m in messagelist:
+                    if m.attachments:
+                        # no attachments
+                        raise QuoteAttachmentError
+
+                    # Check that all messages retrieved are from the same user.
+                    if m.author.id != root_msg.author.id:
+                        raise QuoteAuthorError
+
+            attachments = []
+            if root_msg.attachments:
+                for a in root_msg.attachments:
+                    fp = Path(os.getcwd()) / f"app/static/img/{a.filename}"
+                    print(fp)
+                    await a.save(fp)
+                    attachments.append(a.filename)
+
+            quote = dict(
+                message_id=root_msg.id,
+                message="\n".join([m.content for m in messagelist]),
+                timestamp=root_msg.created_at,
+                user_id=root_msg.author.id,
+                channel_id=root_msg.channel.id,
+                guild_id=root_msg.guild.id,
+                attachments=[a for a in attachments]
+                )
+
+            quote = await self._add_quote(ctx, quote)
+            embed = _create_embed(quote)
+            await ctx.channel.send(embed=embed)
+
+        except QuoteResultError:
+            await ctx.channel.send("Message not found.")
+        except QuoteAuthorError:
+            await ctx.channel.send("All messages must be from the same user.")
+        except QuoteAttachmentError:
+            await ctx.channel.send("Multi-message quotes can't have attachments.")
 
     @commands.guild_only()
     @admin_only()
     @commands.command(name="remove_quote")
     async def remove(self, ctx, *, message_id:int):
-        message = ctx.channel.fetch_message(message_id)
+        message = await ctx.channel.fetch_message(message_id)
         if message:
             await self._remove_quote(ctx, message)
         else:

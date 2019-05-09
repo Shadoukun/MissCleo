@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table, DateTime, Boolean, UniqueConstraint, JSON
 from sqlalchemy.orm import relationship, backref, sessionmaker, Query
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -130,6 +130,7 @@ class Quote(Base):
 
     message_id      = Column(Integer, primary_key=True)
     message         = Column(String)
+    attachments     = Column(JSON)
     timestamp       = Column(DateTime)
     guild_id        = Column(Integer)
     channel_id      = Column(Integer)
