@@ -33,21 +33,21 @@ class Quotes(commands.Cog):
         # Used to prevent duplicate messages in quick succession.
         self.cache = TTLCache(ttl=300, maxsize=120)
 
-    def _create_embed(quote):
-    embed = discord.Embed().from_dict({
-        "title": "\n",
-        "description": quote.message,
-        "color": 0x006FFA,
-        "author": {"name": quote.member.display_name,
-                   "icon_url": str(quote.member.user.avatar_url)},
-        "footer": {'text': quote.timestamp.strftime("%b %d %Y")}
-    })
+    def _create_embed(self, quote):
+        embed = discord.Embed().from_dict({
+            "title": "\n",
+            "description": quote.message,
+            "color": 0x006FFA,
+            "author": {"name": quote.member.display_name,
+                    "icon_url": str(quote.member.user.avatar_url)},
+            "footer": {'text': quote.timestamp.strftime("%b %d %Y")}
+        })
 
-    if quote.attachments:
-        embed.set_image(url=urllib.parse.urljoin(
-            self.bot.HOST + "static/img/", quote.attachments[0]))
+        if quote.attachments:
+            embed.set_image(url=urllib.parse.urljoin(
+                self.bot.host + "static/img/", quote.attachments[0]))
 
-    return embed
+        return embed
 
 
     async def _add_quote(self, ctx, quote:dict):
@@ -107,7 +107,7 @@ class Quotes(commands.Cog):
                 quote = None
 
         if quote:
-            embed = _create_embed(quote)
+            embed = self._create_embed(quote)
             await ctx.channel.send(embed=embed)
         else:
             await ctx.channel.send("All quotes have already been seen.")
@@ -166,7 +166,7 @@ class Quotes(commands.Cog):
                 )
 
             quote = await self._add_quote(ctx, quote)
-            embed = _create_embed(quote)
+            embed = self._create_embed(quote)
             await ctx.channel.send(embed=embed)
 
         except QuoteResultError:
