@@ -130,15 +130,15 @@ class Quotes(commands.Cog):
                 m = await ctx.channel.fetch_message(int(arg))
                 messagelist += [m]
 
-            root_msg = messagelist.pop(0)
+            root_msg = messagelist[0]
 
             # if there are multiple messages being quoted
-            if messagelist:
+            if len(messagelist) > 1:
                 if root_msg.attachments:
                     # no attachments
                     raise QuoteAttachmentError
 
-                for m in messagelist:
+                for m in messagelist[1:]:
                     if m.attachments:
                         # no attachments
                         raise QuoteAttachmentError
@@ -151,7 +151,6 @@ class Quotes(commands.Cog):
             if root_msg.attachments:
                 for a in root_msg.attachments:
                     fp = Path(os.getcwd()) / f"app/static/img/{a.filename}"
-                    print(fp)
                     await a.save(fp)
                     attachments.append(a.filename)
 
