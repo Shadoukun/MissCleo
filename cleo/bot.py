@@ -82,7 +82,6 @@ class MissCleo(commands.Bot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.db = session
         self.tokens = kwargs.get('tokens')
-        self.host = kwargs.get('host', None)
         self.help_command = CustomHelpCommand()
 
         self.load_cogs()

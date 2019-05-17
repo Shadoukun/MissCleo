@@ -7,12 +7,11 @@ from pathlib import Path
 from threading import Thread
 from gevent.pywsgi import WSGIServer
 
+from config import PORT
 from cleo.bot import MissCleo
 from cleo.tasks import update_guilds, update_user_info
 from app import app
 
-# this is ugly and I hate it.
-HOST = "https://127.0.0.1:5000/"
 
 def setup_logging():
     # logging setup
@@ -31,11 +30,11 @@ def main():
     with open('config/tokens.yaml', 'r') as tokenfile:
         globals()['TOKENS'] = yaml.load(tokenfile, Loader=yaml.FullLoader)
 
-    http = WSGIServer(('0.0.0.0', 5000), app.wsgi_app, log=app.logger)
+    http = WSGIServer(('0.0.0.0', PORT), app.wsgi_app, log=app.logger)
     web_thread = Thread(target=http.serve_forever)
     web_thread.start()
 
-    client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=TOKENS, host=HOST)
+    client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=TOKENS)
     client.run(TOKENS['discord'])
 
 if __name__ == "__main__":

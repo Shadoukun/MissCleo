@@ -1,13 +1,15 @@
 import logging
 import os
 import discord
+import urllib.parse
 from cachetools import TTLCache
 from discord.ext import commands
 from sqlalchemy import and_, func
 from pathlib import Path
+
+import config
 from cleo.db import Quote
 from cleo.utils import admin_only, findUser
-import urllib.parse
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,6 @@ NOQUOTE_MSG = "No quotes found."
 REMOVED_MSG = "Quote removed."
 ADDED_MSG = "Quote added."
 
-HOST = "http://127.0.0.1:5000/"
 
 class QuoteAttachmentError(Exception):
     pass
@@ -45,10 +46,9 @@ class Quotes(commands.Cog):
 
         if quote.attachments:
             embed.set_image(url=urllib.parse.urljoin(
-                self.bot.host + "static/img/", quote.attachments[0]))
+                config.HOST_URL + "static/img/", quote.attachments[0]))
 
         return embed
-
 
     async def _add_quote(self, ctx, quote:dict):
         quote = Quote(**quote)
