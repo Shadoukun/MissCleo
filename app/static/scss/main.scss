@@ -116,6 +116,10 @@ body {
 .quote-body {
   padding-top: 0;
   margin-left: 2.2em;
+
+  img {
+    max-width: 60%;
+  }
 }
 
 img.avatar {
