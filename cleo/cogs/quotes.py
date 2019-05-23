@@ -38,7 +38,7 @@ class Quotes(commands.Cog):
         embed = discord.Embed().from_dict({
             "title": "\n",
             "description": quote.message,
-            "color": 0x006FFA,
+            "color": quote.member.top_role.color,
             "author": {"name": quote.member.display_name,
                     "icon_url": str(quote.member.user.avatar_url)},
             "footer": {'text': quote.timestamp.strftime("%b %d %Y")}
