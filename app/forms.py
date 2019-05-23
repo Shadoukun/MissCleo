@@ -35,5 +35,5 @@ class LoginForm(Form):
 
 
 class CommandForm(Form):
-    command = StringField('Command', [Length(min=1, max=10), Required()])
+    command = StringField('Command', [Length(min=1, max=20), Required()])
     response = TextAreaField('Response', [Length(min=1, max=500), Required()])
