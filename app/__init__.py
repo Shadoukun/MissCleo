@@ -3,14 +3,15 @@ import asyncio
 import logging
 from getpass import getpass
 from flask import Flask
-from flask_wtf import CSRFProtect
-from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
 from sassutils.wsgi import SassMiddleware
 from cleo.db import Base, FlaskUser
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 
-login_manager = LoginManager()
 db = SQLAlchemy(model_class=Base)
 
 from app.controllers import quoteController
@@ -30,16 +31,15 @@ def add_user(app):
     with app.app_context():
         if db.session.query(FlaskUser).all():
             return
-
-        username = input("Enter Username: ")
-        password = getpass()
-        assert password == getpass('Password (again):')
-        hashed = generate_password_hash(password)
-
-        db.session.add(FlaskUser(username=username, password=hashed))
-        db.session.commit()
-
-        print('User added.')
+        else:
+            username = input("Enter Username: ")
+            password = getpass()
+            assert password == getpass('Password (again):')
+            hashed = generate_password_hash(password)
+    
+            db.session.add(FlaskUser(username=username, password=hashed))
+            db.session.commit()
+            print('User added.')
 
 
 def format_datetime(value, format="%m/%d/%Y"):
@@ -55,21 +55,22 @@ app.config.from_object('config')
 app.debug = os.getenv("DEBUG", False)
 app.url_map.strict_slashes = False
 
-CSRFProtect(app)
+# TODO: MOVE THIS
+app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+jwt = JWTManager(app)
 db.init_app(app)
-login_manager.init_app(app)
 
 app.register_blueprint(indexController.blueprint)
 app.register_blueprint(quoteController.blueprint)
 app.register_blueprint(macroController.blueprint)
 app.register_blueprint(loginController.blueprint)
 
-# add initial admin user if there isn't one.
-add_user(app)
-
 app.jinja_env.add_extension('jinja2.ext.do')
 app.jinja_env.filters['formatdatetime'] = format_datetime
 app.wsgi_app = SassMiddleware(app.wsgi_app, {
     'app': ('static/scss', 'static/css', 'static/css')
 })
+
+# add initial admin user if there isn't one.
+add_user(app)
 

@@ -9,6 +9,6 @@ def home():
     return redirect(url_for('quotes.quotes'))
     #return render_template('pages/placeholder.home.html')
 
-@blueprint.route('/about')
-def about():
-    return render_template('pages/placeholder.about.html')
+# @blueprint.route('/about')
+# def about():
+#     return render_template('pages/placeholder.about.html')

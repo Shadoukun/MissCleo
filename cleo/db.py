@@ -3,6 +3,10 @@ from sqlalchemy.orm import relationship, backref, sessionmaker, Query
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from flask_sqlalchemy import Pagination
+from sqlalchemy.ext.declarative import DeclarativeMeta
+import json
+import datetime
+
 
 engine = create_engine('sqlite:///database.db')
 Base = declarative_base()
@@ -97,9 +101,9 @@ class GuildMembership(Base):
     def __init__(self, member):
         self.guild_id = member.guild.id
         self.user_id = member.id
-        self.user_id = member.id
         self.display_name = member.display_name
         self.joined_at = member.joined_at
+        self.top_role_id = member.top_role.color.value
 
 
 class Role(Base):
@@ -261,5 +265,84 @@ class CustomQuery(Query):
 
         return Pagination(self, page, per_page, total, items)
 
+
+def new_alchemy_encoder(revisit_self=False, fields_to_expand=[]):
+    '''JSON encoder for SQLAlchemy objects.'''
+    
+    _visited_objs = []
+
+    class AlchemyEncoder(json.JSONEncoder):
+        
+        def default(self, obj):
+            if isinstance(obj.__class__, DeclarativeMeta):
+                # don't re-visit self
+                if revisit_self:
+                    if obj in _visited_objs:
+                        return None
+                    _visited_objs.append(obj)
+
+                # go through each field in this SQLalchemy class
+                fields = {}
+               
+                for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata' and not x.startswith('query')]:
+                    val = obj.__getattribute__(field)
+                    if type(val) is int:
+                        fields[field] = str(val)
+                        continue
+
+                    # is this field another SQLalchemy object, or a list of SQLalchemy objects?
+                    if isinstance(val.__class__, DeclarativeMeta) or (isinstance(val, list) and len(val) > 0 and isinstance(val[0].__class__, DeclarativeMeta)):
+                        # unless we're expanding this field, stop here
+                        if field not in fields_to_expand:
+                            # not expanding this field: set it to None and continue
+                            fields[field] = None
+                            continue
+                    
+                    fields[field] = val
+                
+                # a json-encodable dict
+                return fields
+
+            # datetime.datetime is cancer.
+            if type(obj) is datetime.datetime:
+                return str(obj)
+
+            if type(obj) is int:
+                return str(obj)
+
+            return json.JSONEncoder.default(self, obj)
+
+    return AlchemyEncoder
+
+
+# def new_alchemy_encoder():
+#     _visited_objs = []
+
+#     class AlchemyEncoder(json.JSONEncoder):
+#         def default(self, obj):
+#             if isinstance(obj.__class__, DeclarativeMeta):
+#                 # don't re-visit self
+#                 if obj in _visited_objs:
+#                     return None
+#                 _visited_objs.append(obj)
+
+#                 # an SQLAlchemy class
+#                 fields = {}
+#                 for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata' and not x.startswith('query')]:
+#                     val = obj.__getattribute__(field)
+#                     if type(val) is datetime.datetime:
+#                         fields[field] = str(val)
+#                         continue
+#                     fields[field] = val
+                
+#                 # a json-encodable dict
+#                 return fields
+            
+#             if type(obj) is datetime.datetime:
+#                 return str(obj)
+
+#             return json.JSONEncoder.default(self, obj)
+
+#     return AlchemyEncoder
 
 session = sessionmaker(bind=engine, query_cls=CustomQuery)()

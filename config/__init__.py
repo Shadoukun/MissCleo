@@ -1,6 +1,6 @@
 import os
 
-DEBUG = False
+DEBUG = True
 SECRET_KEY = 'my precious'
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 

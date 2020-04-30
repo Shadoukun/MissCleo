@@ -1,4 +1,4 @@
--e git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]
+discord.py
 aiohttp==3.5.4
 alembic==1.0.8
 appdirs==1.4.3
@@ -44,7 +44,7 @@ lockfile==0.12.2
 lxml==4.3.2
 Mako==1.0.8
 MarkupSafe==1.1.1
-mecab-python3==0.996.1
+mecab-python3==0.996.5
 more-itertools==7.0.0
 msgpack==0.6.1
 multidict==4.5.2

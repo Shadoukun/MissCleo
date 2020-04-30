@@ -1,66 +1,73 @@
 from dataclasses import dataclass
 from typing import Any
 from sqlalchemy import and_, func
-from flask import render_template, Blueprint, request, redirect, url_for
+from flask import render_template, Blueprint, request, redirect, url_for, Response, jsonify
 from flask_login import login_required
+from pprint import pprint
 
-from cleo.db import Quote, Guild, GuildMembership
+from cleo.db import Quote, Guild, GuildMembership, new_alchemy_encoder
 from .. import db
+import json
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 blueprint = Blueprint('quotes', __name__)
 
 
-@dataclass
-class PageData:
-    current_guild: int = None
-    current_member: int = None
-    current_page: int = 1
+def getGuilds():
+    return db.session.query(Guild).all()
 
-    guilds: Any = None
-    members: Any = None
-    quotes: Any = None
-    pages: Any = None
-
-    def __post_init__(self):
-
-        self.guilds = db.session.query(Guild).all()
-
-        if self.current_guild:
-            # member_filters = [GuildMembership.guild_id == self.current_guild,
-                            #   GuildMembership.quotes.any(Quote.guild_id == self.current_guild)]
-
-            quote_filters = [Quote.guild_id == self.current_guild]
-
-            if self.current_member:
-                # member_filters += [GuildMembership.user_id == self.current_member]
-                quote_filters += [Quote.user_id == self.current_member]
-
-            # self.members = db.session.query(GuildMembership).filter(and_(*member_filters)) \
-                                                        # .order_by(func.lower(GuildMembership.display_name)) \
-                                                        # .all()
-
-            self.members = db.session.query(GuildMembership).filter(GuildMembership.quotes.any(Quote.guild_id == self.current_guild)) \
+def getMembers(guild_id):
+    
+    members = db.session.query(GuildMembership).filter(GuildMembership.quotes.any(Quote.guild_id == guild_id)) \
                                                             .order_by(func.lower(GuildMembership.display_name)) \
                                                             .join(GuildMembership.top_role).all()
+    return members
 
-            self.pages = db.session.query(Quote).filter(and_(*quote_filters)) \
-                                                         .order_by(Quote.timestamp.desc()).join(Quote.member) \
-                                                         .paginate(self.current_page, 10, False)
+def getQuotes(guild_id, user_id, page):
+
+    filters = [Quote.guild_id == guild_id]
+
+    if user_id:
+        filters += [Quote.user_id == user_id]
+        
+    quote_page = db.session.query(Quote).filter(and_(*filters)) \
+                                        .order_by(Quote.timestamp.desc()) \
+                                        .join(Quote.member) \
+                                        .paginate(page, 10, False)
+    return quote_page
+
+
+@blueprint.route('/guilds')
+def guilds():
+
+    guilds = json.dumps(getGuilds(), cls=new_alchemy_encoder(False, ['member']))
+    return Response(guilds, mimetype='application/json')
+
+    
+@blueprint.route('/members')
+def members():
+    guild_id = request.args.get('guild', None)
+
+    members = json.dumps(getMembers(guild_id), cls=new_alchemy_encoder(False, ['user']))
+    return Response(members, mimetype='application/json')
 
 
 @blueprint.route('/quotes')
 def quotes():
 
     guild = request.args.get('guild', None)
-    if guild:
-        user = request.args.get('user', None)
-    else:
-        user = None
-
+    user = request.args.get('user', None)
     page = int(request.args.get('page', 1))
-    data = PageData(guild, user, page)
-    return render_template('pages/quotes/quotes.html', data=data)
+
+    quotes = getQuotes(guild, user, page)
+    data = {
+        "quotes": quotes.items,
+        "pages": quotes.pages 
+    }
+
+    quotes = json.dumps(data, cls=new_alchemy_encoder(False, ['member', 'user']))
+    return Response(quotes, mimetype='application/json')
 
 
 @blueprint.route("/delete_quote/<id>")
