@@ -1,9 +1,10 @@
 import requests
-from flask import render_template, Blueprint, request, redirect, url_for, flash
+import json
+from flask import render_template, Blueprint, request, redirect, url_for, flash, Response
 from flask_login import login_required
 from app.forms import CommandForm
 
-from cleo.db import Macro, MacroResponse, MacroReaction
+from cleo.db import Macro, MacroResponse, MacroReaction, new_alchemy_encoder
 from .. import db
 
 blueprint = Blueprint('macros', __name__)
@@ -161,3 +162,10 @@ def edit_reactions(operation, macro_id=None):
             requests.get('http://127.0.0.1:10000/update_reactions')
 
     return redirect(url_for('macros.reactions'))
+
+
+@blueprint.route('/getcommands', methods=['GET'])
+def get_commands():
+    cmds = db.session.query(Macro).all()
+    cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, ['member']))
+    return Response(cmds, mimetype='application/json')

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.scss';
-import QuotePage from './Quotes'
+import QuotePage from './pages/Quotes'
+import CommandsPage from './pages/Commands'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav } from 'react-bootstrap'
 import {
@@ -62,9 +63,9 @@ function App() {
                 <LinkContainer to="/quotes">
                   <Nav.Link>Quotes</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/macros">
-                  <Nav.Link>Macros</Nav.Link>
-                </LinkContainer>
+                  <LinkContainer to="/commands">
+                    <Nav.Link>Commands</Nav.Link>
+                  </LinkContainer>
                 <LinkContainer to="/admin">
                   <Nav.Link>Admin</Nav.Link>
                 </LinkContainer>
@@ -74,6 +75,7 @@ function App() {
 
           <Switch>
             <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
+            <Route path={'/commands'} component={CommandsPage} />
             <PrivateRoute path="/admin" component={Admin} />
             <Route path="/login" component={Login} />
 

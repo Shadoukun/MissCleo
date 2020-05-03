@@ -13,7 +13,7 @@ import {
   QuoteSideBarNavLink,
   QuoteCard,
   PaginationWrapper
-} from './components/QuoteComponents';
+} from '../components/QuoteComponents';
 
 
 const rgbToHex = (rgb) => {
