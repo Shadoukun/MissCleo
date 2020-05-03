@@ -6,6 +6,21 @@ import axios from 'axios';
 import { IndexLinkContainer } from 'react-router-bootstrap';
 import ReactPaginate from 'react-paginate';
 
+import {
+  QuoteMain,
+  QuoteSideBar,
+  QuoteSideBarSection,
+  QuoteSideBarNavLink,
+  QuoteCard,
+  PaginationWrapper
+} from './components/QuoteComponents';
+
+
+const rgbToHex = (rgb) => {
+  let hex = Number(rgb).toString(16);
+  return "#" + hex
+};
+
 const QuotePage = () => {
   const { guildId, userId } = useParams();
   const [guild, setGuild] = useState(guildId);
@@ -17,19 +32,58 @@ const QuotePage = () => {
   }, [guildId, userId])
 
   return (
-    <Container>
+    <Container fluid style={{ paddingLeft: "0px" }}>
       <Row>
-        <Col md={2}>
-          <GuildBar setGuild={setGuild} activeGuildId={guild} />
-          {guild && (<MembersBar guildId={guild} activeUserId={user} setUser={setUser} />)}
+        <Col md={3}>
+          <QuoteSideBar className="sidebar">
+            <GuildBar setGuild={setGuild} activeGuildId={guild} />
+            {guild && (<MembersBar guildId={guild} activeUserId={user} setUser={setUser} />)}
+          </QuoteSideBar>
         </Col>
-        <Col md={10}>
+        <Col md={9}>
           {guild && (<QuoteList guildId={guild} userId={user} />)}
         </Col>
+
       </Row>
     </Container>
   )
 }
+
+const GuildBar = ({ setGuild, activeGuildId }) => {
+  const [guildList, setGuildList] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      let request = await axios('/guilds')
+      setGuildList(request.data)
+    })()
+  }, [])
+
+  return (
+    <QuoteSideBarSection className="quotes-sidebar-section">
+      <h1>Servers</h1>
+      {/* activekey activates all elements if null */}
+      <Nav variant="pills" activeKey={!!activeGuildId ? activeGuildId : ""} >
+        
+        {guildList.map((guild, i) =>
+          <Nav.Item key={i} className="quote-sidebar-nav">
+            <IndexLinkContainer to={`/quotes/${guild.id}`} >
+              <QuoteSideBarNavLink eventKey={guild.id} id={guild.id} onClick={() => { setGuild(guild.id) }} >
+                <img className="avatar" src={guild.icon_url} alt=""/>
+                <div className="name">
+                  {guild.name}
+                </div>
+              </QuoteSideBarNavLink>
+            </IndexLinkContainer>
+          </Nav.Item>
+        )}
+
+      </Nav>
+    </QuoteSideBarSection>
+  )
+
+}
+
 
 const MembersBar = ({ guildId, activeUserId, setUser }) => {
 
@@ -37,29 +91,32 @@ const MembersBar = ({ guildId, activeUserId, setUser }) => {
 
   useEffect(() => {
     (async () => {
-      console.log(`/members/${guildId}`)
       let request = await axios(`/members?guild=${guildId}`)
       setUserList(request.data)
     })()
   }, [guildId])
 
   return (
-    <div>
-      {userList.map((user) =>
-        <Nav variant="pills" activeKey={!!activeUserId ? activeUserId : ""}> {/* activekey activates all elements if param isn't set. cuz why not? */}
-          <Nav.Item>
+    <QuoteSideBarSection className="quotes-sidebar-section">
+      <h1>Users</h1>
+      {/* activekey activates all elements if param isn't set. cuz why not? */}
+      <Nav className="quote-sidebar-nav" variant="pills" activeKey={!!activeUserId ? activeUserId : ""}> 
+
+        {userList.map((user, i) =>
+          <Nav.Item key={i} className='quote-sidebar-entry'>
             <IndexLinkContainer to={`/quotes/${guildId}/${user.user_id}`} >
-              <Nav.Link eventKey={user.user_id} id={user.user_id} onClick={() => { setUser(user.user_id) }}>
-                <div className="avatar">
-                  {user.user.avatar_url ? <img src={user.user.avatar_url} /> : <img/>}
+              <QuoteSideBarNavLink className="quote-sidebar-link" eventKey={user.user_id} id={user.user_id} onClick={() => { setUser(user.user_id) }}>
+                <img className="avatar" src={user.user.avatar_url} alt="" />
+                <div className="name" style={{ color: (rgbToHex(user.top_role.color)) }}>
+                  {user.display_name}
                 </div>
-                <div>{user.display_name}</div>
-                </Nav.Link>
+              </QuoteSideBarNavLink>
             </IndexLinkContainer>
           </Nav.Item>
-        </Nav>
-      )}
-    </div>
+        )}
+
+      </Nav>
+    </QuoteSideBarSection>
 
   )
 }
@@ -71,19 +128,21 @@ const QuoteList = ({ guildId, userId }) => {
   const [currentPage, setCurrentPage] = useState(1)
 
   const url = "/quotes"
+  
+  // reset currentPage when userId changes.
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [guildId, userId])
 
   useEffect(() => {
     (async () => {
       let params = []
 
       if (guildId) { params.push(`guild=${guildId}`) }
-
       if (userId) { params.push(`user=${userId}`) }
-      
-      if (currentPage >= 1) { params.push(`page=${currentPage}`) }
+      if (currentPage) { params.push(`page=${currentPage}`) }
 
       let result = await axios(url + `?${params.join('&')}`)
-      console.log(result)
       setQuoteList(result.data.quotes)
       setPageCount(result.data.pages)
     })()
@@ -91,70 +150,51 @@ const QuoteList = ({ guildId, userId }) => {
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected + 1)
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
   }
 
   return (
-    <div>
-      {quoteList.map((quote) =>
-        <div className="card">
-          <div className="card-header">
-            <div className="avatar">
-              <img src={quote.user.avatar_url}/>
+    <QuoteMain className="quote-list">
+
+      {quoteList.map((quote, i) =>
+        <QuoteCard key={i} className="quote-card card">
+          <div className="quote-header">
+            <img src={quote.user.avatar_url} alt=""/>
+            <div className="wrapper">
+              <div className="name" style={{ color: rgbToHex(quote.member.top_role.color) }}>
+                {quote.member.display_name}
+              </div>
+              <div className="timestamp text-muted">{quote.timestamp}</div>
             </div>
-            <div>{quote.member.display_name}</div>
           </div>
-          <div className='card-body'>{quote.message}</div>
-          <br></br>
-        </div>)}
-
-      <ReactPaginate
-        containerClassName="pagination"
-        breakClassName="page-item"
-        breakLabel={<a className="page-link">...</a>}
-        pageClassName="page-item"
-        previousClassName="page-item"
-        nextClassName="page-item"
-        pageLinkClassName="page-link"
-        previousLinkClassName="page-link"
-        nextLinkClassName="page-link"
-        activeClassName="active"
-        onPageChange={handlePageClick}
-      />
-
-    </div>
-  )
-}
-
-const GuildBar = ({ setGuild, activeGuildId }) => {
-  const [guildList, setGuildList] = useState([]);
-
-  useEffect(() => {
-    (async () => {
-      let request = await axios('/guilds')
-      console.log(request.data)
-      setGuildList(request.data)
-    })()
-  }, [])
-
-  return (
-    <div>
-      {guildList.map((guild) =>
-        <Nav variant="pills" activeKey={!!activeGuildId ? activeGuildId : ""}> {/* activekey activates all elements if null */}
-          <Nav.Item>
-            <IndexLinkContainer to={`/quotes/${guild.id}`} >
-              <Nav.Link eventKey={guild.id} id={guild.id} onClick={() => { setGuild(guild.id) }}>
-                <div>
-                  <img src={guild.icon_url} />
-                </div>
-                {guild.name}
-              </Nav.Link>
-            </IndexLinkContainer>
-          </Nav.Item>
-        </Nav>
+          <div className='quote-body'>
+            {quote.message}
+          </div>
+        </QuoteCard>
       )}
-    </div>
-  )
 
+      <PaginationWrapper>
+        <ReactPaginate className="pagination"
+          containerClassName="pagination"
+          breakClassName="page-item"
+          breakLabel={<button className="page-link">...</button>}
+          previousLabel="<"
+          nextLabel=">"
+          pageCount={pageCount}
+          forcePage={currentPage - 1}
+          pageClassName="page-item"
+          previousClassName="page-item"
+          nextClassName="page-item"
+          pageLinkClassName="page-link"
+          previousLinkClassName="page-link"
+          nextLinkClassName="page-link"
+          activeClassName="active"
+          onPageChange={handlePageClick}
+        />
+      </PaginationWrapper>
+
+    </QuoteMain>
+  )
 }
 
 export default QuotePage;

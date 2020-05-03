@@ -286,6 +286,8 @@ def new_alchemy_encoder(revisit_self=False, fields_to_expand=[]):
                
                 for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata' and not x.startswith('query')]:
                     val = obj.__getattribute__(field)
+                    
+                    # convert ints to strings
                     if type(val) is int:
                         fields[field] = str(val)
                         continue
@@ -305,7 +307,7 @@ def new_alchemy_encoder(revisit_self=False, fields_to_expand=[]):
 
             # datetime.datetime is cancer.
             if type(obj) is datetime.datetime:
-                return str(obj)
+                return obj.strftime("%m/%d/%Y")
 
             if type(obj) is int:
                 return str(obj)
@@ -314,35 +316,5 @@ def new_alchemy_encoder(revisit_self=False, fields_to_expand=[]):
 
     return AlchemyEncoder
 
-
-# def new_alchemy_encoder():
-#     _visited_objs = []
-
-#     class AlchemyEncoder(json.JSONEncoder):
-#         def default(self, obj):
-#             if isinstance(obj.__class__, DeclarativeMeta):
-#                 # don't re-visit self
-#                 if obj in _visited_objs:
-#                     return None
-#                 _visited_objs.append(obj)
-
-#                 # an SQLAlchemy class
-#                 fields = {}
-#                 for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata' and not x.startswith('query')]:
-#                     val = obj.__getattribute__(field)
-#                     if type(val) is datetime.datetime:
-#                         fields[field] = str(val)
-#                         continue
-#                     fields[field] = val
-                
-#                 # a json-encodable dict
-#                 return fields
-            
-#             if type(obj) is datetime.datetime:
-#                 return str(obj)
-
-#             return json.JSONEncoder.default(self, obj)
-
-#     return AlchemyEncoder
 
 session = sessionmaker(bind=engine, query_cls=CustomQuery)()

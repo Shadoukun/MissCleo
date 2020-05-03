@@ -1,6 +1,5 @@
-import React, { useEffect, createContext, useContext, useState } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import './App.scss';
 import QuotePage from './Quotes'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav } from 'react-bootstrap'
@@ -14,10 +13,35 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import { AuthContext } from "./Auth";
 import PrivateRoute from './PrivateRoute';
+import { createGlobalStyle, ThemeProvider  } from 'styled-components';
+import styled from 'styled-components';
+
+export const theme = {
+  backgroundColor: "#2f3136",
+  secondaryBackground: "#202225",
+  primaryFontColor: "#e1e1e1"
+}
+
+const GlobalStyle = createGlobalStyle`
+  html, body, .container-fluid {
+    background: ${props => props.theme.backgroundColor};
+    height: 100%;
+    width: 100%;
+  }
+`
+
+const CleoNavbar = styled(Navbar)`
+    background: ${props => props.theme.secondaryBackground} !important;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  `
+
 
 function App() {
   const existingToken = localStorage.getItem("auth_token");
   const [authToken, setAuthToken] = useState(existingToken);
+
 
   const setToken = (data) => {
     localStorage.setItem("auth_token", data);
@@ -26,9 +50,11 @@ function App() {
 
   return (
     <AuthContext.Provider value={{ authToken, setAuthToken: setToken }}>
+    <ThemeProvider theme={theme}>
+    <GlobalStyle />
       <Router>
         <div className="App">  
-          <Navbar bg="dark" expand="lg" variant="dark">
+          <CleoNavbar expand="lg" variant="dark">
             <Navbar.Brand href="#home">Miss Cleo</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
@@ -44,7 +70,7 @@ function App() {
                 </LinkContainer>
               </Nav>
             </Navbar.Collapse>
-          </Navbar>
+          </CleoNavbar>
 
           <Switch>
             <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
@@ -54,6 +80,7 @@ function App() {
           </Switch>
         </div>
       </Router>
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 }

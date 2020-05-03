@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Link, Redirect, useHistory } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import axios from 'axios';
-import { Card, Logo, Form, InputGroup, Button, Error } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 import { useAuth } from "../Auth";
 
 const Login = (props) => {

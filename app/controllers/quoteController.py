@@ -8,7 +8,7 @@ from pprint import pprint
 from cleo.db import Quote, Guild, GuildMembership, new_alchemy_encoder
 from .. import db
 import json
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
 
 blueprint = Blueprint('quotes', __name__)
@@ -49,7 +49,7 @@ def guilds():
 def members():
     guild_id = request.args.get('guild', None)
 
-    members = json.dumps(getMembers(guild_id), cls=new_alchemy_encoder(False, ['user']))
+    members = json.dumps(getMembers(guild_id), cls=new_alchemy_encoder(False, ['user', 'top_role']))
     return Response(members, mimetype='application/json')
 
 
@@ -66,12 +66,12 @@ def quotes():
         "pages": quotes.pages 
     }
 
-    quotes = json.dumps(data, cls=new_alchemy_encoder(False, ['member', 'user']))
+    quotes = json.dumps(data, cls=new_alchemy_encoder(False, ['member', 'user', 'top_role']))
     return Response(quotes, mimetype='application/json')
 
 
 @blueprint.route("/delete_quote/<id>")
-@login_required
+@jwt_required
 def delete_quote(id):
     db.session.query(Quote).filter_by(message_id=id).delete()
     db.session.commit()
