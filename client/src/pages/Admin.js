@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../Auth";
+import { useAuth } from "../context/Auth";
 import { Button } from 'react-bootstrap';
 
 const Admin = (props) => {

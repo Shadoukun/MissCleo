@@ -1,62 +1,58 @@
-import React, { Component, useEffect, useState, createContext, Fragment } from 'react';
-import { Container, Col, Row, Button } from 'react-bootstrap';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
+import { Container, Col, Row, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
-import ReactModal from 'react-modal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import {
-  ModalContext,
   ModalProvider,
   ModalConsumer,
   ModalRoot
 } from '../context/Modal';
-import { StyledModal } from '../components/CommandComponents';
+import {
+  StyledCommandModal,
+  CommandHeaderStyle,
+  CommandPageMainStyle,
+  CommandEntryStyle
+} from '../components/CommandComponents';
 
-const HeaderWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-`
-
-const CommandEntry = styled.div`
-  display: flex;
-  background: gray;
-  padding: 1em;
-  
-  button {
-    margin-left: auto
-  }
-`
 
 const CommandsPage = () => {
+  const [update, setUpdate] = useState(0)
 
   return (
     <Container>
       <Row>
-        <Col>
-          <CommandsHeader />
-          <CommandsList />
+        <Col md={11} style={{ margin: "auto" }}>
+          <CommandListHeader setUpdate={setUpdate} />
+          <CommandListMain update={update} setUpdate={setUpdate} />
         </Col>
       </Row>
     </Container>
   )
 }
 
-
-const CommandsHeader = () => {
-
-  useEffect(() => {
-
-  }, [])
+const CommandListHeader = ({ setUpdate }) => {
 
   return (
-    <HeaderWrapper>
+    <CommandHeaderStyle>
       <h1>Chat Commands</h1>
-      <Button>Add Command</Button>
-    </HeaderWrapper>
+      <ModalProvider>
+        <ModalRoot />
+        <ModalConsumer>
+          {({ showModal }) => (
+            <Button
+              onClick={() => showModal(NewCommandModal, { command: {}, setUpdate: setUpdate })}>
+              Add Command
+            </Button>
+          )}
+        </ModalConsumer>
+      </ModalProvider>
+    </CommandHeaderStyle>
   )
-
 }
 
-const CommandsList = () => {
+
+const CommandListMain = ({ update, setUpdate }) => {
   const [commandList, setCommandList] = useState([])
 
   useEffect(() => {
@@ -64,44 +60,149 @@ const CommandsList = () => {
       let request = await axios('/getcommands')
       setCommandList(request.data)
     })()
-  }, [])
+  }, [update])
 
   return (
-    <div>
+    <CommandPageMainStyle>
       <ModalProvider>
         <ModalRoot />
         <ModalConsumer>
           {({ showModal }) => (
             commandList.map((command, i) =>
-              <Fragment>
-                <CommandEntry>
-                  {command.command}
-                  <Button onClick={() => showModal(Modal1, { command: command })}>
-                    Edit
-                  </Button>
-                </CommandEntry>
-              </Fragment>
+              <CommandEntry key={i} command={command} setUpdate={setUpdate} showModal={showModal} />
             )
           )}
         </ModalConsumer>
-
-
       </ModalProvider>
-    </div>
+    </CommandPageMainStyle>
+  )
+
+}
+
+
+const CommandEntry = ({ setUpdate, showModal, command }) => {
+  return (
+    <CommandEntryStyle>
+      <div className="command_name">
+        {"!" + command.command}
+      </div>
+      <Button onClick={() => showModal(CommandModal, { command: command, setUpdate: setUpdate })}>
+        Edit
+      </Button>
+    </CommandEntryStyle>
   )
 }
 
 
-const Modal1 = ({ onRequestClose, ...otherProps }) => (
-  <StyledModal modalClassName="Modal" overlayClassName='Overlay' isOpen onRequestClose={onRequestClose} {...otherProps}>
-      <div class="modal-header">
-        <Button onClick={onRequestClose}>close</Button>
-      </div>
-    <div class="modal-content">
-      <div>I am a {otherProps.command.command}</div>
+const CommandForm = (props) => (
+  <Form onSubmit={props.handleSubmit}>
+    <Form.Group controlId="command">
+      <Form.Label>Command</Form.Label>
+      <Form.Control type="command" value={props.command} onChange={props.handleCommandChange} />
+    </Form.Group>
+
+    <Form.Group controlId="response">
+      <Form.Label>Response</Form.Label>
+      <Form.Control as="textarea" rows="3" onChange={props.handleResponseChange}>
+        {props.response}
+      </Form.Control>
+    </Form.Group>
+
+    <div className="modal-footer">
+      <Button type="submit">Save</Button>
     </div>
-  </StyledModal>
-);
+  </Form>
+)
+
+
+const NewCommandModal = ({ onRequestClose, ...props }) => {
+  const [command, setCommand] = useState("")
+  const [response, setResponse] = useState("")
+
+  const handleCommandChange = (event) => {
+    setCommand(event.target.value)
+  }
+
+  const handleResponseChange = (event) => {
+    setResponse(event.target.value)
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setCommand(event.target.elements.command.value)
+    setResponse(event.target.elements.response.value)
+    axios.post('/addcommand', { command: command, response: response });
+    props.setUpdate(update => ++update)
+    onRequestClose()
+  }
+
+  return (
+    <StyledCommandModal ClassName="Modal" overlayClassName='Overlay' isOpen onRequestClose={onRequestClose} {...props}>
+      <div className="modal-header">
+        <div className="modal-title">
+          <h1>New Command</h1>
+        </div>
+        <Button onClick={onRequestClose}><FontAwesomeIcon icon={faTimes} /></Button>
+      </div>
+
+      <div className="modal-body">
+        <CommandForm 
+          command={command}
+          response={response}
+          handleSubmit={handleSubmit} 
+          handleCommandChange={handleCommandChange} 
+          handleResponseChange={handleResponseChange}
+        />
+      </div>
+    </StyledCommandModal>
+  )
+}
+
+
+const CommandModal = ({ onRequestClose, ...props }) => {
+  const [command, setCommand] = useState(props.command.command)
+  const [response, setResponse] = useState(props.command.response)
+  const [commandId,] = useState(props.command.id)
+
+
+  const handleCommandChange = (event) => {
+    setCommand(event.target.value)
+  }
+
+  const handleResponseChange = (event) => {
+    setResponse(event.target.value)
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setCommand(event.target.elements.command.value)
+    setResponse(event.target.elements.response.value)
+    axios.post('/editcommand', { id: commandId, command: command, response: response });
+    props.setUpdate(update => ++update)
+    onRequestClose()
+  }
+
+  return (
+    <StyledCommandModal closeTimeoutMS={200} ClassName="Modal" overlayClassName='Overlay' isOpen onRequestClose={onRequestClose} {...props}>
+      <div className="modal-header">
+        <div className="modal-title">
+          <h1>{"!" + command}</h1>
+        </div>
+        <Button onClick={onRequestClose}><FontAwesomeIcon icon={faTimes} /></Button>
+      </div>
+
+      <div className="modal-body">
+        <CommandForm
+          command={command}
+          response={response}
+          handleSubmit={handleSubmit}
+          handleCommandChange={handleCommandChange}
+          handleResponseChange={handleResponseChange}
+        />
+      </div>
+    </StyledCommandModal>
+  )
+}
 
 
 export default CommandsPage

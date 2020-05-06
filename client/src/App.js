@@ -12,7 +12,7 @@ import {
 import { LinkContainer } from 'react-router-bootstrap';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import { AuthContext } from "./Auth";
+import { AuthContext } from "./context/Auth";
 import PrivateRoute from './PrivateRoute';
 import { createGlobalStyle, ThemeProvider  } from 'styled-components';
 import styled from 'styled-components';
@@ -29,6 +29,20 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     width: 100%;
   }
+
+  .ReactModal__Overlay {
+    opacity: 0;
+    transition: opacity 200ms ease-in-out;
+}
+
+.ReactModal__Overlay--after-open{
+    opacity: 1;
+}
+
+.ReactModal__Overlay--before-close{
+    opacity: 0;
+    
+}
 `
 
 const CleoNavbar = styled(Navbar)`
