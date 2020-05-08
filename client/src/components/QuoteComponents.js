@@ -2,9 +2,6 @@ import styled from 'styled-components';
 import { Nav } from 'react-bootstrap';
 
 
-// this is probably all bad.
-
-
 export const QuoteMain = styled.div`
   padding-top: 1em;
 `

@@ -1,49 +1,55 @@
-import React, { Component, createContext } from 'react';
+import React, { useCallback, useState } from 'react'
+import { Fade, Backdrop, StyledModal } from '../components/Modal'
 
 
-export const ModalContext = createContext({
-    component: null,
-    props: {},
-    showModal: () => { },
-    hideModal: () => { }
-});
+const ModalContext = React.createContext()
+
+export const renderBackdrop = (props) => <Backdrop {...props} />;
+
+const ModalProvider = (props) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [modalContent, setModalContent] = useState("")
+  const [modalProps, setModalProps] = useState({})
 
 
-export class ModalProvider extends Component {
-    showModal = (component, props = {}) => {
-        this.setState({
-            component,
-            props
-        });
-    };
+  const showModal = ({ content: Component, contentProps = {}, newModalProps = {} }) => {
 
-    hideModal = () => this.setState({
-        component: null,
-        props: {},
-    });
+    setModalContent((() => <Component {...contentProps} />))
+    setModalProps(newModalProps)
+    setIsOpen(true)
+  }
 
-    state = {
-        component: null,
-        props: {},
-        showModal: this.showModal,
-        hideModal: this.hideModal
-    };
+  const hideModal = useCallback(() => {
+    setIsOpen(false)
+  }, [setIsOpen])
 
-    render() {
-        return (
-            <ModalContext.Provider value={this.state}>
-                {this.props.children}
-            </ModalContext.Provider>
-        );
-    }
+  return (
+    <ModalContext.Provider value={{ showModal, hideModal }} {...props} >
+      {props.children}
+
+      <StyledModal
+        show={isOpen}
+        onHide={hideModal}
+        transition={Fade}
+        backdropClassName="backdrop"
+        backdropTransition={Fade}
+        renderBackdrop={renderBackdrop}
+        aria-labelledby="modal-label"
+        {...modalProps}
+      >
+        {modalContent}
+      </StyledModal>
+    </ModalContext.Provider>
+  )
 }
 
-export const ModalConsumer = ModalContext.Consumer;
+// custom Hook to provide context to functional components.
+const useModal = () => {
+  const context = React.useContext(ModalContext)
+  if (context === undefined) {
+    throw new Error('useModal must be used within a ModalProvider. Idiot.')
+  }
+  return context
+}
 
-export const ModalRoot = () => (
-    <ModalConsumer>
-        {({ component: Component, props, hideModal }) =>
-            Component ? <Component {...props} onRequestClose={hideModal} /> : null
-        }
-    </ModalConsumer>
-);
+export { ModalProvider, useModal }
