@@ -44,7 +44,7 @@ export const StyledModal = styled(OverlaysModal)`
   position: fixed;
   top: 50%;
   left: 50%;
-  z-index: 1040;  
+  z-index: 1040;
   transform: translate(-50%, -50%);
   transition: opacity 200ms ease-in-out;
   width: 60%;

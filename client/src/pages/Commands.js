@@ -4,6 +4,8 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Container, Row, Button, Form } from 'react-bootstrap';
+import { useHistory } from 'react-router-dom';
+import { useAuth } from '../context/Auth';
 
 import {
   CommandCol,
@@ -15,25 +17,34 @@ import {
 
 
 const CommandsPage = () => {
+  const [commands, setCommands] = useState([])
   const [update, setUpdate] = useState(0)
+  const { authToken, requestconfig } = useAuth();
+
+  useEffect(() => {
+    (async () => {
+      let request = await axios('/getcommands', requestconfig)
+      setCommands(request.data)
+    })()
+  }, [update])
 
   return (
-  <ModalProvider>
-    <Container>
-      <Row>
-        <CommandCol md={10}>
-          <CommandListHeader update={update} setUpdate={setUpdate} />
-          <CommandListMain update={update} setUpdate={setUpdate} />
-        </CommandCol>
-      </Row>
-    </Container>
-  </ModalProvider>
+    <ModalProvider>
+      <Container>
+        <Row>
+          <CommandCol md={10}>
+            <CommandListHeader update={update} setUpdate={setUpdate} />
+            <CommandListMain commands={commands} update={update} setUpdate={setUpdate} />
+          </CommandCol>
+        </Row>
+      </Container>
+    </ModalProvider>
   )
-  }
+}
+
 
 const CommandListHeader = ({ setUpdate }) => {
   const { showModal, hideModal } = useModal()
-
 
   return (
     <CommandListHeaderStyled>
@@ -46,21 +57,14 @@ const CommandListHeader = ({ setUpdate }) => {
   )
 }
 
-function CommandListMain({update, setUpdate}) {
-  const { showModal, hideModal } = useModal()
-  const [commandList, setCommandList] = useState([])
 
-  useEffect(() => {
-    (async () => {
-      let request = await axios('/getcommands')
-      setCommandList(request.data)
-    })()
-  }, [update])
+function CommandListMain({ commands, update, setUpdate }) {
+  const { showModal, hideModal } = useModal()
+
 
   return (
-
     <CommandListMainStyled>
-      {commandList.map((command, i) =>
+      {commands.map((command, i) =>
         <CommandEntryStyled key={i}>
           <div className="command_name"> {"!" + command.command} </div>
           {/* pass content component, props for the content component, and additional props for the modal itself. */}
@@ -78,6 +82,8 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [command, setCommand] = useState(props.command.command)
   const [response, setResponse] = useState(props.command.response)
   const [commandId,] = useState(props.command.id)
+  const { authToken, requestconfig } = useAuth();
+
 
   const handleCommandChange = (event) => {
     setCommand(event.target.value)
@@ -90,9 +96,10 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+
     setCommand(event.target.elements.command.value)
     setResponse(event.target.elements.response.value)
-    axios.post('/editcommand', { id: commandId, command: command, response: response });
+    axios.post('/editcommand', { id: commandId, command: command, response: response }, requestconfig);
     setUpdate((update) => ++update)
     hideModal()
   }
@@ -121,9 +128,12 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   )
 }
 
+
 const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [command, setCommand] = useState("")
   const [response, setResponse] = useState("")
+  const { authToken, requestconfig } = useAuth();
+
 
   const handleCommandChange = (event) => {
     setCommand(event.target.value)
@@ -137,7 +147,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     setCommand(event.target.elements.command.value)
     setResponse(event.target.elements.response.value)
-    axios.post('/addcommand', { command: command, response: response });
+    axios.post('/addcommand', { command: command, response: response }, requestconfig);
     setUpdate(update => ++update)
     hideModal()
   }

@@ -12,9 +12,9 @@ import {
 import { LinkContainer } from 'react-router-bootstrap';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import { AuthContext } from "./context/Auth";
+import { useAuth, AuthContext, AuthProvider } from "./context/Auth";
 import PrivateRoute from './PrivateRoute';
-import { createGlobalStyle, ThemeProvider  } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
 
 export const theme = {
@@ -29,76 +29,84 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     width: 100%;
   }
-
-  .ReactModal__Overlay {
-    opacity: 0;
-    transition: opacity 200ms ease-in-out;
-}
-
-.ReactModal__Overlay--after-open{
-    opacity: 1;
-}
-
-.ReactModal__Overlay--before-close{
-    opacity: 0;
-    
-}
 `
 
-const CleoNavbar = styled(Navbar)`
+
+function App() {
+
+  return (
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <Router>
+        <AuthProvider>
+
+          <div className="App">
+            <CleoNavbar />
+
+            <Switch>
+              <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
+              <Route path={'/commands'} component={CommandsPage} />
+              <PrivateRoute path="/admin" component={Admin} />
+              <Route path="/login" component={Login} />
+
+            </Switch>
+          </div>
+        </AuthProvider>
+
+      </Router>
+    </ThemeProvider>
+  );
+}
+
+
+const StyledNavbar = styled(Navbar)`
     background: ${props => props.theme.secondaryBackground} !important;
     position: sticky;
     top: 0;
     z-index: 100;
+
+    .navbar-nav {
+      flex-grow: 1;
+    }
+
+    .login-wrapper {
+      margin-left: auto;
+    }
   `
 
-
-function App() {
-  const existingToken = localStorage.getItem("auth_token");
-  const [authToken, setAuthToken] = useState(existingToken);
-
-
-  const setToken = (data) => {
-    localStorage.setItem("auth_token", data);
-    setAuthToken(data);
-  }
-
+const CleoNavbar = () => {
+  const { authToken } = useAuth()
+  console.log(authToken)
   return (
-    <AuthContext.Provider value={{ authToken, setAuthToken: setToken }}>
-    <ThemeProvider theme={theme}>
-    <GlobalStyle />
-      <Router>
-        <div className="App">  
-          <CleoNavbar expand="lg" variant="dark">
-            <Navbar.Brand href="#home">Miss Cleo</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="mr-auto">
-                <LinkContainer to="/quotes">
-                  <Nav.Link>Quotes</Nav.Link>
-                </LinkContainer>
-                  <LinkContainer to="/commands">
-                    <Nav.Link>Commands</Nav.Link>
-                  </LinkContainer>
-                <LinkContainer to="/admin">
-                  <Nav.Link>Admin</Nav.Link>
-                </LinkContainer>
-              </Nav>
-            </Navbar.Collapse>
-          </CleoNavbar>
+    <StyledNavbar expand="lg" variant="dark">
+      <Navbar.Brand href="#home">Miss Cleo</Navbar.Brand>
+      <Navbar.Toggle aria-controls="basic-navbar-nav" />
+      <Navbar.Collapse id="basic-navbar-nav">
+        <Nav className="mr-auto">
+          <LinkContainer to="/quotes">
+            <Nav.Link>Quotes</Nav.Link>
+          </LinkContainer>
+          <LinkContainer to="/commands">
+            <Nav.Link>Commands</Nav.Link>
+          </LinkContainer>
 
-          <Switch>
-            <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
-            <Route path={'/commands'} component={CommandsPage} />
-            <PrivateRoute path="/admin" component={Admin} />
-            <Route path="/login" component={Login} />
+          <div className="login-wrapper">
+          {authToken ? (
+            <LinkContainer to="/admin">
+              <Nav.Link>Logout</Nav.Link>
+            </LinkContainer>
+          ) : (
+              <LinkContainer to="/login">
+                <Nav.Link>Login</Nav.Link>
+              </LinkContainer>
+            )
+          }
+          </div>
+        </Nav>
+      </Navbar.Collapse>
+    </StyledNavbar>
+  )
 
-          </Switch>
-        </div>
-      </Router>
-      </ThemeProvider>
-    </AuthContext.Provider>
-  );
 }
 
 export default App;

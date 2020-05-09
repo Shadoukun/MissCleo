@@ -6,7 +6,7 @@ const Admin = (props) => {
   const { setAuthToken } = useAuth();
 
   const logOut = () => {
-    setAuthToken();
+    setAuthToken('');
   }
 
   return (

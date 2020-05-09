@@ -11,14 +11,12 @@ const Login = (props) => {
   const [password, setPassword] = useState("");
   const { setAuthToken } = useAuth();
 
-  const history = useHistory().goBack()
-  const referer = history || '/'
+  // const history = useHistory().goBack()
+  const referer = '/'
 
   const postLogin = () => {
-    axios.post("/auth/login", {
-      userName,
-      password
-    }).then(result => {
+    axios.post("/auth/login", { userName, password})
+    .then(result => {
       if (result.status === 200) {
         console.log(result)
         setAuthToken(result.data.access_token);
@@ -34,32 +32,37 @@ const Login = (props) => {
   if (!isLoggedIn) {
     return (
       <div>
-        <Form>
-          <Form.Group controlId="formBasicEmail">
-            <Form.Label>Username</Form.Label>
-            <Form.Control
-              type="username"
-              placeholder="Username"
-              onChange={e => { setUserName(e.target.value); }}
-            />
-          </Form.Group>
-
-          <Form.Group controlId="formBasicPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Password"
-              onChange={e => { setPassword(e.target.value); }}
-            />
-          </Form.Group>
-          <Button onClick={postLogin}>Submit</Button>
-        </Form>
+        <LoginForm setUserName={setUserName} setPassword={setPassword} postLogin={postLogin} />
         {isError && "The username or password provided were incorrect!"}
       </div>
     )
   } else {
-    return <Redirect to={referer} />;
+    return <Redirect to='/' />;
   }
 }
+
+
+const LoginForm = ({ setUserName, setPassword, postLogin }) => (
+  <Form>
+    <Form.Group controlId="loginUserName">
+      <Form.Label>Username</Form.Label>
+      <Form.Control
+        type="username"
+        placeholder="Username"
+        onChange={e => { setUserName(e.target.value); }}
+      />
+    </Form.Group>
+
+    <Form.Group controlId="loginPassword">
+      <Form.Label>Password</Form.Label>
+      <Form.Control
+        type="password"
+        placeholder="Password"
+        onChange={e => { setPassword(e.target.value); }}
+      />
+    </Form.Group>
+    <Button onClick={postLogin}>Submit</Button>
+  </Form>
+)
 
 export default Login;

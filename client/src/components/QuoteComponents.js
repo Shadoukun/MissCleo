@@ -31,7 +31,7 @@ export const QuoteSideBarSection = styled.div`
   .nav {
     display: flex;
     flex-direction: column !important;
-  
+
     .quote-avatar {
       height: 40px;
       width: 40px;
@@ -42,7 +42,7 @@ export const QuoteSideBarSection = styled.div`
       width:40px;
       height: 40px;
     }
-  
+
     .name {
       margin-left: 1em;
     }
@@ -54,11 +54,11 @@ export const QuoteSideBarNavLink = styled(Nav.Link)`
   align-items: center;
   color: gray;
   font-weight: bold;
-  
+
   &:active, &:focus{
     outline: none;
     }
-  
+
   &.active {
     color: white !important;
     background: gray !important;
@@ -123,13 +123,13 @@ export const PaginationWrapper = styled.div`
 
     .page-item {
       color: white;
-      
+
       .page-link {
         color: white;
         background: ${props => props.theme.backgroundColor};
 
         &:active, &:focus, &:hover {
-          box-shadow: none !important;          
+          box-shadow: none !important;
         }
       }
 
@@ -138,12 +138,12 @@ export const PaginationWrapper = styled.div`
           background: #474a51;
       }
     }
-    
+
     .pagination .page-link {
         background: none;
         border: 1px solid #202225;
 
-        
+
     }
 
 `

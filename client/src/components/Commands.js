@@ -14,8 +14,8 @@ export const CommandModalStyle = styled.div`
 
   .modal-header {
       display: flex;
-      justify-content: space-between; 
-      
+      justify-content: space-between;
+
       button {
         background: transparent;
         border: 1px solid gray;
@@ -25,7 +25,7 @@ export const CommandModalStyle = styled.div`
 
   .modal-footer {
     padding: 1em 0 0 1em;
-    
+
     button {
       font-size: 12px;
       margin: auto 0 auto auto;
@@ -42,7 +42,7 @@ export const CommandModalStyle = styled.div`
         color: ${props => darken(0.2, props.theme.primaryFontColor)}
       }
 
-      &:focus { 
+      &:focus {
         box-shadow: none !important;
       }
 
@@ -64,8 +64,8 @@ export const CommandModalStyle = styled.div`
         background: ${props => lighten(0.05, props.theme.backgroundColor)};
         color: ${props => props.theme.primaryFontColor};
   }
-  
-  
+
+
 `
 
 
