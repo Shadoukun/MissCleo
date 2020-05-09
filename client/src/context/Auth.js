@@ -27,7 +27,6 @@ export const AuthProvider = (props) => {
 
     },
     validateStatus: (status) => {
-      console.log(status)
       switch (status) {
         case 200:
           return true

@@ -18,7 +18,7 @@ import {
 
 const rgbToHex = (rgb) => {
   let hex = Number(rgb).toString(16);
-  return hex.length == 6 ? ( "#" + hex ) : ("#ffffff")
+  return hex.length === 6 ? ( "#" + hex ) : ("#ffffff")
 };
 
 const QuotePage = () => {
@@ -64,7 +64,7 @@ const GuildBar = ({ setGuild, activeGuildId }) => {
       <h1>Servers</h1>
       {/* activekey activates all elements if null */}
       <Nav variant="pills" activeKey={!!activeGuildId ? activeGuildId : ""} >
-        
+
         {guildList.map((guild, i) =>
           <Nav.Item key={i} className="quote-sidebar-nav">
             <IndexLinkContainer to={`/quotes/${guild.id}`} >
@@ -100,7 +100,7 @@ const MembersBar = ({ guildId, activeUserId, setUser }) => {
     <QuoteSideBarSection className="quotes-sidebar-section">
       <h1>Users</h1>
       {/* activekey activates all elements if param isn't set. cuz why not? */}
-      <Nav className="quote-sidebar-nav" variant="pills" activeKey={!!activeUserId ? activeUserId : ""}> 
+      <Nav className="quote-sidebar-nav" variant="pills" activeKey={!!activeUserId ? activeUserId : ""}>
 
         {userList.map((user, i) =>
           <Nav.Item key={i} className='quote-sidebar-entry'>
@@ -128,7 +128,7 @@ const QuoteList = ({ guildId, userId }) => {
   const [currentPage, setCurrentPage] = useState(1)
 
   const url = "/quotes"
-  
+
   // reset currentPage when userId changes.
   useEffect(() => {
     setCurrentPage(1)

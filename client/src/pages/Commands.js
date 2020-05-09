@@ -4,7 +4,6 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Container, Row, Button, Form } from 'react-bootstrap';
-import { useHistory } from 'react-router-dom';
 import { useAuth } from '../context/Auth';
 
 import {
@@ -19,14 +18,14 @@ import {
 const CommandsPage = () => {
   const [commands, setCommands] = useState([])
   const [update, setUpdate] = useState(0)
-  const { authToken, requestconfig } = useAuth();
+  const { requestconfig } = useAuth();
 
   useEffect(() => {
     (async () => {
       let request = await axios('/getcommands', requestconfig)
       setCommands(request.data)
     })()
-  }, [update])
+  }, [update, requestconfig])
 
   return (
     <ModalProvider>
@@ -82,7 +81,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [command, setCommand] = useState(props.command.command)
   const [response, setResponse] = useState(props.command.response)
   const [commandId,] = useState(props.command.id)
-  const { authToken, requestconfig } = useAuth();
+  const { requestconfig } = useAuth();
 
 
   const handleCommandChange = (event) => {
@@ -132,7 +131,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [command, setCommand] = useState("")
   const [response, setResponse] = useState("")
-  const { authToken, requestconfig } = useAuth();
+  const { requestconfig } = useAuth();
 
 
   const handleCommandChange = (event) => {

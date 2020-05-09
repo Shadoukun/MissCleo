@@ -2,8 +2,6 @@ import React from 'react';
 import { Transition } from 'react-transition-group';
 import { Modal as OverlaysModal } from 'react-overlays'
 import styled from 'styled-components';
-import { lighten, darken } from 'polished';
-
 
 const FADE_DURATION = 200;
 

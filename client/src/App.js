@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './App.scss';
-import QuotePage from './pages/Quotes'
-import CommandsPage from './pages/Commands'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navbar, Nav } from 'react-bootstrap'
+import Admin from './pages/Admin';
+import Login from './pages/Login';
+import CommandsPage from './pages/Commands'
+import QuotePage from './pages/Quotes'
+import { useAuth, AuthProvider } from "./context/Auth";
 import {
   BrowserRouter as Router,
   Switch,
   Route
 } from "react-router-dom";
-import { LinkContainer } from 'react-router-bootstrap';
-import Admin from './pages/Admin';
-import Login from './pages/Login';
-import { useAuth, AuthContext, AuthProvider } from "./context/Auth";
 import PrivateRoute from './PrivateRoute';
-import { createGlobalStyle, ThemeProvider } from 'styled-components';
-import styled from 'styled-components';
+import { LinkContainer } from 'react-router-bootstrap';
+import { Navbar, Nav } from 'react-bootstrap'
+import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
+
 
 export const theme = {
   backgroundColor: "#2f3136",
@@ -76,7 +76,6 @@ const StyledNavbar = styled(Navbar)`
 
 const CleoNavbar = () => {
   const { authToken } = useAuth()
-  console.log(authToken)
   return (
     <StyledNavbar expand="lg" variant="dark">
       <Navbar.Brand href="#home">Miss Cleo</Navbar.Brand>

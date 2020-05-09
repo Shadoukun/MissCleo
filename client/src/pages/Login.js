@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Redirect, useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import { Form, Button } from 'react-bootstrap';
 import { useAuth } from "../context/Auth";
@@ -11,8 +11,6 @@ const Login = (props) => {
   const [password, setPassword] = useState("");
   const { setAuthToken } = useAuth();
 
-  // const history = useHistory().goBack()
-  const referer = '/'
 
   const postLogin = () => {
     axios.post("/auth/login", { userName, password})
