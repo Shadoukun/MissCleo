@@ -2,6 +2,7 @@ import React from 'react';
 import { Transition } from 'react-transition-group';
 import { Modal as OverlaysModal } from 'react-overlays'
 import styled from 'styled-components';
+import { lighten, darken } from 'polished';
 
 
 const FADE_DURATION = 200;
@@ -44,16 +45,8 @@ export const StyledModal = styled(OverlaysModal)`
   top: 50%;
   left: 50%;
   z-index: 1040;  
-  border-radius: 10px;
-  background: ${props => props.theme.secondaryBackground};
-  color: white;
-  padding: 1em;
-  width: 60%;
   transform: translate(-50%, -50%);
   transition: opacity 200ms ease-in-out;
+  width: 60%;
 
-  input, textarea {
-  background-color: ${props => props.theme.backgroundColor};
-  color: ${props => props.theme.primaryFontColor};
-  border: none;
 `

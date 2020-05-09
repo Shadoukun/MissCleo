@@ -101,9 +101,9 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     <CommandModalStyle>
       <div className="modal-header">
         <div className="modal-title">
-          <h1>{"!" + command}</h1>
+          <h1>{"!" + props.command.command}</h1>
         </div>
-        <Button onClick={props.hideModal}>
+        <Button onClick={hideModal}>
           <FontAwesomeIcon icon={faTimes} />
         </Button>
       </div>
@@ -148,7 +148,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
         <div className="modal-title">
           <h1>New Command</h1>
         </div>
-        <Button onClick={props.hideModal}><FontAwesomeIcon icon={faTimes} /></Button>
+        <Button onClick={hideModal}><FontAwesomeIcon icon={faTimes} /></Button>
       </div>
 
       <div className="modal-body">

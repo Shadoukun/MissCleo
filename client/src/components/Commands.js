@@ -7,32 +7,73 @@ export const CommandCol = styled(Col)`
 `
 
 export const CommandModalStyle = styled.div`
-  
+  border-radius: 10px;
+  background: ${props => props.theme.secondaryBackground};
+  color: white;
+  padding: 1em;
+
   .modal-header {
       display: flex;
       justify-content: space-between; 
       
       button {
-      background: transparent;
-      border: 1px solid gray;
-      color: gray;
+        background: transparent;
+        border: 1px solid gray;
+        color: gray;
       }
   }
 
+  .modal-footer {
+    padding: 1em 0 0 1em;
+    
+    button {
+      font-size: 12px;
+      margin: auto 0 auto auto;
+      background: #43B581 !important;
+      color: ${props => props.theme.primaryFontColor};
+      border: 1px solid transparent !important;
+      font-weight: bold;
+      padding: 0.75em 3em;
+
+      &:hover {
+        box-shadow: none;
+        border: 1px solid transparent;
+        background: ${props => darken(0.2, "#43B581")} !important;
+        color: ${props => darken(0.2, props.theme.primaryFontColor)}
+      }
+
+      &:focus { 
+        box-shadow: none !important;
+      }
+
+      &:active {
+        background: ${props => lighten(0.05, "#43B581")} !important;
+      }
+
+    }
+  }
+
+  input, textarea {
+    background-color: ${props => props.theme.backgroundColor};
+    color: ${props => props.theme.primaryFontColor};
+    border: none;
+
+    &:active, &:focus, &:hover {
+        transition: all 0.2s linear;
+        box-shadow: 0 0 0 .1rem ${props => darken(0.1, props.theme.backgroundColor)};
+        background: ${props => lighten(0.05, props.theme.backgroundColor)};
+        color: ${props => props.theme.primaryFontColor};
+  }
+  
+  
 `
+
+
 export const CommandListMainStyled = styled.div`
     display: flex;
     flex-direction: column;
 
-// `
-// export const CommandEntryStyled = styled.div`
-//     display: flex;
-//     margin: auto;
-
-//     button {
-//       margin-left: auto;
-//     }
-// `
+`
 
 
 export const CommandListHeaderStyled = styled.div`
@@ -63,7 +104,12 @@ export const CommandListHeaderStyled = styled.div`
       color: ${props => darken(0.2, props.theme.primaryFontColor)}
     }
 
-    &:focus { 
+    &:active {
+      background: ${props => lighten(0.05, "#43B581")} !important;
+    }
+
+    &:focus {
+      color: ${props => props.theme.primaryFontColor};
       box-shadow: none !important;
     }
   }
@@ -107,58 +153,3 @@ export const CommandEntryStyled = styled.div`
   }
 
 `
-//   .Modal {
-//     border-radius: 10px;
-//     background: ${props => props.theme.secondaryBackground};
-//     color: white;
-//     padding: 1em;
-//     top: 50%;
-//     left: 50%;
-//     transform: translate(-50%, -50%);
-//     position: fixed;
-//     width: 60%;
-//     transition: width 0.5s, height 0.5s, opacity 0.5s 0.5s;
-
-//     input, textarea {
-//     background-color: ${props => props.theme.backgroundColor};
-//     color: ${props => props.theme.primaryFontColor};
-//     border: none;
-//     }
-
-//     .modal-header {
-//          button {
-//             background: transparent;
-//             border: 1px solid gray;
-//             color: gray;
-//         }
-
-//     }
-
-//     .modal-footer {
-//         margin-top: 2em;
-//         padding: 1em 0 0 0;
-
-//         button {
-//             background: #43B581;
-//             padding: .5em 2em;
-//             border: 1px solid transparent;
-//         }
-//     }
-//   }
-
-//   .Overlay {
-//     position: fixed;
-//     top 0;
-//     height: 100vh;
-//     width: 100%;
-//     background:rgba(50, 50, 50, 0.9);
-
-//     .modal-header {
-//         display:flex;
-
-//         .btn {
-//             margin-left: auto;
-//         }
-//     }
-//   }
-// `
