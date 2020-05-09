@@ -18,13 +18,13 @@ import {
 
 const rgbToHex = (rgb) => {
   let hex = Number(rgb).toString(16);
-  return "#" + hex
+  return hex.length == 6 ? ( "#" + hex ) : ("#ffffff")
 };
 
 const QuotePage = () => {
   const { guildId, userId } = useParams();
-  const [guild, setGuild] = useState(guildId);
-  const [user, setUser] = useState(userId);
+  const [guild, setGuild] = useState();
+  const [user, setUser] = useState();
 
   useEffect(() => {
     setUser(userId);
@@ -155,7 +155,6 @@ const QuoteList = ({ guildId, userId }) => {
 
   return (
     <QuoteMain className="quote-list">
-
       {quoteList.map((quote, i) =>
         <QuoteCard key={i} className="quote-card card">
           <div className="quote-header">
