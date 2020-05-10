@@ -8,7 +8,7 @@ import Copy from 'copy-to-clipboard';
 import { backendCall } from '../api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons'
-
+import { backendURL } from '../api';
 import {
   QuoteMain,
   QuoteSideBar,
@@ -174,6 +174,9 @@ const QuoteList = ({ guildId, userId }) => {
           </div>
           <div className='quote-body'>
             {quote.message}
+            {quote.attachments && quote.attachments.map((file, i) => {
+                return<img src={`${backendURL}/static/img/${file}`}></img>
+              })}
           </div>
         </QuoteCard>
       )}
