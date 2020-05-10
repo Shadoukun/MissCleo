@@ -73,9 +73,9 @@ class Quotes(commands.Cog):
 
         filters = [Quote.guild_id == ctx.guild.id]
         if user:
-            filters += [Quote.message_id == quote_id]
-        elif quote_id:
             filters += [Quote.user_id == user.id]
+        elif quote_id:
+            filters += [Quote.message_id == quote_id]
 
         quote = self.db.query(Quote).filter(and_(*filters)) \
                                     .order_by(func.random()).first()
@@ -93,13 +93,18 @@ class Quotes(commands.Cog):
 
         if args[0]:
             try:
+                print(args[0])
                 quote_id = int(args[0])
+                print(quote_id)
                 if quote_id:
                     quote = await self._get_quote(ctx, quote_id=quote_id)
+                    print(quote)
                     if not quote:
                         await ctx.channel.send("Quote not found.")
                         return
+
                     embed = self._create_embed(quote)
+                    print(embed)
                     await ctx.channel.send(embed=embed)
                     return
             except:
