@@ -91,20 +91,16 @@ class Quotes(commands.Cog):
         quote_id = None
         quote = None
 
-        if args[0]:
+        if args:
             try:
-                print(args[0])
                 quote_id = int(args[0])
-                print(quote_id)
                 if quote_id:
                     quote = await self._get_quote(ctx, quote_id=quote_id)
-                    print(quote)
                     if not quote:
                         await ctx.channel.send("Quote not found.")
                         return
 
                     embed = self._create_embed(quote)
-                    print(embed)
                     await ctx.channel.send(embed=embed)
                     return
             except:
