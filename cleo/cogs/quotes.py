@@ -46,7 +46,7 @@ class Quotes(commands.Cog):
 
         if quote.attachments:
             embed.set_image(url=urllib.parse.urljoin(
-                config.HOST_URL + "static/img/", quote.attachments[0]))
+                config.HOST + "static/img/", quote.attachments[0]))
 
         return embed
 
