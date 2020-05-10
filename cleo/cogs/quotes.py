@@ -72,7 +72,11 @@ class Quotes(commands.Cog):
            Otherwise, get a random quote.'''
 
         filters = [Quote.guild_id == ctx.guild.id]
-        if user: filters += [Quote.user_id == user.id]
+        if user:
+            filters += [Quote.message_id == quote_id]
+        elif quote_id:
+            filters += [Quote.user_id == user.id]
+
         quote = self.db.query(Quote).filter(and_(*filters)) \
                                     .order_by(func.random()).first()
         return quote
