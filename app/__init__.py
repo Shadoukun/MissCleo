@@ -11,6 +11,7 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
 )
+from flask_cors import CORS
 
 db = SQLAlchemy(model_class=Base)
 
@@ -36,7 +37,7 @@ def add_user(app):
             password = getpass()
             assert password == getpass('Password (again):')
             hashed = generate_password_hash(password)
-    
+
             db.session.add(FlaskUser(username=username, password=hashed))
             db.session.commit()
             print('User added.')
@@ -54,6 +55,9 @@ app = Flask(__name__)
 app.config.from_object('config')
 app.debug = os.getenv("DEBUG", False)
 app.url_map.strict_slashes = False
+
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # TODO: MOVE THIS
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!

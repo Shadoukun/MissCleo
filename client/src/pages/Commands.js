@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ModalProvider, useModal } from '../context/Modal';
-import axios from 'axios';
+import { backendCall } from '../api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Container, Row, Button, Form } from 'react-bootstrap';
@@ -22,7 +22,7 @@ const CommandsPage = () => {
 
   useEffect(() => {
     (async () => {
-      let request = await axios('/getcommands', requestconfig)
+      let request = await backendCall.get('/getcommands', requestconfig)
       setCommands(request.data)
     })()
   }, [update, requestconfig])
@@ -98,7 +98,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
     setCommand(event.target.elements.command.value)
     setResponse(event.target.elements.response.value)
-    axios.post('/editcommand', { id: commandId, command: command, response: response }, requestconfig);
+    backendCall.post('/editcommand', { id: commandId, command: command, response: response }, requestconfig);
     setUpdate((update) => ++update)
     hideModal()
   }
@@ -146,7 +146,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     setCommand(event.target.elements.command.value)
     setResponse(event.target.elements.response.value)
-    axios.post('/addcommand', { command: command, response: response }, requestconfig);
+    backendCall.post('/addcommand', { command: command, response: response }, requestconfig);
     setUpdate(update => ++update)
     hideModal()
   }

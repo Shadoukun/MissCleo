@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Container, Col, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { Nav } from 'react-bootstrap';
-import axios from 'axios';
 import { IndexLinkContainer } from 'react-router-bootstrap';
 import ReactPaginate from 'react-paginate';
+import { backendCall } from '../api';
 
 import {
   QuoteMain,
@@ -54,7 +54,7 @@ const GuildBar = ({ setGuild, activeGuildId }) => {
 
   useEffect(() => {
     (async () => {
-      let request = await axios('/guilds')
+      let request = await backendCall.get('/guilds')
       setGuildList(request.data)
     })()
   }, [])
@@ -91,7 +91,7 @@ const MembersBar = ({ guildId, activeUserId, setUser }) => {
 
   useEffect(() => {
     (async () => {
-      let request = await axios(`/members?guild=${guildId}`)
+      let request = await backendCall.get(`/members?guild=${guildId}`)
       setUserList(request.data)
     })()
   }, [guildId])
@@ -142,7 +142,7 @@ const QuoteList = ({ guildId, userId }) => {
       if (userId) { params.push(`user=${userId}`) }
       if (currentPage) { params.push(`page=${currentPage}`) }
 
-      let result = await axios(url + `?${params.join('&')}`)
+      let result = await backendCall.get(url + `?${params.join('&')}`)
       setQuoteList(result.data.quotes)
       setPageCount(result.data.pages)
     })()

@@ -9,6 +9,7 @@ from cleo.db import Quote, Guild, GuildMembership, new_alchemy_encoder
 from .. import db
 import json
 from flask_jwt_extended import jwt_required
+from flask_cors import cross_origin
 
 
 blueprint = Blueprint('quotes', __name__)
@@ -18,7 +19,7 @@ def getGuilds():
     return db.session.query(Guild).all()
 
 def getMembers(guild_id):
-    
+
     members = db.session.query(GuildMembership).filter(GuildMembership.quotes.any(Quote.guild_id == guild_id)) \
                                                             .order_by(func.lower(GuildMembership.display_name)) \
                                                             .join(GuildMembership.top_role).all()
@@ -30,7 +31,7 @@ def getQuotes(guild_id, user_id, page):
 
     if user_id:
         filters += [Quote.user_id == user_id]
-        
+
     quote_page = db.session.query(Quote).filter(and_(*filters)) \
                                         .order_by(Quote.timestamp.desc()) \
                                         .join(Quote.member) \
@@ -39,13 +40,15 @@ def getQuotes(guild_id, user_id, page):
 
 
 @blueprint.route('/guilds')
+@cross_origin()
 def guilds():
 
     guilds = json.dumps(getGuilds(), cls=new_alchemy_encoder(False, ['member']))
     return Response(guilds, mimetype='application/json')
 
-    
+
 @blueprint.route('/members')
+@cross_origin()
 def members():
     guild_id = request.args.get('guild', None)
 
@@ -54,6 +57,7 @@ def members():
 
 
 @blueprint.route('/quotes')
+@cross_origin()
 def quotes():
 
     guild = request.args.get('guild', None)
@@ -63,7 +67,7 @@ def quotes():
     quotes = getQuotes(guild, user, page)
     data = {
         "quotes": quotes.items,
-        "pages": quotes.pages 
+        "pages": quotes.pages
     }
 
     quotes = json.dumps(data, cls=new_alchemy_encoder(False, ['member', 'user', 'top_role']))

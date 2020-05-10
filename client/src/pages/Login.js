@@ -3,6 +3,7 @@ import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import { Form, Button } from 'react-bootstrap';
 import { useAuth } from "../context/Auth";
+import { backendCall } from "../api";
 
 const Login = (props) => {
   const [isLoggedIn, setLoggedIn] = useState(false);
@@ -13,7 +14,7 @@ const Login = (props) => {
 
 
   const postLogin = () => {
-    axios.post("/auth/login", { userName, password})
+    backendCall.post("/auth/login", { userName, password})
     .then(result => {
       if (result.status === 200) {
         console.log(result)

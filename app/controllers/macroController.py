@@ -3,6 +3,7 @@ import requests
 import json
 from flask import render_template, Blueprint, request, redirect, url_for, flash, Response
 from flask_login import login_required
+from flask_cors import cross_origin
 from app.forms import CommandForm
 
 from cleo.db import Macro, MacroResponse, MacroReaction, new_alchemy_encoder
@@ -13,6 +14,7 @@ blueprint = Blueprint('macros', __name__)
 
 @blueprint.route('/addcommand', methods=['POST'])
 @jwt_required
+@cross_origin()
 def add_command():
     data = request.json
     command = Macro(data['command'], data['response'], 1)
@@ -27,6 +29,7 @@ def add_command():
 
 @blueprint.route('/editcommand', methods=['POST'])
 @jwt_required
+@cross_origin()
 def edit_command():
 
     data = request.json
@@ -40,10 +43,11 @@ def edit_command():
         requests.get('http://127.0.0.1:10000/update_macros')
 
     return Response(None, status=200, mimetype='application/json')
-        
+
 
 @blueprint.route('/getcommands', methods=['GET'])
 @jwt_required
+@cross_origin()
 def get_commands():
     cmds = db.session.query(Macro).all()
     cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, ['member']))
