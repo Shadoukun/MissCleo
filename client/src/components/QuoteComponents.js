@@ -1,5 +1,8 @@
+import React from 'react';
 import styled from 'styled-components';
-import { Nav } from 'react-bootstrap';
+import { Nav, Dropdown, Button } from 'react-bootstrap';
+import { darken } from 'polished';
+
 
 
 export const QuoteMain = styled.div`
@@ -147,3 +150,31 @@ export const PaginationWrapper = styled.div`
     }
 
 `
+
+export const QuoteDropdown = styled(Dropdown)`
+  margin-left: auto;
+
+  button {
+    color: ${props => darken(0.2, props.theme.primaryFontColor)};
+    background-color: transparent !important;
+    border: none !important;
+
+    &:active, &:focus {
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+`
+
+export const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+  <Button
+    href=""
+    ref={ref}
+    onClick={(e) => {
+      e.preventDefault();
+      onClick(e);
+    }}
+  >
+    {children}
+  </Button>
+));

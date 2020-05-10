@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Col, Row } from 'react-bootstrap';
+import { Container, Col, Row, Button } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import { Nav } from 'react-bootstrap';
+import { Nav, ButtonToolbar } from 'react-bootstrap';
 import { IndexLinkContainer } from 'react-router-bootstrap';
 import ReactPaginate from 'react-paginate';
+import Copy from 'copy-to-clipboard';
 import { backendCall } from '../api';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons'
 
 import {
   QuoteMain,
@@ -12,13 +15,15 @@ import {
   QuoteSideBarSection,
   QuoteSideBarNavLink,
   QuoteCard,
+  QuoteDropdown as Dropdown,
+  CustomToggle,
   PaginationWrapper
 } from '../components/QuoteComponents';
 
 
 const rgbToHex = (rgb) => {
   let hex = Number(rgb).toString(16);
-  return hex.length === 6 ? ( "#" + hex ) : ("#ffffff")
+  return hex.length === 6 ? ("#" + hex) : ("#ffffff")
 };
 
 const QuotePage = () => {
@@ -69,7 +74,7 @@ const GuildBar = ({ setGuild, activeGuildId }) => {
           <Nav.Item key={i} className="quote-sidebar-nav">
             <IndexLinkContainer to={`/quotes/${guild.id}`} >
               <QuoteSideBarNavLink eventKey={guild.id} id={guild.id} onClick={() => { setGuild(guild.id) }} >
-                <img className="avatar" src={guild.icon_url} alt=""/>
+                <img className="avatar" src={guild.icon_url} alt="" />
                 <div className="name">
                   {guild.name}
                 </div>
@@ -158,13 +163,14 @@ const QuoteList = ({ guildId, userId }) => {
       {quoteList.map((quote, i) =>
         <QuoteCard key={i} className="quote-card card">
           <div className="quote-header">
-            <img src={quote.user.avatar_url} alt=""/>
+            <img src={quote.user.avatar_url} alt="" />
             <div className="wrapper">
               <div className="name" style={{ color: rgbToHex(quote.member.top_role.color) }}>
                 {quote.member.display_name}
               </div>
               <div className="timestamp text-muted">{quote.timestamp}</div>
             </div>
+              <QuoteDropdown quoteId={quote.message_id} />
           </div>
           <div className='quote-body'>
             {quote.message}
@@ -193,6 +199,27 @@ const QuoteList = ({ guildId, userId }) => {
       </PaginationWrapper>
 
     </QuoteMain>
+  )
+}
+
+
+const QuoteDropdown = (props) => {
+  const [quoteId,] = useState(props.quoteId)
+
+  const handleClick = () => {
+    Copy(quoteId)
+  }
+
+  return (
+      <Dropdown
+        id="quote_dropdown"
+        rootCloseEvent="mousedown"
+      >
+        <Dropdown.Toggle as={CustomToggle}><FontAwesomeIcon icon={faCaretDown} /></Dropdown.Toggle>
+        <Dropdown.Menu className="quote_dropdown_menu">
+          <Dropdown.Item eventKey="1" onClick={handleClick}>Copy Quote ID</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
   )
 }
 
