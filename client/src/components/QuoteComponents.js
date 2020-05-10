@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Nav, Dropdown, Button } from 'react-bootstrap';
-import { darken } from 'polished';
+import { lighten, darken } from 'polished';
 
 
 
@@ -163,7 +163,30 @@ export const QuoteDropdown = styled(Dropdown)`
       border: none !important;
       box-shadow: none !important;
     }
+
+    &:focus {
+      color: ${props => darken(0.2, props.theme.primaryFontColor)} !important;
+    }
   }
+
+  .quote_dropdown_menu {
+    background: ${props => props.theme.secondaryBackground};
+    color: ${props => props.theme.primaryFontColor} !important;
+    padding: 0;
+  }
+
+  .dropdown-item {
+    color: ${props => props.theme.primaryFontColor};
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+
+
+    &:hover {
+      background: ${props => lighten(0.05, props.theme.secondaryBackground)};
+    }
+
+  }
+
 `
 
 export const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (

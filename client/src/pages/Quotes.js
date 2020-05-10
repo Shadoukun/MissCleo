@@ -170,7 +170,7 @@ const QuoteList = ({ guildId, userId }) => {
               </div>
               <div className="timestamp text-muted">{quote.timestamp}</div>
             </div>
-              <QuoteDropdown quoteId={quote.message_id} />
+              <QuoteDropdown quote={quote} />
           </div>
           <div className='quote-body'>
             {quote.message}
@@ -203,8 +203,12 @@ const QuoteList = ({ guildId, userId }) => {
 }
 
 
-const QuoteDropdown = (props) => {
-  const [quoteId,] = useState(props.quoteId)
+const QuoteDropdown = ({quote}) => {
+  const [quoteId, setQuoteId] = useState(quote.message_id)
+
+  useEffect(() => {
+    setQuoteId(quote.message_id)
+  }, [quote])
 
   const handleClick = () => {
     Copy(quoteId)
