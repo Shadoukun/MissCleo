@@ -115,6 +115,11 @@ export const QuoteCard = styled.div`
     display: flex;
     padding: .5em 1em .5em 3.5em;
     text-align: left !important;
+
+    img {
+      height: auto !important;
+      max-height: 20em !important;
+    }
   }
 
 `
