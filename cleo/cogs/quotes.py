@@ -66,7 +66,7 @@ class Quotes(commands.Cog):
         self.db.commit()
         await ctx.channel.send(REMOVED_MSG)
 
-    async def _get_quote(self, ctx, user=None):
+    async def _get_quote(self, ctx, user=None, quote_id=None):
         '''Get quote by the user on the current server.
            If 'user' is provided, get quote by that user.
            Otherwise, get a random quote.'''
@@ -77,19 +77,32 @@ class Quotes(commands.Cog):
                                     .order_by(func.random()).first()
         return quote
 
+
     @commands.guild_only()
     @commands.command(name='quote')
-    async def quote(self, ctx, *, username:str=None):
+    async def quote(self, ctx, *args):
+
 
         user = None
+        quote_id = None
         quote = None
 
-        # search for a user if a name is given.
-        if username:
-            user = await findUser(ctx, username)
-            if not user:
-                await ctx.channel.send("User not found.")
-                return
+        if args[0]:
+            try:
+                quote_id = int(args[0])
+                if quote_id:
+                    quote = await self._get_quote(ctx, quote_id=quote_id)
+                    if not quote:
+                        await ctx.channel.send("Quote not found.")
+                        return
+                    embed = self._create_embed(quote)
+                    await ctx.channel.send(embed=embed)
+                    return
+            except:
+                user = await findUser(ctx, args[0])
+                if not user:
+                    await ctx.channel.send("User not found.")
+                    return
 
         # range limit retries from cached duplicates.
         for _ in range(20):

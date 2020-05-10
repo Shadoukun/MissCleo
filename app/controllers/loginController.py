@@ -6,22 +6,24 @@ from cleo.db import FlaskUser
 from ..forms import LoginForm
 from .. import db
 from flask_jwt_extended import get_jwt_identity, create_access_token
+from flask_cors import cross_origin
 
 
 blueprint = Blueprint('login', __name__)
 
 
 @blueprint.route("/auth/login", methods=("GET", "POST"))
+@cross_origin()
 def login():
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
 
     username = request.json.get('userName', None)
     password = request.json.get('password', None)
-    
+
     if not username:
         return jsonify({"msg": "Missing username parameter"}), 400
-    
+
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
