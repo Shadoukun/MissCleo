@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Col, Row, Button } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
-import { Nav, ButtonToolbar } from 'react-bootstrap';
-import { IndexLinkContainer } from 'react-router-bootstrap';
 import ReactPaginate from 'react-paginate';
-import Copy from 'copy-to-clipboard';
-import { backendCall } from '../api';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons'
-import { backendURL } from '../api';
+import { Container, Col, Row } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
+import { Nav } from 'react-bootstrap';
+import { IndexLinkContainer } from 'react-router-bootstrap';
+import { backendCall, backendURL } from '../api';
+
 import {
   QuoteMain,
   QuoteSideBar,
   QuoteSideBarSection,
   QuoteSideBarNavLink,
-  QuoteCard,
-  QuoteDropdown as Dropdown,
-  CustomToggle,
+  QuoteEntry,
+  QuoteDropdown,
   PaginationWrapper
-} from '../components/QuoteComponents';
+} from '../components/Quotes';
 
 
 const rgbToHex = (rgb) => {
@@ -160,8 +156,9 @@ const QuoteList = ({ guildId, userId }) => {
 
   return (
     <QuoteMain className="quote-list">
+
       {quoteList.map((quote, i) =>
-        <QuoteCard key={i} className="quote-card card">
+        <QuoteEntry key={i} className="quote-card card">
           <div className="quote-header">
             <img src={quote.user.avatar_url} alt="" />
             <div className="wrapper">
@@ -175,10 +172,10 @@ const QuoteList = ({ guildId, userId }) => {
           <div className='quote-body'>
             {quote.message}
             {quote.attachments && quote.attachments.map((file, i) => {
-                return<img src={`${backendURL}/static/img/${file}`}></img>
-              })}
+              return <img src={`${backendURL}/static/img/${file}`} alt=""/>
+            })}
           </div>
-        </QuoteCard>
+        </QuoteEntry>
       )}
 
       <PaginationWrapper>
@@ -202,31 +199,6 @@ const QuoteList = ({ guildId, userId }) => {
       </PaginationWrapper>
 
     </QuoteMain>
-  )
-}
-
-
-const QuoteDropdown = ({quote}) => {
-  const [quoteId, setQuoteId] = useState(quote.message_id)
-
-  useEffect(() => {
-    setQuoteId(quote.message_id)
-  }, [quote])
-
-  const handleClick = () => {
-    Copy(quoteId)
-  }
-
-  return (
-      <Dropdown
-        id="quote_dropdown"
-        rootCloseEvent="mousedown"
-      >
-        <Dropdown.Toggle as={CustomToggle}><FontAwesomeIcon icon={faCaretDown} /></Dropdown.Toggle>
-        <Dropdown.Menu className="quote_dropdown_menu">
-          <Dropdown.Item eventKey="1" onClick={handleClick}>Copy Quote ID</Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
   )
 }
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ModalProvider, useModal } from '../context/Modal';
-import { backendCall } from '../api';
+import { Container, Row, Button, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Container, Row, Button, Form } from 'react-bootstrap';
+import { ModalProvider, useModal } from '../context/Modal';
 import { useAuth } from '../context/Auth';
+import { backendCall } from '../api';
 
 import {
   CommandCol,
@@ -42,14 +42,21 @@ const CommandsPage = () => {
 }
 
 
-const CommandListHeader = ({ setUpdate }) => {
+const CommandListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
+
+  const handleClick = (command) => {
+    showModal({
+      content: NewCommandModal,
+      contentProps: { hideModal, update, setUpdate },
+      ModalProps: {}
+    })
+  }
 
   return (
     <CommandListHeaderStyled>
       <h1>Chat Commands</h1>
-      {/* pass content component, props for the content component, and additional props for the modal itself. */}
-      <Button onClick={() => showModal({ content: NewCommandModal, contentProps: { hideModal, setUpdate }, ModalProps: {} })}>
+      <Button onClick={() => handleClick()}>
         Add Command
       </Button>
     </CommandListHeaderStyled>
@@ -60,14 +67,20 @@ const CommandListHeader = ({ setUpdate }) => {
 function CommandListMain({ commands, update, setUpdate }) {
   const { showModal, hideModal } = useModal()
 
+  const handleClick = (command) => {
+    showModal({
+      content: CommandModal,
+      contentProps: { command, hideModal, update, setUpdate },
+      ModalProps: {}
+    })
+  }
 
   return (
     <CommandListMainStyled>
       {commands.map((command, i) =>
         <CommandEntryStyled key={i}>
           <div className="command_name"> {"!" + command.command} </div>
-          {/* pass content component, props for the content component, and additional props for the modal itself. */}
-          <Button onClick={() => showModal({ content: CommandModal, contentProps: { command, hideModal, update, setUpdate }, ModalProps: {} })}>
+          <Button onClick={() => handleClick(command)}>
             Edit
           </Button>
         </CommandEntryStyled>
@@ -94,11 +107,14 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
-
     setCommand(event.target.elements.command.value)
     setResponse(event.target.elements.response.value)
-    backendCall.post('/editcommand', { id: commandId, command: command, response: response }, requestconfig);
+    backendCall.post(
+      '/editcommand',
+      { id: commandId, command: command, response: response },
+      requestconfig
+    );
+
     setUpdate((update) => ++update)
     hideModal()
   }
@@ -146,7 +162,12 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     setCommand(event.target.elements.command.value)
     setResponse(event.target.elements.response.value)
-    backendCall.post('/addcommand', { command: command, response: response }, requestconfig);
+    backendCall.post(
+      '/addcommand',
+      { command: command, response: response },
+      requestconfig
+    );
+
     setUpdate(update => ++update)
     hideModal()
   }

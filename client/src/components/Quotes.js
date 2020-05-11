@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Nav, Dropdown, Button } from 'react-bootstrap';
 import { lighten, darken } from 'polished';
-
+import Copy from 'copy-to-clipboard';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons'
 
 
 export const QuoteMain = styled.div`
@@ -20,6 +22,7 @@ export const QuoteSideBar = styled.div`
     height: 100%;
     background: ${p => p.theme.secondaryBackground}
 `
+
 
 export const QuoteSideBarSection = styled.div`
   margin-bottom: 20px;
@@ -52,6 +55,7 @@ export const QuoteSideBarSection = styled.div`
   }
 `
 
+
 export const QuoteSideBarNavLink = styled(Nav.Link)`
   display:flex;
   align-items: center;
@@ -69,7 +73,7 @@ export const QuoteSideBarNavLink = styled(Nav.Link)`
 
 `
 
-export const QuoteCard = styled.div`
+export const QuoteEntry = styled.div`
   border-radius: 20px !important;
   margin-bottom: .5em;
   display: flex;
@@ -124,6 +128,7 @@ export const QuoteCard = styled.div`
 
 `
 
+
 export const PaginationWrapper = styled.div`
     padding-top: 1em;
     padding-bottom: 2em;
@@ -156,7 +161,7 @@ export const PaginationWrapper = styled.div`
 
 `
 
-export const QuoteDropdown = styled(Dropdown)`
+const StyledDropdown = styled(Dropdown)`
   margin-left: auto;
 
   button {
@@ -194,7 +199,7 @@ export const QuoteDropdown = styled(Dropdown)`
 
 `
 
-export const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
   <Button
     href=""
     ref={ref}
@@ -206,3 +211,28 @@ export const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     {children}
   </Button>
 ));
+
+
+export const QuoteDropdown = ({ quote }) => {
+  const [quoteId, setQuoteId] = useState(quote.message_id)
+
+  useEffect(() => {
+    setQuoteId(quote.message_id)
+  }, [quote])
+
+  const handleClick = () => {
+    Copy(quoteId)
+  }
+
+  return (
+    <StyledDropdown
+      id="quote_dropdown"
+      rootCloseEvent="mousedown"
+    >
+      <Dropdown.Toggle as={CustomToggle}><FontAwesomeIcon icon={faCaretDown} /></Dropdown.Toggle>
+      <Dropdown.Menu className="quote_dropdown_menu">
+        <Dropdown.Item eventKey="1" onClick={handleClick}>Copy Quote ID</Dropdown.Item>
+      </Dropdown.Menu>
+    </StyledDropdown>
+  )
+}

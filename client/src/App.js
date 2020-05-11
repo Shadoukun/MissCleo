@@ -1,20 +1,19 @@
 import React from 'react';
 import './App.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Admin from './pages/Admin';
-import Login from './pages/Login';
-import CommandsPage from './pages/Commands'
-import QuotePage from './pages/Quotes'
-import { useAuth, AuthProvider } from "./context/Auth";
 import {
   BrowserRouter as Router,
   Switch,
   Route
 } from "react-router-dom";
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import PrivateRoute from './PrivateRoute';
-import { LinkContainer } from 'react-router-bootstrap';
-import { Navbar, Nav } from 'react-bootstrap'
-import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
+import { AuthProvider } from './context/Auth';
+import CleoNavbar from './components/Navbar';
+import Admin from './pages/Admin';
+import Login from './pages/Login';
+import CommandsPage from './pages/Commands';
+import QuotePage from './pages/Quotes'
 
 
 export const theme = {
@@ -31,9 +30,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `
 
-
 function App() {
-
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -42,70 +39,17 @@ function App() {
 
           <div className="App">
             <CleoNavbar />
-
             <Switch>
               <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
               <Route path={'/commands'} component={CommandsPage} />
               <PrivateRoute path="/admin" component={Admin} />
               <Route path="/login" component={Login} />
-
             </Switch>
           </div>
         </AuthProvider>
-
       </Router>
     </ThemeProvider>
   );
-}
-
-
-const StyledNavbar = styled(Navbar)`
-    background: ${props => props.theme.secondaryBackground} !important;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-
-    .navbar-nav {
-      flex-grow: 1;
-    }
-
-    .login-wrapper {
-      margin-left: auto;
-    }
-  `
-
-const CleoNavbar = () => {
-  const { authToken } = useAuth()
-  return (
-    <StyledNavbar expand="lg" variant="dark">
-      <Navbar.Brand href="#home">Miss Cleo</Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="mr-auto">
-          <LinkContainer to="/quotes">
-            <Nav.Link>Quotes</Nav.Link>
-          </LinkContainer>
-          <LinkContainer to="/commands">
-            <Nav.Link>Commands</Nav.Link>
-          </LinkContainer>
-
-          <div className="login-wrapper">
-          {authToken ? (
-            <LinkContainer to="/admin">
-              <Nav.Link>Logout</Nav.Link>
-            </LinkContainer>
-          ) : (
-              <LinkContainer to="/login">
-                <Nav.Link>Login</Nav.Link>
-              </LinkContainer>
-            )
-          }
-          </div>
-        </Nav>
-      </Navbar.Collapse>
-    </StyledNavbar>
-  )
-
 }
 
 export default App;

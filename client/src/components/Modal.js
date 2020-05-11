@@ -1,29 +1,29 @@
 import React from 'react';
 import { Transition } from 'react-transition-group';
-import { Modal as OverlaysModal } from 'react-overlays'
+import { Modal } from 'react-overlays'
 import styled from 'styled-components';
 
 const FADE_DURATION = 200;
 
 const fadeStyles = {
-    entering: 'show',
-    entered: 'show',
-    exiting: '',
-    exited: ''
+  entering: 'show',
+  entered: 'show',
+  exiting: '',
+  exited: ''
 };
 
 export const Fade = ({ children, ...props }) => {
-    console.log(props)
-    return (
-        <Transition {...props} timeout={FADE_DURATION}>
-            {(status, innerProps) => (
-                React.cloneElement(children, {
-                    ...innerProps,
-                    className: `fade ${fadeStyles[status]} ${children.props.className}`,
-                }))
-            }
-        </Transition>
-    );
+  console.log(props)
+  return (
+    <Transition {...props} timeout={FADE_DURATION}>
+      {(status, innerProps) => (
+        React.cloneElement(children, {
+          ...innerProps,
+          className: `fade ${fadeStyles[status]} ${children.props.className}`,
+        }))
+      }
+    </Transition>
+  );
 }
 
 export const Backdrop = styled("div")`
@@ -38,7 +38,7 @@ export const Backdrop = styled("div")`
   transition: opacity 200ms ease-in-out;
 `
 
-export const StyledModal = styled(OverlaysModal)`
+export const StyledModal = styled(Modal)`
   position: fixed;
   top: 50%;
   left: 50%;

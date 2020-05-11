@@ -64,8 +64,6 @@ export const CommandModalStyle = styled.div`
         background: ${props => lighten(0.05, props.theme.backgroundColor)};
         color: ${props => props.theme.primaryFontColor};
   }
-
-
 `
 
 
@@ -151,5 +149,4 @@ export const CommandEntryStyled = styled.div`
     }
 
   }
-
 `

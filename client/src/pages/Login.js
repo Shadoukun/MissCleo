@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Redirect } from 'react-router-dom';
-import axios from 'axios';
 import { Form, Button } from 'react-bootstrap';
 import { useAuth } from "../context/Auth";
 import { backendCall } from "../api";
