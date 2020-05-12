@@ -8,7 +8,7 @@ from sqlalchemy import and_, func
 from pathlib import Path
 
 import config
-from cleo.db import Quote
+from cleo.db import Quote, GuildMembership
 from cleo.utils import admin_only, findUser
 
 logger = logging.getLogger(__name__)
@@ -81,30 +81,57 @@ class Quotes(commands.Cog):
                                     .order_by(func.random()).first()
         return quote
 
+    async def _get_quote_user(self, ctx, username):
+
+        user = await findUser(ctx, username)
+
+        # try to find user in database.
+        # For users that are no longer in the server.
+        if not user:
+            user = self.db.query(GuildMembership).filter(and_(
+                GuildMembership.display_name == username, GuildMembership.guild_id == ctx.guild.id)).first()
+
+        if user:
+            return user
+        else:
+            return None
+
+
+    def quote_or_user(self, arg):
+        '''Returns true if arg is an int (quote ID),
+        else returns false (user)'''
+
+        try:
+            quote_id = int(arg)
+            return True
+        except:
+            return False
+
+
 
     @commands.guild_only()
     @commands.command(name='quote')
     async def quote(self, ctx, *args):
-
-
         user = None
         quote_id = None
         quote = None
 
         if args:
-            try:
-                quote_id = int(args[0])
-                if quote_id:
-                    quote = await self._get_quote(ctx, quote_id=quote_id)
-                    if not quote:
-                        await ctx.channel.send("Quote not found.")
-                        return
-
-                    embed = self._create_embed(quote)
-                    await ctx.channel.send(embed=embed)
+            type_check = self.quote_or_user(args[0])
+            if type_check:
+                # arg is a quote_id
+                quote = await self._get_quote(ctx, quote_id=quote_id)
+                if not quote:
+                    await ctx.channel.send("Quote not found.")
                     return
-            except:
-                user = await findUser(ctx, args[0])
+
+                embed = self._create_embed(quote)
+                await ctx.channel.send(embed=embed)
+                return
+
+            else:
+                # arg is a username
+                user = await self._get_quote_user(ctx, args[0])
                 if not user:
                     await ctx.channel.send("User not found.")
                     return
