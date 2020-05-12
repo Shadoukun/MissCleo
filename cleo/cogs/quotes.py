@@ -76,7 +76,6 @@ class Quotes(commands.Cog):
            '''
 
         filters = [Quote.guild_id == ctx.guild.id]
-
         if user_id:
             filters += [Quote.user_id == user_id]
         elif quote_id:
@@ -84,7 +83,6 @@ class Quotes(commands.Cog):
 
         quote = self.db.query(Quote).filter(and_(*filters)) \
                                     .order_by(func.random())
-
         if limit:
             quote = quote.limit(limit).all()
         else:
@@ -128,7 +126,6 @@ class Quotes(commands.Cog):
 
         if args:
             type_check = self.quote_or_user(args[0])
-            print(type_check)
             if type_check:
                 # arg is a quote_id
                 quote = await self._get_quote(ctx, quote_id=args[0])
