@@ -66,14 +66,14 @@ class Quotes(commands.Cog):
         self.db.commit()
         await ctx.channel.send(REMOVED_MSG)
 
-    async def _get_quote(self, ctx, user=None, quote_id=None):
+    async def _get_quote(self, ctx, user_id=None, quote_id=None):
         '''Get quote by the user on the current server.
            If 'user' is provided, get quote by that user.
            Otherwise, get a random quote.'''
 
         filters = [Quote.guild_id == ctx.guild.id]
-        if user:
-            filters += [Quote.user_id == user.id]
+        if user_id:
+            filters += [Quote.user_id == user_id]
         elif quote_id:
             filters += [Quote.message_id == quote_id]
 
@@ -85,14 +85,16 @@ class Quotes(commands.Cog):
 
         user = await findUser(ctx, username)
 
+        if user:
+            return user.id
+
         # try to find user in database.
         # For users that are no longer in the server.
-        if not user:
-            user = self.db.query(GuildMembership).filter(and_(
-                GuildMembership.display_name == username, GuildMembership.guild_id == ctx.guild.id)).first()
+        user = self.db.query(GuildMembership).filter(and_(
+            GuildMembership.display_name == username, GuildMembership.guild_id == ctx.guild.id)).first()
 
         if user:
-            return user
+            return user.user_id
         else:
             return None
 
@@ -138,7 +140,7 @@ class Quotes(commands.Cog):
 
         # range limit retries from cached duplicates.
         for _ in range(20):
-            quote = await self._get_quote(ctx, user)
+            quote = await self._get_quote(ctx, user_id=user)
             if not quote:
                 await ctx.channel.send(NORESULTS_MSG)
                 return
