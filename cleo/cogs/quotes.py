@@ -17,6 +17,7 @@ NORESULTS_MSG = "Message not found."
 NOQUOTE_MSG = "No quotes found."
 REMOVED_MSG = "Quote removed."
 ADDED_MSG = "Quote added."
+ALLSEEN_MSG = "All quotes have already been seen."
 
 
 class QuoteAttachmentError(Exception):
@@ -60,16 +61,19 @@ class Quotes(commands.Cog):
     async def _remove_quote(self, ctx, message):
         '''Remove a quote from the database.'''
 
-        quote = self.db.query(Quote).filter_by(guild_id=ctx.guild.id) \
-                                    .filter_by(message_id=message.id) \
-                                    .delete()
+        self.db.query(Quote).filter_by(guild_id=ctx.guild.id) \
+                                .filter_by(message_id=message.id) \
+                                .delete()
         self.db.commit()
         await ctx.channel.send(REMOVED_MSG)
 
-    async def _get_quote(self, ctx, user_id=None, quote_id=None):
+    async def _get_quote(self, ctx, user_id=None, quote_id=None, limit=None):
         '''Get quote by the user on the current server.
            If 'user' is provided, get quote by that user.
-           Otherwise, get a random quote.'''
+           Otherwise, get a random quote.
+
+           if limit is given, return total number of quotes.
+           '''
 
         filters = [Quote.guild_id == ctx.guild.id]
         if user_id:
@@ -78,37 +82,40 @@ class Quotes(commands.Cog):
             filters += [Quote.message_id == quote_id]
 
         quote = self.db.query(Quote).filter(and_(*filters)) \
-                                    .order_by(func.random()).first()
+                                    .order_by(func.random())
+        if limit:
+            quote = quote.limit(limit).all()
+        else:
+            quote = quote.first()
+
         return quote
 
     async def _get_quote_user(self, ctx, username):
 
         user = await findUser(ctx, username)
-
         if user:
             return user.id
 
         # try to find user in database.
         # For users that are no longer in the server.
         user = self.db.query(GuildMembership).filter(and_(
-            GuildMembership.display_name == username, GuildMembership.guild_id == ctx.guild.id)).first()
+            GuildMembership.display_name == username,
+            GuildMembership.guild_id == ctx.guild.id)).first()
 
         if user:
             return user.user_id
         else:
             return None
 
-
     def quote_or_user(self, arg):
         '''Returns true if arg is an int (quote ID),
         else returns false (user)'''
 
         try:
-            quote_id = int(arg)
+            _ = int(arg)
             return True
         except:
             return False
-
 
 
     @commands.guild_only()
@@ -138,13 +145,13 @@ class Quotes(commands.Cog):
                     await ctx.channel.send("User not found.")
                     return
 
-        # range limit retries from cached duplicates.
-        for _ in range(20):
-            quote = await self._get_quote(ctx, user_id=user)
-            if not quote:
-                await ctx.channel.send(NORESULTS_MSG)
-                return
+        # limit retries from cached duplicates.
+        quotes = await self._get_quote(ctx, user_id=user, limit=20)
+        if not quotes:
+            await ctx.channel.send(NORESULTS_MSG)
+            return
 
+        for quote in quotes:
             # check to see if quote was already sent recently
             cached_quote = self.cache.get(quote.message_id, None)
             if not cached_quote:
@@ -157,7 +164,8 @@ class Quotes(commands.Cog):
             embed = self._create_embed(quote)
             await ctx.channel.send(embed=embed)
         else:
-            await ctx.channel.send("All quotes have already been seen.")
+            await ctx.channel.send(ALLSEEN_MSG)
+
 
     @commands.guild_only()
     @admin_only()
@@ -187,7 +195,7 @@ class Quotes(commands.Cog):
 
                 for m in messagelist[1:]:
                     if m.attachments:
-                        # no attachments
+                        # no attachments in multi-quote messages. (for now)
                         raise QuoteAttachmentError
 
                     # Check that all messages retrieved are from the same user.
@@ -221,6 +229,7 @@ class Quotes(commands.Cog):
             await ctx.channel.send("All messages must be from the same user.")
         except QuoteAttachmentError:
             await ctx.channel.send("Multi-message quotes can't have attachments.")
+
 
     @commands.guild_only()
     @admin_only()
