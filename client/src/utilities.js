@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { theme } from './theme';
 
 export const backendURL = window.location.hostname.includes("localhost") ? "http://localhost:5000" : "/api"
 

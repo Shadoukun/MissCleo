@@ -14,13 +14,11 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import CommandsPage from './pages/Commands';
 import QuotePage from './pages/Quotes'
-import { createMuiTheme } from '@material-ui/core/styles';
-import { makeStyles } from '@material-ui/core/styles';
 import { ThemeProvider } from 'styled-components';
-import { Box, CssBaseline, StylesProvider } from '@material-ui/core';
+import { CssBaseline, StylesProvider } from '@material-ui/core';
 import { createGlobalStyle } from 'styled-components'
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/styles';
-import { theme as customTheme } from './theme';
+import { theme } from './theme';
 
 // export const theme = {
 //   backgroundColor: "#2f3136",
@@ -36,38 +34,30 @@ const GlobalStyle = createGlobalStyle`
   }
 `
 
-// const useStyles = makeStyles({
-//   root: {
-//     background: "#2f3136",
-//     height: "100%",
-//     width: "100%",
-//   },
-// })
-
-
 function App() {
 
   return (
     <StylesProvider injectFirst>
-    <MuiThemeProvider theme={customTheme}>
-    <ThemeProvider theme={customTheme}>
-    <Box>
-      <CssBaseline />
-      <GlobalStyle />
-      <Router>
-        <AuthProvider>
-          <Navbar />
-          <Switch>
-            <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
-            <Route path={'/commands'} component={CommandsPage} />
-            <PrivateRoute path="/admin" component={Admin} />
-            <Route path="/login" component={Login} />
-          </Switch>
-        </AuthProvider>
-      </Router>
-    </Box>
-    </ThemeProvider>
-    </MuiThemeProvider>
+      <MuiThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <GlobalStyle />
+          <div className="App">
+            <Router>
+              <AuthProvider>
+                <Navbar />
+
+                <Switch>
+                  <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
+                  <Route path={'/commands'} component={CommandsPage} />
+                  <PrivateRoute path="/admin" component={Admin} />
+                  <Route path="/login" component={Login} />
+                </Switch>
+              </AuthProvider>
+            </Router>
+          </div>
+        </ThemeProvider>
+      </MuiThemeProvider>
     </StylesProvider>
 
   );

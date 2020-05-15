@@ -1,7 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import AppBar from '@material-ui/core/AppBar';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import React, { useState } from 'react';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
@@ -9,10 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import axios from 'axios';
 import { theme } from '../theme';
 
 
@@ -38,6 +32,11 @@ const useStyles = makeStyles(theme => ({
         [theme.breakpoints.up('sm')]: {
             display: 'none',
         },
+        '&:focus': {
+            outline: "none",
+            border: "none",
+            boxShadow: "none",
+        },
     },
     toolbar: theme.mixins.toolbar,
     drawerPaper: {
@@ -52,6 +51,11 @@ const useStyles = makeStyles(theme => ({
     closeMenuButton: {
         marginRight: 'auto',
         marginLeft: 0,
+        '&:focus': {
+            outline: "none",
+            border: "none",
+            boxShadow: "none",
+        },
     },
 }));
 

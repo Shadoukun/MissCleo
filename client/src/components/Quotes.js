@@ -11,14 +11,12 @@ import {
   ListItemText,
   ListItemAvatar,
   ListSubheader,
-  Paper,
-  Box
+  Paper
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import styled from 'styled-components';
-import { lighten, darken } from 'polished';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons'
+import { lighten, darken } from 'polished';
+import styled from 'styled-components';
 
 import { backendURL, backendCall, rgbToHex } from '../utilities';
 
@@ -94,25 +92,27 @@ const QuoteListStyled = styled.div`
 
       .page-item {
         color: white;
-      }
 
-      .page-link {
-        color: white;
-        background: ${theme.colors.backgroundColor};
+         .page-link {
+            color: white;
+            background: ${theme.colors.backgroundColor};
+            border: 1px solid ${theme.colors.secondaryBackground};
 
-        &:active, &:focus, &:hover {
-          box-shadow: none !important;
+            &:active, &:focus, &:hover {
+              box-shadow: none !important;
+            }
+         }
+
+        &.active .page-link {
+            color: ${ darken(0.05, theme.colors.primaryFontColor)};
+            background: ${ lighten(0.1, theme.colors.backgroundColor)};
         }
       }
 
-      &.active .page-link {
-        border: none;
+
+      &.active {
+        border:
         background: #474a51;
-
-        .page-link {
-            background: none;
-            border: 1px solid #202225;
-        }
       }
     }
   `}
@@ -128,7 +128,7 @@ export const GuildList = ({ setGuild }) => {
   const [guildList, setGuildList] = useState([]);
   const { guildId } = useParams();
 
-  const isActive = (value) => ( value == guildId ? "active" : '' )
+  const isActive = (value) => ( value === guildId ? "active" : '' )
 
 
   useEffect(() => {
@@ -145,7 +145,11 @@ export const GuildList = ({ setGuild }) => {
       subheader={<SidebarListHeader name="Servers" />}
     >
       {guildList.map((guild, i) =>
-        <GuildEntry activeClass={isActive(guild.id)} guild={guild} onClick={() => setGuild(guild.id)} />
+        <GuildEntry key={i}
+          activeClass={isActive(guild.id)}
+          guild={guild}
+          onClick={() => setGuild(guild.id)}
+        />
       )}
 
     </List>
@@ -157,7 +161,7 @@ export const MemberList = ({ guildId, activeUserId, setUser }) => {
   const [userList, setUserList] = useState([]);
   const { userId } = useParams();
 
-  const isActive = (value) => (value == userId ? "active" : '')
+  const isActive = (value) => (value === userId ? "active" : '')
 
   useEffect(() => {
     (async () => {
@@ -171,7 +175,11 @@ export const MemberList = ({ guildId, activeUserId, setUser }) => {
       subheader={<SidebarListHeader name="Members" />}
       >
       {userList.map((user, i) =>
-        <MemberEntry activeClass={isActive(user.user_id)} user={user} guildId={guildId} />
+        <MemberEntry key={i}
+          activeClass={isActive(user.user_id)}
+          user={user}
+          guildId={guildId}
+        />
       )}
     </List>
   )
@@ -239,7 +247,7 @@ export const QuoteList = ({ guildId, userId }) => {
   return (
     <QuoteListStyled>
       {quoteList.map((quote, i) =>
-        <QuoteEntry quote={quote} />
+        <QuoteEntry key={i} quote={quote} />
       )}
 
       {!!quoteList.length &&
@@ -259,7 +267,8 @@ export const QuoteList = ({ guildId, userId }) => {
           nextLinkClassName="page-link"
           activeClassName="active"
           onPageChange={handlePageClick}
-        />}
+        />
+      }
     </QuoteListStyled>
   )
 }
@@ -291,159 +300,6 @@ const QuoteEntry = ({ quote }) => (
   </QuoteEntryStyled>
 )
 
-// export const QuoteMain = styled.div`
-//   padding-top: 1em;
-// `
-
-// export const QuoteSideBar = styled.div`
-//     position: sticky;
-//     top: 3.5rem !important;
-//     height: calc(100vh - 3.5rem) !important;
-//     flex: 0 1 240px;
-//     overflow-y: scroll;
-//     scrollbar-width: none;
-//     color: gray;
-//     height: 100%;
-//     background: ${p => p.theme.secondaryBackground}
-// `
-
-
-// export const QuoteSideBarSection = styled.div`
-//   margin-bottom: 20px;
-
-//   h1 {
-//     padding: 1em;
-//     color: white;
-//     text-align:left;
-//     font-size: 1.25em;
-//   }
-
-//   .nav {
-//     display: flex;
-//     flex-direction: column !important;
-
-//     .quote-avatar {
-//       height: 40px;
-//       width: 40px;
-//     }
-
-//     .avatar {
-//       border-radius: 100px;
-//       width:40px;
-//       height: 40px;
-//     }
-
-//     .name {
-//       margin-left: 1em;
-//     }
-//   }
-// `
-
-
-// export const QuoteSideBarNavLink = styled(Nav.Link)`
-//   display:flex;
-//   align-items: center;
-//   color: gray;
-//   font-weight: bold;
-
-//   &:active, &:focus{
-//     outline: none;
-//     }
-
-//   &.active {
-//     color: white !important;
-//     background: gray !important;
-//   }
-
-// `
-
-// export const QuoteEntry = styled.div`
-//   border-radius: 20px !important;
-//   margin-bottom: .5em;
-//   display: flex;
-//   background: #36393f;
-//   color: ${props => props.theme.primaryFontColor};
-//   box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.8);
-//   padding: 1em;
-
-//   .quote-header {
-
-//     display: flex;
-//     width: 100%;
-//     padding: 0;
-//     border: none;
-//     background: transparent;
-//     align-items: center;
-
-//     img {
-//       height: 40px;
-//       width: 40px;
-//       margin-right: 1em !important;
-//       border-radius: 100px !important;
-//     }
-
-//     .wrapper {
-//         display:flex;
-//         align-items: center;
-//     }
-
-//     .name {
-//         height: auto;
-//         font-weight: bold;
-//         margin-right: .5em;
-//     }
-
-//     .timestamp {
-//         font-size: 80%;
-//     }
-
-//   }
-
-//   .quote-body {
-//     display: flex;
-//     padding: .5em 1em .5em 3.5em;
-//     text-align: left !important;
-
-//     img {
-//       height: auto !important;
-//       max-height: 20em !important;
-//     }
-//   }
-
-// `
-
-
-// export const PaginationWrapper = styled.div`
-//     padding-top: 1em;
-//     padding-bottom: 2em;
-//     display: inline-flex !important;
-
-//     .page-item {
-//       color: white;
-
-//       .page-link {
-//         color: white;
-//         background: ${props => props.theme.backgroundColor};
-
-//         &:active, &:focus, &:hover {
-//           box-shadow: none !important;
-//         }
-//       }
-
-//       &.active .page-link {
-//           border: none;
-//           background: #474a51;
-//       }
-//     }
-
-//     .pagination .page-link {
-//         background: none;
-//         border: 1px solid #202225;
-
-
-//     }
-
-// `
 
 const StyledDropdown = styled(Dropdown)`
   margin-left: auto;
