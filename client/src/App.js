@@ -11,7 +11,7 @@ import { AuthProvider } from './context/Auth';
 import PrivateRoute from './PrivateRoute';
 import Navbar from './components/Navbar';
 import Admin from './pages/Admin';
-import Login from './pages/Login';
+import { Login, Logout } from './pages/Login';
 import CommandsPage from './pages/Commands';
 import QuotePage from './pages/Quotes'
 import { ThemeProvider } from 'styled-components';
@@ -52,6 +52,7 @@ function App() {
                   <Route path={'/commands'} component={CommandsPage} />
                   <PrivateRoute path="/admin" component={Admin} />
                   <Route path="/login" component={Login} />
+                  <Route path="/logout" component={Logout} />
                 </Switch>
               </AuthProvider>
             </Router>

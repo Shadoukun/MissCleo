@@ -18,10 +18,8 @@ const QuotePage = (props) => {
   return (
     <>
       <ResponsiveDrawer>
-        <Box>
         <GuildList setGuild={setGuild} activeGuildId={guild} />
         {guild && <MemberList guildId={guild} activeUserId={user} setUser={setUser} />}
-        </Box>
       </ResponsiveDrawer>
       <QuoteList guildId={guild} userId={user} />
     </>

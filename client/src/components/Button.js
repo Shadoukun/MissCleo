@@ -4,17 +4,25 @@ import styled from 'styled-components';
 export const Button = styled(MuiButton)`
  &:hover {
     color: inherit;
+    text-decoration: none;
  }
 
  &:focus {
       box-shadow: none;
       outline: none;
+      text-decoration: none;
     }
 `
 
 export const IconButton = styled(MuiIconButton)`
-    &:focus {
+ &:hover {
+    color: inherit;
+    text-decoration: none;
+ }
+
+ &:focus {
       box-shadow: none;
       outline: none;
+      text-decoration: none;
     }
 `

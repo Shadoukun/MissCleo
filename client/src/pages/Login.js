@@ -5,7 +5,7 @@ import { backendCall } from "../api";
 import { LoginForm } from '../components/Login'
 import { Container } from '@material-ui/core'
 
-const Login = (props) => {
+export const Login = (props) => {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [isError, setIsError] = useState(false);
   const [userName, setUserName] = useState("");
@@ -45,5 +45,10 @@ const Login = (props) => {
   }
 }
 
+export const Logout = () => {
+  const { setAuthToken } = useAuth();
+  setAuthToken('');
 
-export default Login
+  return <Redirect to='/' />;
+
+}
