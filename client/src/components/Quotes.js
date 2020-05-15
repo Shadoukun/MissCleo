@@ -67,6 +67,7 @@ const QuoteEntryStyled = styled(Paper)`
     }
 
     .quoteBody {
+      text-align: left;
       margin-left: 60px;
       margin-top: -5px;
     }

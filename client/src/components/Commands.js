@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { lighten, darken } from 'polished';
-import { Button, TextField } from '@material-ui/core'
+import { Input, FormLabel, FormControl } from './Form'
+import { Button } from "./Button"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 import { useModal } from '../context/Modal';
 import { useAuth } from '../context/Auth';
 import { backendCall } from '../utilities';
-
 
 
 export const CommandListHeaderStyled = styled.div`
@@ -122,12 +122,11 @@ const ModalStyle = styled.div`
     }
 `}`
 
-const ModalInput = styled(TextField)`
-${({ theme }) => `
-  margin-bottom: 20px;
-  background: ${theme.colors.backgroundColor}
-`}`
-
+const ModalFormControl = styled(FormControl)`
+  div.MuiFormControl-root + & {
+    margin-top: 15px;
+  }
+`
 
 export const CommandListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
@@ -259,15 +258,15 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   }
 
   return (
-    <>
-      <div className="modal-header">
-        <div className="modal-title">
+    <ModalStyle>
+      <div className="modalHeader">
+        <div className="modalTitle">
           <h1>New Command</h1>
         </div>
         <Button onClick={hideModal}><FontAwesomeIcon icon={faTimes} /></Button>
       </div>
 
-      <div className="modal-body">
+      <div className="modalBody">
         <CommandForm
           command={command}
           response={response}
@@ -276,31 +275,38 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
           handleResponseChange={handleResponseChange}
         />
       </div>
-    </>
+    </ModalStyle>
   )
 }
 
 
 const CommandForm = (props) => (
-  <form onSubmit={props.handleSubmit} autoComplete="off">
-    <ModalInput
-      variant="outlined"
-      label="Command"
-      id="command"
-      fullWidth
-      value={props.command}
-      onChange={props.handleCommandChange}
-    />
+  <form onSubmit={props.handleSubmit} autoComplete="off" style={{ display: "flex", flexDirection: "column" }}>
+    <ModalFormControl>
+      <FormLabel>Command</FormLabel>
+      <Input
+        variant="filled"
+        label="Command"
+        id="command"
+        value={props.command}
+        onChange={props.handleCommandChange}
 
-    <ModalInput
-      variant="outlined"
-      multiline
-      rows={2}
-      rowsMax={4}
-      fullWidth
-      value={props.response}
-      onChange={props.handleResponseChange}
-    />
+      />
+    </ModalFormControl>
+
+    <ModalFormControl>
+      <FormLabel>Response</FormLabel>
+      <Input
+        variant="filled"
+        label="Response"
+        id="response"
+        multiline
+        rows={3}
+        rowsMax={6}
+        value={props.response}
+        onChange={props.handleResponseChange}
+      />
+    </ModalFormControl>
 
     <div className="modalFooter">
       <Button type="submit">
