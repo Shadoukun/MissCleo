@@ -11,7 +11,6 @@ const ModalProvider = (props) => {
   const [modalContent, setModalContent] = useState("")
   const [modalProps, setModalProps] = useState({})
 
-
   const showModal = ({ content: Component, contentProps = {}, newModalProps = {} }) => {
 
     setModalContent((() => <Component {...contentProps} />))

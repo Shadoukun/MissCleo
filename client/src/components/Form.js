@@ -9,7 +9,11 @@ import { FormLabel as MuiFormLabel, FormControl as MuiFormControl } from '@mater
 import { lighten, darken } from 'polished';
 
 export const FormControl = styled(MuiFormControl)`
- label + &.MuiInputBase-formControl {
+  div.MuiFormControl-root + & {
+    margin-top: 15px;
+  }
+
+  label + &.MuiInputBase-formControl {
     padding: 0 0 7px 0;
  }
 `

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Redirect } from 'react-router-dom';
-import { Form, Button } from 'react-bootstrap';
 import { useAuth } from "../context/Auth";
 import { backendCall } from "../api";
+import { LoginForm } from '../components/Login'
+import { Container } from '@material-ui/core'
 
 const Login = (props) => {
   const [isLoggedIn, setLoggedIn] = useState(false);
@@ -11,28 +12,33 @@ const Login = (props) => {
   const [password, setPassword] = useState("");
   const { setAuthToken } = useAuth();
 
-
-  const postLogin = () => {
-    backendCall.post("/auth/login", { userName, password})
-    .then(result => {
-      if (result.status === 200) {
-        console.log(result)
-        setAuthToken(result.data.access_token);
-        setLoggedIn(true);
-      } else {
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    backendCall.post("/auth/login", { userName, password })
+      .then(result => {
+        if (result.status === 200) {
+          console.log(result)
+          setAuthToken(result.data.access_token);
+          setLoggedIn(true);
+        } else {
+          setIsError(true);
+        }
+      }).catch(e => {
+        console.log(e)
         setIsError(true);
-      }
-    }).catch(e => {
-      setIsError(true);
-    });
+      });
   }
 
   if (!isLoggedIn) {
     return (
-      <div>
-        <LoginForm setUserName={setUserName} setPassword={setPassword} postLogin={postLogin} />
+      <Container maxWidth="xs">
+        <LoginForm
+          setUserName={setUserName}
+          setPassword={setPassword}
+          handleSubmit={handleSubmit}
+        />
         {isError && "The username or password provided were incorrect!"}
-      </div>
+      </Container>
     )
   } else {
     return <Redirect to='/' />;
@@ -40,27 +46,4 @@ const Login = (props) => {
 }
 
 
-const LoginForm = ({ setUserName, setPassword, postLogin }) => (
-  <Form>
-    <Form.Group controlId="loginUserName">
-      <Form.Label>Username</Form.Label>
-      <Form.Control
-        type="username"
-        placeholder="Username"
-        onChange={e => { setUserName(e.target.value); }}
-      />
-    </Form.Group>
-
-    <Form.Group controlId="loginPassword">
-      <Form.Label>Password</Form.Label>
-      <Form.Control
-        type="password"
-        placeholder="Password"
-        onChange={e => { setPassword(e.target.value); }}
-      />
-    </Form.Group>
-    <Button onClick={postLogin}>Submit</Button>
-  </Form>
-)
-
-export default Login;
+export default Login

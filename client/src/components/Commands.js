@@ -122,6 +122,13 @@ const ModalStyle = styled.div`
     }
 `}`
 
+
+const ModalForm = styled.form`
+    display: flex;
+    flex-direction: column;
+`
+
+
 const ModalFormControl = styled(FormControl)`
   div.MuiFormControl-root + & {
     margin-top: 15px;
@@ -245,8 +252,6 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setCommand(event.target.elements.command.value)
-    setResponse(event.target.elements.response.value)
     backendCall.post(
       '/addcommand',
       { command: command, response: response },
@@ -281,7 +286,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
 
 const CommandForm = (props) => (
-  <form onSubmit={props.handleSubmit} autoComplete="off" style={{ display: "flex", flexDirection: "column" }}>
+  <ModalForm onSubmit={props.handleSubmit} autoComplete="off">
     <ModalFormControl>
       <FormLabel>Command</FormLabel>
       <Input
@@ -313,5 +318,5 @@ const CommandForm = (props) => (
         Save
       </Button>
     </div>
-  </form>
+  </ModalForm>
 )
