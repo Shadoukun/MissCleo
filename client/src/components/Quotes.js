@@ -301,7 +301,7 @@ const QuoteEntry = ({ quote }) => (
     <div className="quoteBody">
       {quote.message}
       {quote.attachments && quote.attachments.map((file, i) =>
-        <img src={`${backendURL}/static/img/${file}`} alt="" />
+        <img src={`${backendURL}/files/${file}`} alt="" />
       )}
     </div>
   </QuoteEntryStyled>
