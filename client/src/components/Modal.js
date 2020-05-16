@@ -12,6 +12,7 @@ const fadeStyles = {
   exited: ''
 };
 
+
 export const Fade = ({ children, ...props }) => {
   console.log(props)
   return (
@@ -35,7 +36,6 @@ export const Backdrop = styled("div")`
   right: 0;
   background-color: #000;
   opacity: 0.5;
-  transition: opacity 200ms ease-in-out;
 `
 
 export const StyledModal = styled(Modal)`
@@ -44,7 +44,8 @@ export const StyledModal = styled(Modal)`
   left: 50%;
   z-index: 1040;
   transform: translate(-50%, -50%);
-  transition: opacity 200ms ease-in-out;
   width: 60%;
-
+  outline: none;
 `
+// const FadeTransition = styled(Transition)`
+// `

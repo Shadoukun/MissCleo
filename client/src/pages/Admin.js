@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../context/Auth";
-import { Button } from 'react-bootstrap';
+import { Button } from '../components/Button';
 
 const Admin = (props) => {
   const { setAuthToken } = useAuth();
