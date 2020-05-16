@@ -47,7 +47,7 @@ class Quotes(commands.Cog):
 
         if quote.attachments:
             embed.set_image(url=urllib.parse.urljoin(
-                config.HOST + "static/img/", quote.attachments[0]))
+                config.HOST + "files/", quote.attachments[0]))
 
         return embed
 
@@ -204,7 +204,7 @@ class Quotes(commands.Cog):
             attachments = []
             if root_msg.attachments:
                 for a in root_msg.attachments:
-                    fp = Path(os.getcwd()) / f"app/static/img/{a.filename}"
+                    fp = Path(f"./public/files/{a.filename}")
                     await a.save(fp)
                     attachments.append(a.filename)
 
