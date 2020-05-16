@@ -14,7 +14,6 @@ const fadeStyles = {
 
 
 export const Fade = ({ children, ...props }) => {
-  console.log(props)
   return (
     <Transition {...props} timeout={FADE_DURATION}>
       {(status, innerProps) => (

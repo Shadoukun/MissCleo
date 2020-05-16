@@ -17,14 +17,12 @@ export const Login = (props) => {
     backendCall.post("/auth/login", { userName, password })
       .then(result => {
         if (result.status === 200) {
-          console.log(result)
           setAuthToken(result.data.access_token);
           setLoggedIn(true);
         } else {
           setIsError(true);
         }
       }).catch(e => {
-        console.log(e)
         setIsError(true);
       });
   }
