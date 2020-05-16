@@ -79,6 +79,7 @@ ${({ theme }) => `
     padding-right: 20px;
 
     img {
+      height: auto;
       max-height: 300px;
     }
   }
