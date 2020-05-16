@@ -152,13 +152,13 @@ class Quote(Base):
                           uselist=False, lazy='joined')
 
 
-class Macro(Base):
+class CustomCommand(Base):
     """
     Macro Commands.
     Like a normal bot command that Triggers with command prefix.
     """
 
-    __tablename__ = "macro_commands"
+    __tablename__ = "custom_commands"
 
     id              = Column(Integer, primary_key=True)
     command         = Column(String, unique=True)
@@ -268,11 +268,11 @@ class CustomQuery(Query):
 
 def new_alchemy_encoder(revisit_self=False, fields_to_expand=[]):
     '''JSON encoder for SQLAlchemy objects.'''
-    
+
     _visited_objs = []
 
     class AlchemyEncoder(json.JSONEncoder):
-        
+
         def default(self, obj):
             if isinstance(obj.__class__, DeclarativeMeta):
                 # don't re-visit self
@@ -283,10 +283,10 @@ def new_alchemy_encoder(revisit_self=False, fields_to_expand=[]):
 
                 # go through each field in this SQLalchemy class
                 fields = {}
-               
+
                 for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata' and not x.startswith('query')]:
                     val = obj.__getattribute__(field)
-                    
+
                     # convert ints to strings
                     if type(val) is int:
                         fields[field] = str(val)
@@ -299,9 +299,9 @@ def new_alchemy_encoder(revisit_self=False, fields_to_expand=[]):
                             # not expanding this field: set it to None and continue
                             fields[field] = None
                             continue
-                    
+
                     fields[field] = val
-                
+
                 # a json-encodable dict
                 return fields
 

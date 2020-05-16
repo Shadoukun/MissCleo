@@ -12,7 +12,7 @@ import os
 
 sys.path.append(os.getcwd())
 
-from cleo.db import Base
+from cleo.db import *
 
 
 # this is the Alembic Config object, which provides

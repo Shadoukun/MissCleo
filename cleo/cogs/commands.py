@@ -3,13 +3,13 @@ import logging
 from aiohttp import web
 from discord.ext import commands
 
-from cleo.db import Macro, MacroReaction, MacroResponse
+from cleo.db import CustomCommand, MacroReaction, MacroResponse
 
 logger = logging.getLogger(__name__)
 
 
-class Macros(commands.Cog):
-    """Macro commands, responses, and reactions"""
+class CustomCommands(commands.Cog):
+    """Custom commands, responses, and reactions"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -30,9 +30,9 @@ class Macros(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        logger.debug("adding macros, responses, reactions")
+        logger.debug("adding commands, responses, reactions")
 
-        await self._load_macro_commands()
+        await self._load_custom_commands()
         await self.update_responses()
         await self.update_reactions()
 
@@ -44,38 +44,38 @@ class Macros(commands.Cog):
         await self._process_responses(message)
         await self._process_reactions(message)
 
-    def _make_macro(self, macro):
+    def _make_command(self, command):
         '''Returns a generic send_message callback function
-           for command macros'''
+           for custom commands'''
 
-        logger.debug(f"creating macro: {macro.command}")
+        logger.debug(f"creating command: {command.command}")
 
-        # callback function for regular macros
-        async def _macro(ctx):
-            nonlocal macro
-            await ctx.channel.send(macro.response)
+        # callback function for custom commands
+        async def _command(ctx):
+            nonlocal command
+            await ctx.channel.send(command.response)
 
-        return _macro
+        return _command
 
-    async def _load_macro_commands(self, macro=None):
+    async def _load_custom_commands(self, command=None):
         '''Load/Reload macro commands from database
            takes single macro to reload as optional arg'''
 
         logger.debug("loading macro commands")
-        macros = [macro] if macro else self.db.query(Macro).all()
+        cmds = [command] if command else self.db.query(CustomCommand).all()
 
-        for m in macros:
-            if m.command in self.bot.commands:
-                self.bot.remove_command(m.command)
+        for c in cmds:
+            if c.command in self.bot.commands:
+                self.bot.remove_command(c.command)
 
-            func = self._make_macro(m)
-            cmd = commands.Command(func, name=m.command)
+            func = self._make_command(c)
+            cmd = commands.Command(func, name=c.command)
             cmd.category = 'Custom'
             self.bot.add_command(cmd)
 
                 # if commands cog is enabled, add macro to auto-enabled commands.
-            if m.command not in self.bot.auto_enable:
-                self.bot.auto_enable.append(m.command)
+            if c.command not in self.bot.auto_enable:
+                self.bot.auto_enable.append(c.command)
 
     async def _process_responses(self, message):
         '''Triggers a macro response if message containers trigger.'''
@@ -120,28 +120,28 @@ class Macros(commands.Cog):
                 if react == emoji.name:
                     await message.add_reaction(emoji)
 
-    async def update_macros(self):
-        '''Update macro commands from database'''
+    async def update_commands(self):
+        '''Update custom commands from database'''
 
-        logger.debug("updating macros")
+        logger.debug("updating commands")
 
-        macros = self.db.query(Macro).all()
+        commands = self.db.query(CustomCommand).all()
 
-        if macros:
-            for macro in macros:
+        if commands:
+            for command in commands:
                 # sqlalchemy seems to not refresh consistently. I think
-                self.db.refresh(macro)
-                if macro.modified_flag == 1:
+                self.db.refresh(command)
+                if command.modified_flag == 1:
                     macro.modified_flag = 0
                     self.db.commit()
-                    await self._load_macro_commands(macro)
+                    await self._load_custom_commands(command)
 
-    async def remove_macro(self, macro_id):
-        macro = self.db.query(Macro).filter_by(id=macro_id).one()
+    async def remove_commands(self, command_id):
+        command = self.db.query(CustomCommand).filter_by(id=command_id).one()
 
-        macro_cmd = self.bot.get_command(macro.command)
-        self.bot.remove_command(macro.command)
-        self.db.query(Macro).filter_by(id=macro_id).delete()
+        custom_cmd = self.bot.get_command(command.command)
+        self.bot.remove_command(command.command)
+        self.db.query(CustomCommand).filter_by(id=command_id).delete()
         self.db.commit()
 
 
@@ -177,18 +177,18 @@ class Macros(commands.Cog):
     async def handle(self, request):
         '''crappy rest API'''
         name = request.match_info.get('name', "Anonymous")
-        if name == "update_macros":
-            await self.update_macros()
+        if name == "update_commands":
+            await self.update_commands()
         elif name == "update_responses":
             await self.update_responses()
         elif name == "update_reactions":
             await self.update_reactions()
-        elif name== "remove_macro":
-            await self.remove_macro(request.rel_url.query['id'])
+        elif name== "remove_command":
+            await self.remove_command(request.rel_url.query['id'])
 
         text = "Hello, " + name
         return web.Response(text=text)
 
 
 def setup(bot):
-    bot.add_cog(Macros(bot))
+    bot.add_cog(CustomCommands(bot))

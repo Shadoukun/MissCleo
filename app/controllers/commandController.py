@@ -6,10 +6,10 @@ from flask_login import login_required
 from flask_cors import cross_origin
 from app.forms import CommandForm
 
-from cleo.db import Macro, MacroResponse, MacroReaction, new_alchemy_encoder
+from cleo.db import CustomCommand, MacroResponse, MacroReaction, new_alchemy_encoder
 from .. import db
 
-blueprint = Blueprint('macros', __name__)
+blueprint = Blueprint('commands', __name__)
 
 
 @blueprint.route('/addcommand', methods=['POST'])
@@ -17,12 +17,12 @@ blueprint = Blueprint('macros', __name__)
 @cross_origin()
 def add_command():
     data = request.json
-    command = Macro(data['command'], data['response'], 1)
+    command = CustomCommand(data['command'], data['response'], 1)
     print(f"{command.command}, {command.response}")
     db.session.add(command)
     db.session.commit()
 
-    requests.get('http://127.0.0.1:10000/update_macros')
+    requests.get('http://127.0.0.1:10000/update_commands')
 
     return Response(None, status=200, mimetype='application/json')
 
@@ -34,13 +34,13 @@ def edit_command():
 
     data = request.json
     if data['id']:
-        command = db.session.query(Macro).filter_by(id=data['id']).first()
+        command = db.session.query(CustomCommand).filter_by(id=data['id']).first()
         if not command:
             return Response(None, status=400, mimetype='application/json')
         command.command = data['command']
         command.response = data['response']
         db.session.commit()
-        requests.get('http://127.0.0.1:10000/update_macros')
+        requests.get('http://127.0.0.1:10000/update_commands')
 
     return Response(None, status=200, mimetype='application/json')
 
@@ -49,6 +49,6 @@ def edit_command():
 @jwt_required
 @cross_origin()
 def get_commands():
-    cmds = db.session.query(Macro).all()
+    cmds = db.session.query(CustomCommand).all()
     cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, ['member']))
     return Response(cmds, mimetype='application/json')

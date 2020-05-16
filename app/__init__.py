@@ -17,7 +17,7 @@ db = SQLAlchemy(model_class=Base)
 
 from app.controllers import quoteController
 from app.controllers import loginController
-from app.controllers import macroController
+from app.controllers import commandController
 from app.controllers import indexController
 
 # ignore sassutils strip_extension FutureWarning
@@ -66,7 +66,7 @@ db.init_app(app)
 
 app.register_blueprint(indexController.blueprint)
 app.register_blueprint(quoteController.blueprint)
-app.register_blueprint(macroController.blueprint)
+app.register_blueprint(commandController.blueprint)
 app.register_blueprint(loginController.blueprint)
 
 app.jinja_env.add_extension('jinja2.ext.do')
