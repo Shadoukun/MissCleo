@@ -71,6 +71,8 @@ ${({ theme }) => `
     text-align: left;
     margin-left: 60px;
     margin-top: -5px;
+    max-width: 100%;
+    max-height: 300px;
   }
 
   .quoteTimestamp {
