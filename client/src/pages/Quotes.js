@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import ResponsiveDrawer from '../components/Drawer'
 import { GuildList, MemberList, QuoteList } from '../components/Quotes'
 import { useParams } from 'react-router-dom';
-import { Box } from '@material-ui/core';
 
 
 const QuotePage = (props) => {

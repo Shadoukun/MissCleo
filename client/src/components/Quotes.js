@@ -15,12 +15,10 @@ import {
   Menu,
   MenuItem
 } from '@material-ui/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons'
 import { lighten, darken } from 'polished';
 import styled from 'styled-components';
 
-import { backendURL, backendCall, rgbToHex } from '../utilities';
+import { backendCall, rgbToHex } from '../utilities';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const SidebarLink = styled(Link)`
@@ -69,17 +67,20 @@ ${({ theme }) => `
     font-weight: bold;
   }
 
+  .quoteTimestamp {
+    color: ${darken(0.5, theme.colors.primaryFontColor)};
+  }
+
   .quoteBody {
     text-align: left;
     margin-left: 60px;
     margin-top: -5px;
     max-width: 100%;
-    max-height: 300px;
     padding-right: 20px;
-  }
 
-  .quoteTimestamp {
-    color: ${darken(0.5, theme.colors.primaryFontColor)};
+    img {
+      max-height: 300px;
+    }
   }
 `}`
 
@@ -119,7 +120,6 @@ ${({ theme }) => `
           background: ${ lighten(0.1, theme.colors.backgroundColor)};
       }
     }
-
 
     &.active {
       border:

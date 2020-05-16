@@ -5,13 +5,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link as RouterLink,
-  useLocation
-} from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/Auth";
 import styled from 'styled-components';
 
@@ -34,12 +28,6 @@ const NavTitle = styled(Typography)`
   margin-right: 20px;
 `
 
-const NavButton = styled(Button)`
-  span {
-    font-weight: bold;
-  }
-
-`
 
 const LoginButton = styled(IconButton)`
   border-radius: 5px;
