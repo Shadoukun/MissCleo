@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Copy from 'copy-to-clipboard';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
-import { Button } from './Button';
+import { IconButton } from './Button';
 import {
   Avatar,
   Link,
@@ -11,7 +11,9 @@ import {
   ListItemText,
   ListItemAvatar,
   ListSubheader,
-  Paper
+  Paper,
+  Menu,
+  MenuItem
 } from '@material-ui/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons'
@@ -19,7 +21,7 @@ import { lighten, darken } from 'polished';
 import styled from 'styled-components';
 
 import { backendURL, backendCall, rgbToHex } from '../utilities';
-
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const SidebarLink = styled(Link)`
 ${({ theme }) => `
@@ -47,7 +49,7 @@ ${({ theme }) => `
   background-color: "gray";
   padding: 10px;
   padding-bottom: 20px;
-  padding-right: 20px;
+  padding-right: 5px;
   background: #36393f;
 
   .quoteHeader {
@@ -73,6 +75,7 @@ ${({ theme }) => `
     margin-top: -5px;
     max-width: 100%;
     max-height: 300px;
+    padding-right: 20px;
   }
 
   .quoteTimestamp {
@@ -124,6 +127,42 @@ ${({ theme }) => `
     }
   }
 `}`
+
+const QuoteDropdownButton = styled(IconButton)`
+${({ theme }) => `
+  border-radius: 5px;
+  padding: 10px;
+  transition: ${theme.transitions.create(['color'])};
+
+  &:hover, &:hover svg {
+    background: transparent;
+    color: ${theme.colors.primaryFontColor};
+    transition: ${theme.transitions.create(['color'])};
+  }
+
+  svg {
+    color: ${darken(0.5, theme.colors.primaryFontColor)};
+  }
+`}`
+
+const QuoteDropdownMenu = styled(Menu)`
+${({ theme }) => `
+
+  .MuiPaper-root {
+    background: ${theme.colors.secondaryBackground};
+  }
+
+  ul {
+    padding: 0;
+  }
+
+  li {
+    padding: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+`}`
+
 
 const SidebarListHeader = ({ name }) => (
   <ListSubheader component="div" id={`nested-list-${name}`}>
@@ -290,7 +329,7 @@ const QuoteHeader = ({ quote }) => (
       </div>
       <div className="quoteTimestamp">{quote.timestamp}</div>
     </div>
-    {/* <QuoteDropdown quote={quote} /> */}
+    <QuoteDropdown quote={quote} />
   </div>
 )
 
@@ -308,78 +347,49 @@ const QuoteEntry = ({ quote }) => (
 )
 
 
-// const StyledDropdown = styled(Dropdown)`
-//   margin-left: auto;
+const QuoteDropdown = ({ quote }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [quoteId, setQuoteId] = useState(quote.message_id)
 
-//   button {
-//     color: ${props => darken(0.2, props.theme.primaryFontColor)};
-//     background-color: transparent !important;
-//     border: none !important;
+  useEffect(() => {
+    setQuoteId(quote.message_id)
+  }, [quote])
 
-//     &:active, &:focus {
-//       border: none !important;
-//       box-shadow: none !important;
-//     }
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  }
 
-//     &:focus {
-//       color: ${props => darken(0.2, props.theme.primaryFontColor)} !important;
-//     }
-//   }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
-//   .quote_dropdown_menu {
-//     background: ${props => props.theme.secondaryBackground};
-//     color: ${props => props.theme.primaryFontColor} !important;
-//     padding: 0;
-//   }
+  const copyId = () => {
+    Copy(quoteId)
+    handleClose()
+  }
 
-//   .dropdown-item {
-//     color: ${props => props.theme.primaryFontColor};
-//     font-weight: bold;
-//     padding: 0.5rem 1.5rem;
-
-
-//     &:hover {
-//       background: ${props => lighten(0.05, props.theme.secondaryBackground)};
-//     }
-
-//   }
-
-// `
-
-// const CustomDropdownToggle = React.forwardRef(({ children, onClick }, ref) => (
-//   <Button
-//     href=""
-//     ref={ref}
-//     onClick={(e) => {
-//       e.preventDefault();
-//       onClick(e);
-//     }}
-//   >
-//     {children}
-//   </Button>
-// ));
-
-
-// export const QuoteDropdown = ({ quote }) => {
-//   const [quoteId, setQuoteId] = useState(quote.message_id)
-
-//   useEffect(() => {
-//     setQuoteId(quote.message_id)
-//   }, [quote])
-
-//   const handleClick = () => {
-//     Copy(quoteId)
-//   }
-
-//   return (
-//     <StyledDropdown
-//       id="quote_dropdown"
-//       rootCloseEvent="mousedown"
-//     >
-//       <Dropdown.Toggle as={CustomDropdownToggle}><FontAwesomeIcon icon={faCaretDown} /></Dropdown.Toggle>
-//       <Dropdown.Menu className="quote_dropdown_menu">
-//         <Dropdown.Item eventKey="1" onClick={handleClick}>Copy Quote ID</Dropdown.Item>
-//       </Dropdown.Menu>
-//     </StyledDropdown>
-//   )
-// }
+  return (
+    <>
+      <QuoteDropdownButton aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+        <ExpandMoreIcon />
+      </QuoteDropdownButton>
+      <QuoteDropdownMenu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }
+        }
+      >
+        <MenuItem onClick={copyId}>Copy Quote ID</MenuItem>
+      </QuoteDropdownMenu>
+    </>
+  )
+}
