@@ -3,7 +3,6 @@ from flask_login import login_required, login_user, logout_user, current_user
 from flask_bcrypt import check_password_hash
 
 from cleo.db import FlaskUser
-from ..forms import LoginForm
 from .. import db
 from flask_jwt_extended import get_jwt_identity, create_access_token
 from flask_cors import cross_origin

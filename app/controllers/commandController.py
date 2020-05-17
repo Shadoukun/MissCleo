@@ -4,7 +4,6 @@ import json
 from flask import render_template, Blueprint, request, redirect, url_for, flash, Response
 from flask_login import login_required
 from flask_cors import cross_origin
-from app.forms import CommandForm
 
 from cleo.db import CustomCommand, CustomResponse, CustomReaction, new_alchemy_encoder
 from .. import db

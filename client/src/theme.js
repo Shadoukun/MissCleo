@@ -1,6 +1,7 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 import { createGlobalStyle } from 'styled-components'
 
+
 export const theme = createMuiTheme({
   colors: {
     backgroundColor: "#2f3136",
@@ -14,10 +15,15 @@ export const theme = createMuiTheme({
   },
 });
 
+
 export const GlobalStyle = createGlobalStyle`
   html, body {
     background: ${theme.colors.backgroundColor};
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   .fade {
     opacity: 0;
     transition: opacity 200ms linear;

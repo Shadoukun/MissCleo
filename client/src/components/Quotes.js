@@ -4,7 +4,6 @@ import { Link as RouterLink, useParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import { IconButton } from './Button';
 import {
-  Avatar,
   Link,
   List,
   ListItem,
@@ -20,6 +19,7 @@ import styled from 'styled-components';
 
 import { backendCall, rgbToHex } from '../utilities';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { DiscordAvatar } from './Avatar';
 
 const SidebarLink = styled(Link)`
 ${({ theme }) => `
@@ -238,7 +238,7 @@ const GuildEntry = ({ guild, activeClass }) => {
     <SidebarLink className={activeClass} component={RouterLink} to={`/quotes/${guild.id}`} underline="none">
       <ListItem button>
         <ListItemAvatar className="sidebarAvatar">
-          <Avatar src={guild.icon_url} />
+          <DiscordAvatar src={guild.icon_url} />
         </ListItemAvatar>
         <ListItemText primary={guild.name} />
       </ListItem>
@@ -251,7 +251,7 @@ export const MemberEntry = ({ activeClass, guildId, user }) => (
   <SidebarLink className={activeClass} component={RouterLink} to={`/quotes/${guildId}/${user.user_id}`}>
     <ListItem button>
       <ListItemAvatar>
-        <Avatar src={user.user.avatar_url} />
+        <DiscordAvatar src={user.user.avatar_url} />
       </ListItemAvatar>
       <ListItemText primary={user.display_name} style={{ color: rgbToHex(user.top_role.color) }} />
     </ListItem>
@@ -323,7 +323,7 @@ export const QuoteList = ({ guildId, userId }) => {
 
 const QuoteHeader = ({ quote }) => (
   <div className="quoteHeader">
-    <Avatar src={quote.user.avatar_url} />
+    <DiscordAvatar src={quote.user.avatar_url} />
     <div className="quoteInfo">
       <div className="quoteUsername" style={{ color: rgbToHex(quote.member.top_role.color) }}>
         {quote.member.display_name}

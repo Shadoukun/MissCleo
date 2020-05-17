@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Redirect } from 'react-router-dom';
 import { useAuth } from "../context/Auth";
-import { backendCall } from "../api";
+import { backendCall } from "../utilities";
 import { LoginForm } from '../components/Login'
 import { Container } from '@material-ui/core'
 
