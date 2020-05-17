@@ -9,7 +9,6 @@ from gevent.pywsgi import WSGIServer
 
 from config import PORT
 from cleo.bot import MissCleo
-from cleo.tasks import update_guilds, update_user_info
 from app import app
 
 

@@ -9,7 +9,7 @@ from pathlib import Path
 from discord.ext import commands
 
 from . import utils
-from .tasks import update_guilds, update_user_info
+from .tasks import update_all_guild_members, add_update_all_guilds
 from cleo.db import Base, engine, session
 
 logger = logging.getLogger(__name__)
@@ -85,8 +85,8 @@ class MissCleo(commands.Bot):
         self.help_command = CustomHelpCommand()
 
         self.load_cogs()
-        self.loop.create_task(update_guilds(self))
-        self.loop.create_task(update_user_info(self))
+        self.loop.create_task(add_update_all_guilds(self))
+        self.loop.create_task(update_all_guild_members(self))
 
     async def on_ready(self):
         # database background tasks
