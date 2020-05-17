@@ -6,6 +6,7 @@ from cachetools import TTLCache
 from discord.ext import commands
 from sqlalchemy import and_, func
 from pathlib import Path
+import time
 
 import config
 from cleo.db import Quote, GuildMembership
@@ -204,7 +205,8 @@ class Quotes(commands.Cog):
             attachments = []
             if root_msg.attachments:
                 for a in root_msg.attachments:
-                    fp = Path(f"./public/files/{a.filename}")
+
+                    fp = Path(f"./public/files/{str(time.time())}_{a.filename}")
                     await a.save(fp)
                     attachments.append(a.filename)
 
