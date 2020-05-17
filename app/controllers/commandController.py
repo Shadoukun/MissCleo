@@ -6,7 +6,7 @@ from flask_login import login_required
 from flask_cors import cross_origin
 from app.forms import CommandForm
 
-from cleo.db import CustomCommand, MacroResponse, MacroReaction, new_alchemy_encoder
+from cleo.db import CustomCommand, CustomResponse, CustomReaction, new_alchemy_encoder
 from .. import db
 
 blueprint = Blueprint('commands', __name__)

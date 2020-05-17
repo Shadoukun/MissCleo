@@ -3,7 +3,7 @@ import logging
 from aiohttp import web
 from discord.ext import commands
 
-from cleo.db import CustomCommand, MacroReaction, MacroResponse
+from cleo.db import CustomCommand, CustomResponse, CustomReaction
 
 logger = logging.getLogger(__name__)
 
@@ -58,10 +58,10 @@ class CustomCommands(commands.Cog):
         return _command
 
     async def _load_custom_commands(self, command=None):
-        '''Load/Reload macro commands from database
-           takes single macro to reload as optional arg'''
+        '''Load/Reload custom commands from database
+           takes individual commands to reload as optional arg'''
 
-        logger.debug("loading macro commands")
+        logger.debug("loading custom commands")
         cmds = [command] if command else self.db.query(CustomCommand).all()
 
         for c in cmds:
@@ -73,12 +73,12 @@ class CustomCommands(commands.Cog):
             cmd.category = 'Custom'
             self.bot.add_command(cmd)
 
-                # if commands cog is enabled, add macro to auto-enabled commands.
+                # if commands cog is enabled, add command to auto-enabled commands.
             if c.command not in self.bot.auto_enable:
                 self.bot.auto_enable.append(c.command)
 
     async def _process_responses(self, message):
-        '''Triggers a macro response if message containers trigger.'''
+        '''Triggers a custom response if message containers trigger.'''
 
         logger.debug("processing responses")
 
@@ -125,14 +125,14 @@ class CustomCommands(commands.Cog):
 
         logger.debug("updating commands")
 
-        commands = self.db.query(CustomCommand).all()
+        cmds = self.db.query(CustomCommand).all()
 
-        if commands:
-            for command in commands:
+        if cmds:
+            for command in cmds:
                 # sqlalchemy seems to not refresh consistently. I think
                 self.db.refresh(command)
                 if command.modified_flag == 1:
-                    macro.modified_flag = 0
+                    command.modified_flag = 0
                     self.db.commit()
                     await self._load_custom_commands(command)
 
@@ -146,12 +146,12 @@ class CustomCommands(commands.Cog):
 
 
     async def update_responses(self):
-        '''Add macro responses from database'''
+        '''Add custom responses from database'''
 
         logger.debug("updating responses")
 
         self.responses.clear()
-        responses = self.db.query(MacroResponse).all()
+        responses = self.db.query(CustomResponse).all()
 
         if responses:
             for resp in responses:
@@ -161,12 +161,12 @@ class CustomCommands(commands.Cog):
 
 
     async def update_reactions(self):
-        '''Add macro reactions from database'''
+        '''Add custom reactions from database'''
 
         logger.debug("updating reactions")
 
         self.reactions = {}
-        reactions = self.db.query(MacroReaction).all()
+        reactions = self.db.query(CustomReaction).all()
         if reactions:
             for r in reactions:
                 # sqlalchemy seems to not refresh consistently

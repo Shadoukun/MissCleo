@@ -154,7 +154,7 @@ class Quote(Base):
 
 class CustomCommand(Base):
     """
-    Macro Commands.
+    Custom Commands.
     Like a normal bot command that Triggers with command prefix.
     """
 
@@ -171,10 +171,10 @@ class CustomCommand(Base):
         self.modified_flag = modified_flag
 
 
-class MacroResponse(Base):
-    """Macro Responses to Keywords"""
+class CustomResponse(Base):
+    """Custom Responses"""
 
-    __tablename__ = "macro_responses"
+    __tablename__ = "custom_responses"
 
     id              = Column(Integer, primary_key=True)
     trigger         = Column(String, unique=True)
@@ -185,10 +185,10 @@ class MacroResponse(Base):
         self.response = response
 
 
-class MacroReaction(Base):
-    """Macro Reactions to Keywords"""
+class CustomReaction(Base):
+    """Custom Reactions"""
 
-    __tablename__ = "macro_reactions"
+    __tablename__ = "custom_reactions"
 
     id              = Column(Integer, primary_key=True)
     trigger         = Column(String, unique=True)
