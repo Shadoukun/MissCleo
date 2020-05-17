@@ -77,9 +77,13 @@ ${({ theme }) => `
   .quoteBody {
     text-align: left;
     margin-left: 60px;
-    margin-top: -5px;
+    margin-top: -15px;
     max-width: 100%;
     padding-right: 20px;
+
+    a, a:visited {
+      color: #00b0f4;
+    }
 
     img {
       height: auto;
