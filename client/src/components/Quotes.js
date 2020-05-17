@@ -347,20 +347,35 @@ const QuoteHeader = ({ quote }) => (
 )
 
 
-const QuoteEntry = ({ quote }) => (
-  <QuoteEntryStyled elevation={2}>
-    <QuoteHeader quote={quote} />
-    <div className="quoteBody">
-      {parse(toHTML(quote.message, {escapeHTML: false}))}
-      {quote.attachments && quote.attachments.map((file, i) =>
-        <>
-        <br />
-        <img src={window.location.origin + `/files/${file}`} alt="" />
-        </>
-      )}
-    </div>
-  </QuoteEntryStyled>
-)
+const QuoteEntry = ({ quote }) => {
+  const [message, setMessage] = useState([]);
+
+  useEffect(() => {
+    let msg = []
+    if (quote.message) {
+      msg.push(parse(toHTML(quote.message, { escapeHTML: false })))
+      if (quote.attachments) {
+        msg.push(<br />)
+      }
+    }
+
+    if (quote.attachments) {
+      for (let file of quote.attachments) {
+        msg.push(<img src={window.location.origin + `/files/${file}`} alt="" />)
+      }
+    }
+    setMessage(msg)
+  }, [quote]);
+
+  return (
+    <QuoteEntryStyled elevation={2}>
+      <QuoteHeader quote={quote} />
+      <div className="quoteBody">
+        {message}
+      </div>
+    </QuoteEntryStyled>
+  )
+}
 
 
 const QuoteDropdown = ({ quote }) => {
