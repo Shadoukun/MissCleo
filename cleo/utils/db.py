@@ -76,7 +76,7 @@ async def update_member(self, before, after):
                     .one_or_none()
 
     if member and after:
-        member.user.avatar_url = str(after.avatar_url)
+        member.user.avatar_url = str(guild.icon_url_as(format=None, static_format="webp", size=512))
         member.display_name = after.display_name
 
         self.db.commit()
