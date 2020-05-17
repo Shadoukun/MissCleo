@@ -325,9 +325,14 @@ const QuoteHeader = ({ quote }) => (
   <div className="quoteHeader">
     <DiscordAvatar src={quote.user.avatar_url} />
     <div className="quoteInfo">
-      <div className="quoteUsername" style={{ color: rgbToHex(quote.member.top_role.color) }}>
+      <Link
+        className="quoteUsername"
+        component={RouterLink}
+        to={`/quotes/${quote.guild_id}/${quote.user_id}`}
+        style={{ color: rgbToHex(quote.member.top_role.color) }}
+      >
         {quote.member.display_name}
-      </div>
+      </Link>
       <div className="quoteTimestamp">{quote.timestamp}</div>
     </div>
     <QuoteDropdown quote={quote} />
