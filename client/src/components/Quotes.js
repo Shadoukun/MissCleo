@@ -352,8 +352,8 @@ const QuoteEntry = ({ quote }) => (
     <QuoteHeader quote={quote} />
     <div className="quoteBody">
       {parse(toHTML(quote.message, {escapeHTML: false}))}
-      <br />
       {quote.attachments && quote.attachments.map((file, i) =>
+        <br />
         <img src={window.location.origin + `/files/${file}`} alt="" />
       )}
     </div>
