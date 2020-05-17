@@ -205,10 +205,10 @@ class Quotes(commands.Cog):
             attachments = []
             if root_msg.attachments:
                 for a in root_msg.attachments:
-
-                    fp = Path(f"./public/files/{str(time.time())}_{a.filename}")
+                    filename = f"{str(time.time())}_{a.filename}"
+                    fp = Path(f"./public/files/{filename}")
                     await a.save(fp)
-                    attachments.append(a.filename)
+                    attachments.append(filename)
 
             quote = dict(
                 message_id=root_msg.id,
