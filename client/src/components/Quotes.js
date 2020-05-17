@@ -339,9 +339,12 @@ const QuoteEntry = ({ quote }) => (
   <QuoteEntryStyled elevation={2}>
     <QuoteHeader quote={quote} />
     <div className="quoteBody">
-      {quote.message.split('\n').map((item, key) => {
-        return <span key={key}>{item}<br /></span>
-      })}
+      {quote.message ? (
+        quote.message.split('\n').map((item, key) => (
+          <span key={key}>{item}<br /></span>)
+        )
+      ) : (quote.message)}
+
       {quote.attachments && quote.attachments.map((file, i) =>
         <img src={window.location.origin + `/files/${file}`} alt="" />
       )}
