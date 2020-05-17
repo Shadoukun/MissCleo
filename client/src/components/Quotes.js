@@ -21,6 +21,9 @@ import { backendCall, rgbToHex } from '../utilities';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { DiscordAvatar } from './Avatar';
 
+import { parser, htmlOutput, toHTML } from 'discord-markdown';
+import parse from 'html-react-parser';
+
 const SidebarLink = styled(Link)`
 ${({ theme }) => `
   color: ${theme.colors.primaryFontColor};
@@ -344,11 +347,14 @@ const QuoteEntry = ({ quote }) => (
   <QuoteEntryStyled elevation={2}>
     <QuoteHeader quote={quote} />
     <div className="quoteBody">
-      {quote.message ? (
+      {parse(toHTML(quote.message, {escapeHTML: false}))}
+
+
+      {/* {quote.message ? (
         quote.message.split('\n').map((item, key) => (
           <span key={key}>{item}<br /></span>)
         )
-      ) : (quote.message)}
+      ) : (quote.message)} */}
 
       {quote.attachments && quote.attachments.map((file, i) =>
         <img src={window.location.origin + `/files/${file}`} alt="" />
