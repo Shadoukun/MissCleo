@@ -11,6 +11,8 @@ from .. import db
 blueprint = Blueprint('commands', __name__)
 
 
+# COMMANDS #
+
 @blueprint.route('/addcommand', methods=['POST'])
 @jwt_required
 @cross_origin()
@@ -30,7 +32,6 @@ def add_command():
 @jwt_required
 @cross_origin()
 def edit_command():
-
     data = request.json
     if data['id']:
         command = db.session.query(CustomCommand).filter_by(id=data['id']).first()
@@ -53,13 +54,15 @@ def get_commands():
     return Response(cmds, mimetype='application/json')
 
 
+# RESPONSES #
+
 @blueprint.route('/getresponses', methods=['GET'])
 @jwt_required
 @cross_origin()
 def get_responses():
-    cmds = db.session.query(CustomResponse).all()
-    cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
-    return Response(cmds, mimetype='application/json')
+    responses = db.session.query(CustomResponse).all()
+    responses = json.dumps(responses, cls=new_alchemy_encoder(False, []))
+    return Response(responses, mimetype='application/json')
 
 
 @blueprint.route('/addresponse', methods=['POST'])
@@ -68,7 +71,6 @@ def get_responses():
 def add_response():
     data = request.json
     response = CustomResponse(data['trigger'], data['response'])
-    print(f"{response.trigger}, {response.response}")
     db.session.add(response)
     db.session.commit()
 
@@ -81,15 +83,13 @@ def add_response():
 @jwt_required
 @cross_origin()
 def edit_response():
-
     data = request.json
     if data['id']:
         response = db.session.query(
             CustomResponse).filter_by(id=data['id']).first()
         if not response:
             return Response(None, status=400, mimetype='application/json')
-        print(data['trigger'])
-        print(data['response'])
+
         response.trigger = data['trigger']
         response.response = data['response']
         db.session.commit()
@@ -98,10 +98,46 @@ def edit_response():
     return Response(None, status=200, mimetype='application/json')
 
 
+# REACTIONS #
+
 @blueprint.route('/getreactions', methods=['GET'])
 @jwt_required
 @cross_origin()
 def get_reactions():
-    cmds = db.session.query(CustomReaction).all()
-    cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
-    return Response(cmds, mimetype='application/json')
+    reactions = db.session.query(CustomReaction).all()
+    reactions = json.dumps(reactions, cls=new_alchemy_encoder(False, []))
+    return Response(reactions, mimetype='application/json')
+
+
+@blueprint.route('/addreaction', methods=['POST'])
+@jwt_required
+@cross_origin()
+def add_reaction():
+    data = request.json
+    reaction = CustomReaction(data['trigger'], data['reaction'])
+    db.session.add(reaction)
+    db.session.commit()
+
+    requests.get('http://127.0.0.1:10000/update_reactions')
+
+    return Response(None, status=200, mimetype='application/json')
+
+
+@blueprint.route('/editreaction', methods=['POST'])
+@jwt_required
+@cross_origin()
+def edit_reaction():
+
+    data = request.json
+    if data['id']:
+        reaction = db.session.query(
+            CustomReaction).filter_by(id=data['id']).first()
+        if not reaction:
+            return Response(None, status=400, mimetype='application/json')
+
+        reaction.trigger = data['trigger']
+        reaction.reaction = data['reaction']
+        db.session.commit()
+        requests.get('http://127.0.0.1:10000/update_reactions')
+
+    return Response(None, status=200, mimetype='application/json')
