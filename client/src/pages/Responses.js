@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { CommandListHeader, CommandListMain } from '../components/Commands';
 import { ModalProvider } from '../context/Modal';
 import { useAuth } from '../context/Auth';
 import { backendCall } from '../utilities';
 import { Container, CssBaseline } from '@material-ui/core'
-import { ResponseListHeader, ResponseListMain } from '../components/Responses'
+import { ResponseListHeader, ResponseListMain } from '../components/page/Responses'
 
 
 export const ResponsesPage = () => {

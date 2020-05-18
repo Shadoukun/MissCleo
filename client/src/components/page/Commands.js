@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { lighten, darken } from 'polished';
-import { Input, FormLabel } from './Form'
-import { Button } from "./Button"
+import { Input, FormLabel } from '../Form'
+import { Button } from "../Button"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
-import { useModal } from '../context/Modal';
-import { useAuth } from '../context/Auth';
-import { backendCall } from '../utilities';
-import { ModalForm, ModalFormControl } from './Modal';
+import { useModal } from '../../context/Modal';
+import { useAuth } from '../../context/Auth';
+import { backendCall } from '../../utilities';
+import { ModalForm, ModalFormControl } from '../Modal';
 
 
 export const CommandListHeaderStyled = styled.div`

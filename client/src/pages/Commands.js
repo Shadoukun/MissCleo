@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CommandListHeader, CommandListMain } from '../components/Commands';
+import { CommandListHeader, CommandListMain } from '../components/page/Commands';
 import { ModalProvider } from '../context/Modal';
 import { useAuth } from '../context/Auth';
 import { backendCall } from '../utilities';
