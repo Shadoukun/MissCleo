@@ -62,6 +62,9 @@ const Navbar = (props) => {
           <Button className={isActive('/commands')} component={RouterLink} to="/commands">
             Commands
         </Button>
+          <Button className={isActive('/responses')} component={RouterLink} to="/responses">
+            Responses
+        </Button>
         </Box>
 
         <LoginBar isLoggedIn={authToken} />

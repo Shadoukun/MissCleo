@@ -49,5 +49,59 @@ def edit_command():
 @cross_origin()
 def get_commands():
     cmds = db.session.query(CustomCommand).all()
-    cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, ['member']))
+    cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
+    return Response(cmds, mimetype='application/json')
+
+
+@blueprint.route('/getresponses', methods=['GET'])
+@jwt_required
+@cross_origin()
+def get_responses():
+    cmds = db.session.query(CustomResponse).all()
+    cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
+    return Response(cmds, mimetype='application/json')
+
+
+@blueprint.route('/addresponse', methods=['POST'])
+@jwt_required
+@cross_origin()
+def add_response():
+    data = request.json
+    response = CustomResponse(data['trigger'], data['response'])
+    print(f"{response.trigger}, {response.response}")
+    db.session.add(response)
+    db.session.commit()
+
+    requests.get('http://127.0.0.1:10000/update_responses')
+
+    return Response(None, status=200, mimetype='application/json')
+
+
+@blueprint.route('/editresponse', methods=['POST'])
+@jwt_required
+@cross_origin()
+def edit_response():
+
+    data = request.json
+    if data['id']:
+        response = db.session.query(
+            CustomResponse).filter_by(id=data['id']).first()
+        if not response:
+            return Response(None, status=400, mimetype='application/json')
+        print(data['trigger'])
+        print(data['response'])
+        response.trigger = data['trigger']
+        response.response = data['response']
+        db.session.commit()
+        requests.get('http://127.0.0.1:10000/update_responses')
+
+    return Response(None, status=200, mimetype='application/json')
+
+
+@blueprint.route('/getreactions', methods=['GET'])
+@jwt_required
+@cross_origin()
+def get_reactions():
+    cmds = db.session.query(CustomReaction).all()
+    cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
     return Response(cmds, mimetype='application/json')

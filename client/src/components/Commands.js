@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { lighten, darken } from 'polished';
-import { Input, FormLabel, FormControl } from './Form'
+import { Input, FormLabel } from './Form'
 import { Button } from "./Button"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { useModal } from '../context/Modal';
 import { useAuth } from '../context/Auth';
 import { backendCall } from '../utilities';
+import { ModalForm, ModalFormControl } from './Modal';
 
 
 export const CommandListHeaderStyled = styled.div`
@@ -72,73 +73,10 @@ export const CommandEntryStyled = styled.div`
 `}`
 
 
-const ModalStyle = styled.div`
- ${({ theme }) => `
-  background: ${theme.colors.secondaryBackground};
-  color: ${theme.colors.primaryFontColor};
-  padding: 20px;
-  border-radius: 5px;
-
-  h1 {
-    font-size: 25px;
-  }
-  .modalHeader {
-    display: flex;
-    margin-bottom: 20px;
-
-    button {
-      margin-left: auto;
-    }
-  }
-
-  .modalFooter {
-    padding: 20px 0 0 20px;
-    display: flex;
-
-    button {
-      font-size: 12px;
-      margin: auto 0 auto auto;
-      background: #43B581 !important;
-      color: ${theme.colors.primaryFontColor};
-      border: 1px solid transparent !important;
-      font-weight: bold;
-      padding: 0.75em 3em;
-
-      &:hover {
-        box-shadow: none;
-        border: 1px solid transparent;
-        background: ${darken(0.2, "#43B581")} !important;
-        color: ${darken(0.2, theme.colors.primaryFontColor)}
-      }
-
-      &:focus {
-        box-shadow: none !important;
-      }
-
-      &:active {
-        background: ${lighten(0.05, "#43B581")} !important;
-      }
-
-    }
-`}`
-
-
-const ModalForm = styled.form`
-    display: flex;
-    flex-direction: column;
-`
-
-
-const ModalFormControl = styled(FormControl)`
-  div.MuiFormControl-root + & {
-    margin-top: 15px;
-  }
-`
-
 export const CommandListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
 
-  const handleClick = (command) => {
+  const handleClick = () => {
     showModal({
       content: NewCommandModal,
       contentProps: { hideModal, update, setUpdate },
@@ -183,7 +121,6 @@ export function CommandListMain({ commands, update, setUpdate }) {
 }
 
 
-
 const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [command, setCommand] = useState(props.command.command)
   const [response, setResponse] = useState(props.command.response)
@@ -212,7 +149,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   }
 
   return (
-    <ModalStyle>
+    <>
       <div className="modalHeader">
         <div className="modalTitle">
           <h1>{"!" + props.command.command}</h1>
@@ -231,7 +168,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
           handleResponseChange={handleResponseChange}
         />
       </div>
-    </ModalStyle>
+    </>
   )
 }
 
@@ -263,7 +200,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   }
 
   return (
-    <ModalStyle>
+    <>
       <div className="modalHeader">
         <div className="modalTitle">
           <h1>New Command</h1>
@@ -280,7 +217,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
           handleResponseChange={handleResponseChange}
         />
       </div>
-    </ModalStyle>
+    </>
   )
 }
 

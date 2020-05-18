@@ -15,6 +15,7 @@ import { CssBaseline, StylesProvider } from '@material-ui/core';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/styles';
 import { theme, GlobalStyle } from './theme';
 
+import {ResponsesPage} from './pages/Responses';
 
 function App() {
 
@@ -32,6 +33,7 @@ function App() {
                 <Switch>
                   <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
                   <Route path={'/commands'} component={CommandsPage} />
+                  <Route path={'/responses'} component={ResponsesPage} />
                   <Route path="/login" component={Login} />
                   <Route path="/logout" component={Logout} />
                 </Switch>
