@@ -28,7 +28,8 @@ async def add_update_all_guilds(self):
             g.name = guild.name
             g.icon_url = str(guild.icon_url_as(format=None, static_format="webp", size=512))
 
-        for channel in guild.channels:
+        channels = await guild.fetch_channels()
+        for channel in channels:
             if (isinstance(channel, TextChannel)) and (channel.id not in existing_channels):
                 self.db.add(Channel(channel))
 
