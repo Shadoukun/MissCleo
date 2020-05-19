@@ -107,9 +107,10 @@ class CustomCommands(commands.Cog):
 
         custom_emojis = self.bot.emojis
         reactions = []
+        msg = message.content.lower().split()
 
         for trigger in self.reactions:
-            if trigger in message.content.lower():
+            if trigger in msg:
                 reactions = self.reactions[trigger].split('\n')
 
         if not reactions:
