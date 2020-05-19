@@ -24,7 +24,7 @@ class CustomCommands(commands.Cog):
         app.router.add_get('/{name}', self.handle)
 
 
-        # crappy REST api for triggering triggering events from flask app to discord bot.
+        # crappy REST api for triggering triggering discord bot functions.
         handler = app.make_handler()
         f = self.bot.loop.create_server(handler, '0.0.0.0', 10000)
         srv = self.bot.loop.run_until_complete(f)
@@ -83,14 +83,14 @@ class CustomCommands(commands.Cog):
 
         logger.debug("processing responses")
 
-        channel = message.channel
-        message = message.content.lower()
         resp = []
+        channel = message.channel
+        msg = message.content.lower()
 
         # check for trigger in message
-        for trigger in self.responses:
-            if trigger in message:
-                resp = self.responses[trigger].split('\n')
+        for _, r in self.responses.items():
+            if r[0].search(msg):
+                resp = r[1].split('\n')
 
         # check if there are multiple possible responses
         if resp:
@@ -106,18 +106,15 @@ class CustomCommands(commands.Cog):
 
         logger.debug("processing reactions")
 
-        custom_emojis = self.bot.emojis
         reactions = []
+        react_emoji = None
         msg = message.content.lower()
+        custom_emojis = self.bot.emojis
 
-        for k, r in self.reactions.items():
+        # check for trigger in message
+        for _, r in self.reactions.items():
             if r[0].search(msg):
                 reactions = r[1].split('\n')
-
-        if not reactions:
-            return
-
-        react_emoji = None
 
         for react in reactions:
             # check if a custom emoji
@@ -133,7 +130,7 @@ class CustomCommands(commands.Cog):
             try:
                 await message.add_reaction(react_emoji)
             except:
-                print("EmojiError")
+                logger.error("EmojiError")
 
     async def update_commands(self):
         '''Update custom commands from database'''
@@ -141,15 +138,16 @@ class CustomCommands(commands.Cog):
         logger.debug("updating commands")
 
         cmds = self.db.query(CustomCommand).all()
+        if not cmds:
+            return
 
-        if cmds:
-            for command in cmds:
-                # sqlalchemy seems to not refresh consistently. I think
-                self.db.refresh(command)
-                if command.modified_flag == 1:
-                    command.modified_flag = 0
-                    self.db.commit()
-                    await self._load_custom_commands(command)
+        for command in cmds:
+            # sqlalchemy seems to not refresh consistently. I think
+            self.db.refresh(command)
+            if command.modified_flag == 1:
+                command.modified_flag = 0
+                self.db.commit()
+                await self._load_custom_commands(command)
 
     async def remove_commands(self, command_id):
         command = self.db.query(CustomCommand).filter_by(id=command_id).one()
@@ -165,14 +163,14 @@ class CustomCommands(commands.Cog):
 
         logger.debug("updating responses")
 
-        self.responses.clear()
+        self.responses = {}
         responses = self.db.query(CustomResponse).all()
-
         if responses:
-            for resp in responses:
+            for r in responses:
                 # sqlalchemy seems to not refresh consistently. I think
-                self.db.refresh(resp)
-                self.responses[resp.trigger] = resp.response
+                self.db.refresh(r)
+                trigger_exp = re.compile(fr'\b{r.trigger}\b')
+                self.responses[r.trigger] = [trigger_exp, r.response]
 
 
     async def update_reactions(self):
@@ -187,7 +185,6 @@ class CustomCommands(commands.Cog):
                 # sqlalchemy seems to not refresh consistently
                 self.db.refresh(r)
                 trigger_exp = re.compile(fr'\b{r.trigger}\b')
-
                 self.reactions[r.trigger] = (trigger_exp, r.reaction.replace(':', ''))
 
 
