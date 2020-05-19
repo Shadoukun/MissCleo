@@ -2,6 +2,7 @@ import random
 import logging
 from aiohttp import web
 from discord.ext import commands
+import emoji
 
 from cleo.db import CustomCommand, CustomResponse, CustomReaction
 
@@ -105,7 +106,7 @@ class CustomCommands(commands.Cog):
 
         logger.debug("processing reactions")
 
-        emojis = self.bot.emojis
+        custom_emojis = self.bot.emojis
         reactions = []
 
         for trigger in self.reactions:
@@ -115,10 +116,23 @@ class CustomCommands(commands.Cog):
         if not reactions:
             return
 
+        react_emoji = None
+
         for react in reactions:
-            for emoji in emojis:
-                if react == emoji.name:
-                    await message.add_reaction(emoji)
+            # check if a custom emoji
+            for e in custom_emojis:
+                if react == e.name:
+                    react_emoji = e
+                    break
+
+            # otherwise, try to pass literal string
+            if not react_emoji:
+                react_emoji = react
+
+            try:
+                await message.add_reaction(react_emoji)
+            except:
+                print("EmojiError")
 
     async def update_commands(self):
         '''Update custom commands from database'''

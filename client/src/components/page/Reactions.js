@@ -58,7 +58,7 @@ export function ReactionListMain({ reactions, update, setUpdate }) {
 
 const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [trigger, setTrigger] = useState(props.reaction.trigger)
-  const [response, setResponse] = useState(props.reaction.response)
+  const [response, setResponse] = useState(props.reaction.reaction)
   const [reactionId,] = useState(props.reaction.id)
   const { requestconfig } = useAuth();
 
