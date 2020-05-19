@@ -2,7 +2,6 @@ import random
 import logging
 from aiohttp import web
 from discord.ext import commands
-import emoji
 
 from cleo.db import CustomCommand, CustomResponse, CustomReaction
 
