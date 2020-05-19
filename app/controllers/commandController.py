@@ -114,7 +114,7 @@ def get_reactions():
 @cross_origin()
 def add_reaction():
     data = request.json
-    reaction = CustomReaction(data['trigger'], data['reaction'])
+    reaction = CustomReaction(data['trigger'], data['response'])
     db.session.add(reaction)
     db.session.commit()
 

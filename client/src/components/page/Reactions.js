@@ -11,12 +11,12 @@ import { ModalForm, ModalFormControl } from '../Modal';
 
 import { CommandListHeaderStyled, CommandEntryStyled } from './Commands';
 
-export const ResponseListHeader = ({ update, setUpdate }) => {
+export const ReactionListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
 
   const handleClick = () => {
     showModal({
-      content: NewResponseModal,
+      content: NewReactionModal,
       contentProps: { hideModal, update, setUpdate },
       ModalProps: {}
     })
@@ -24,31 +24,30 @@ export const ResponseListHeader = ({ update, setUpdate }) => {
 
   return (
     <CommandListHeaderStyled>
-      <h1>Custom Responses</h1>
+      <h1>Custom Reactions</h1>
       <Button variant="contained" onClick={() => handleClick()}>
-        Add Response
+        Add Reaction
       </Button>
     </CommandListHeaderStyled>
   )
 }
 
-export function ResponseListMain({ responses, update, setUpdate }) {
+export function ReactionListMain({ reactions, update, setUpdate }) {
   const { showModal, hideModal } = useModal()
-
-  const handleClick = (response) => {
+  const handleClick = (reaction) => {
     showModal({
-      content: ResponseModal,
-      contentProps: { response, hideModal, update, setUpdate },
+      content: ReactionModal,
+      contentProps: { reaction, hideModal, update, setUpdate },
       ModalProps: {}
     })
   }
 
   return (
     <>
-      {responses.map((response, i) =>
+      {reactions.map((reaction, i) =>
         <CommandEntryStyled key={i}>
-          <div className="command_name"> {response.trigger} </div>
-          <Button onClick={() => handleClick(response)}>
+          <div className="command_name"> {reaction.trigger} </div>
+          <Button onClick={() => handleClick(reaction)}>
             Edit
           </Button>
         </CommandEntryStyled>
@@ -57,10 +56,10 @@ export function ResponseListMain({ responses, update, setUpdate }) {
   );
 }
 
-const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
-  const [trigger, setTrigger] = useState(props.response.trigger)
-  const [response, setResponse] = useState(props.response.response)
-  const [responseId,] = useState(props.response.id)
+const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
+  const [trigger, setTrigger] = useState(props.reaction.trigger)
+  const [response, setResponse] = useState(props.reaction.response)
+  const [reactionId,] = useState(props.reaction.id)
   const { requestconfig } = useAuth();
 
 
@@ -73,22 +72,22 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   }
 
   const handleSubmit = (event) => {
-      event.preventDefault();
-      backendCall.post(
-          '/editresponse',
-          { id: responseId, trigger: trigger, response: response },
-          requestconfig
-      );
+    event.preventDefault();
+    backendCall.post(
+      '/editreaction',
+      { id: reactionId, trigger: trigger, reaction: response },
+      requestconfig
+    );
 
-      setUpdate((update) => ++update)
-      hideModal()
+    setUpdate((update) => ++update)
+    hideModal()
   }
 
   return (
     <>
       <div className="modalHeader">
         <div className="modalTitle">
-          <h1>{props.response.trigger}</h1>
+          <h1>{props.reaction.trigger}</h1>
         </div>
         <Button onClick={hideModal}>
           <FontAwesomeIcon icon={faTimes} />
@@ -96,7 +95,7 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
       </div>
 
       <div className="modalBody">
-        <ResponseForm
+        <ReactionForm
           trigger={trigger}
           response={response}
           handleSubmit={handleSubmit}
@@ -108,7 +107,7 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   )
 }
 
-const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
+const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [trigger, setTrigger] = useState("")
   const [response, setResponse] = useState("")
   const { requestconfig } = useAuth();
@@ -124,13 +123,13 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-        backendCall.post(
-            '/addresponse',
-            { trigger: trigger, response: response },
-            requestconfig
-        );
+    backendCall.post(
+      '/addreaction',
+      { trigger: trigger, reaction: response },
+      requestconfig
+    );
 
-        setUpdate((update) => ++update)
+    setUpdate((update) => ++update)
     hideModal()
   }
 
@@ -138,7 +137,7 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
     <>
       <div className="modalHeader">
         <div className="modalTitle">
-          <h1>New Response</h1>
+          <h1>New Reaction</h1>
         </div>
         <Button onClick={hideModal}>
           <FontAwesomeIcon icon={faTimes} />
@@ -146,7 +145,7 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
       </div>
 
       <div className="modalBody">
-        <ResponseForm
+        <ReactionForm
           trigger={trigger}
           response={response}
           handleSubmit={handleSubmit}
@@ -158,7 +157,7 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   )
 }
 
-const ResponseForm = (props) => (
+const ReactionForm = (props) => (
   <ModalForm onSubmit={props.handleSubmit} autoComplete="off">
     <ModalFormControl>
       <FormLabel>Trigger</FormLabel>

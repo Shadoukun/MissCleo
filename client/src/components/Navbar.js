@@ -65,6 +65,9 @@ const Navbar = (props) => {
           <Button className={isActive('/responses')} component={RouterLink} to="/responses">
             Responses
         </Button>
+          <Button className={isActive('/reactions')} component={RouterLink} to="/reactions">
+            Reactions
+        </Button>
         </Box>
 
         <LoginBar isLoggedIn={authToken} />
