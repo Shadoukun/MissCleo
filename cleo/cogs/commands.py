@@ -4,6 +4,7 @@ from aiohttp import web
 from discord.ext import commands
 
 from cleo.db import CustomCommand, CustomResponse, CustomReaction
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -107,11 +108,12 @@ class CustomCommands(commands.Cog):
 
         custom_emojis = self.bot.emojis
         reactions = []
-        msg = message.content.lower().split()
+        msg = message.content.lower()
 
-        for trigger in self.reactions:
-            if trigger in msg:
-                reactions = self.reactions[trigger].split('\n')
+        for k, r in self.reactions.items():
+            print(r)
+            if r[0].search(msg):
+                reactions = r[1].split('\n')
 
         if not reactions:
             return
@@ -185,7 +187,9 @@ class CustomCommands(commands.Cog):
             for r in reactions:
                 # sqlalchemy seems to not refresh consistently
                 self.db.refresh(r)
-                self.reactions[r.trigger] = r.reaction.replace(':', '')
+                trigger_exp = re.compile(fr'\b{r.trigger}\b')
+
+                self.reactions[r.trigger] = (trigger_exp, r.reaction.replace(':', ''))
 
 
     async def handle(self, request):
