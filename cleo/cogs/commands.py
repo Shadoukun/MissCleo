@@ -111,7 +111,6 @@ class CustomCommands(commands.Cog):
         msg = message.content.lower()
 
         for k, r in self.reactions.items():
-            print(r)
             if r[0].search(msg):
                 reactions = r[1].split('\n')
 
