@@ -33,13 +33,14 @@ async def add_update_all_guilds(self):
             if (isinstance(channel, TextChannel)) and (channel.id not in existing_channels):
                 self.db.add(Channel(channel))
 
-        for role in guild.roles:
+        roles = await guild.fetch_roles()
+        for role in roles:
             if role.id not in existing_roles:
                 self.db.add(Role(role))
                 logger.debug((f"Adding Role for '{guild.name}': "
                               f"({role.id}) {role.name} - {role.color.value}"))
 
-        for member in guild.members:
+        async for member in guild.fetch_members():
             if member.id not in existing_members:
                 new_member = GuildMembership(member)
                 self.db.add(new_member)
@@ -48,6 +49,8 @@ async def add_update_all_guilds(self):
 
     self.db.commit()
 
+    await update_all_guild_members(self)
+
 
 async def update_all_guild_members(self):
 
@@ -55,13 +58,15 @@ async def update_all_guild_members(self):
 
     async for guild in self.fetch_guilds():
         members = self.db.query(GuildMembership).filter_by(guild_id=guild.id).all()
+        if not members:
+            continue
 
         async for member in guild.fetch_members():
-            m = next(x for x in members if x.user_id == member.id)
-
+            m = next(filter(lambda x: x.user_id == member.id, members))
             m.user.avatar_url = str(member.avatar_url_as(format=None, static_format="webp", size=512))
             m.top_role_id = m.top_role_id if m.top_role else 0
             logger.debug((f"Updating Member for '{guild.name}': "
-                            f"({member.id}) {member.name} - {member.display_name}"))
+                        f"({member.id}) {member.name} - {member.display_name}"))
+
 
     self.db.commit()

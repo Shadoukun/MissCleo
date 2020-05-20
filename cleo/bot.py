@@ -86,7 +86,6 @@ class MissCleo(commands.Bot):
 
         self.load_cogs()
         self.loop.create_task(add_update_all_guilds(self))
-        self.loop.create_task(update_all_guild_members(self))
 
     async def on_ready(self):
         # database background tasks

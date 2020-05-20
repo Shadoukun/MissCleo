@@ -103,7 +103,7 @@ class GuildMembership(Base):
         self.user_id = member.id
         self.display_name = member.display_name
         self.joined_at = member.joined_at
-        self.top_role_id = member.top_role.color.value
+        self.top_role_id = member.top_role.color.value if member.top_role else None
 
 
 class Role(Base):
