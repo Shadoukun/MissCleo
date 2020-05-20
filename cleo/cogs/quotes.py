@@ -243,5 +243,9 @@ class Quotes(commands.Cog):
             await ctx.channel.send(NORESULTS_MSG)
 
 
+    @commands.command(name="cleo")
+    async def cleo(self, ctx, *args):
+        await ctx.channel.send(config.HOST_URL + "quotes/" + str(ctx.guild.id))
+
 def setup(bot):
     bot.add_cog(Quotes(bot))
