@@ -54,6 +54,19 @@ def get_commands():
     return Response(cmds, mimetype='application/json')
 
 
+@blueprint.route('/removecommand', methods=['GET'])
+@jwt_required
+@cross_origin()
+def remove_command():
+    data = request.json
+    if data['id']:
+        db.session.query(CustomCommand).filter_by(id=data['id']).remove()
+
+        return Response(None, status=200, mimetype='application/json')
+
+    return Response(None, status=500, mimetype='application/json')
+
+
 # RESPONSES #
 
 @blueprint.route('/getresponses', methods=['GET'])
@@ -98,6 +111,17 @@ def edit_response():
     return Response(None, status=200, mimetype='application/json')
 
 
+@blueprint.route('/removeresponse', methods=['GET'])
+@jwt_required
+@cross_origin()
+def remove_response():
+    data = request.json
+    if data['id']:
+        db.session.query(CustomResponse).filter_by(id=data['id']).remove()
+        return Response(None, status=200, mimetype='application/json')
+
+    return Response(None, status=500, mimetype='application/json')
+
 # REACTIONS #
 
 @blueprint.route('/getreactions', methods=['GET'])
@@ -141,3 +165,15 @@ def edit_reaction():
         requests.get('http://127.0.0.1:10000/update_reactions')
 
     return Response(None, status=200, mimetype='application/json')
+
+
+@blueprint.route('/removereaction', methods=['GET'])
+@jwt_required
+@cross_origin()
+def remove_reaction():
+    data = request.json
+    if data['id']:
+        db.session.query(CustomResponse).filter_by(id=data['id']).remove()
+        return Response(None, status=200, mimetype='application/json')
+
+    return Response(None, status=500, mimetype='application/json')
