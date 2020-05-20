@@ -174,12 +174,12 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
       <div className="modalBody">
         <CommandForm
           edit
-          command={command}
+          trigger={command}
           response={response}
           handleSubmit={handleSubmit}
           handleCommandChange={handleCommandChange}
           handleResponseChange={handleResponseChange}
-          remove={handleRemove}
+          handleRemove={handleRemove}
         />
       </div>
     </>
@@ -224,7 +224,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
       <div className="modalBody">
         <CommandForm
-          command={command}
+          trigger={command}
           response={response}
           handleSubmit={handleSubmit}
           handleCommandChange={handleCommandChange}
@@ -236,16 +236,24 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 }
 
 
-const CommandForm = ({edit, ...props}) => (
-  <ModalForm onSubmit={props.handleSubmit} autoComplete="off">
+export const CommandForm = ({
+    type="Command",
+    edit=false,
+    trigger,
+    response,
+    handleSubmit,
+    handleTriggerChange,
+    handleResponseChange,
+    handleRemove,
+    ...props
+  }) => (
+  <ModalForm onSubmit={handleSubmit} autoComplete="off">
     <ModalFormControl>
-      <FormLabel>Command</FormLabel>
+      <FormLabel>{type === "Command" ? "Command" : "Trigger"}</FormLabel>
       <Input
-        variant="filled"
-        label="Command"
-        id="command"
-        value={props.command}
-        onChange={props.handleCommandChange}
+        id="trigger"
+        value={trigger}
+        onChange={handleTriggerChange}
 
       />
     </ModalFormControl>
@@ -253,21 +261,19 @@ const CommandForm = ({edit, ...props}) => (
     <ModalFormControl>
       <FormLabel>Response</FormLabel>
       <Input
-        variant="filled"
-        label="Response"
         id="response"
         multiline
         rows={3}
         rowsMax={6}
-        value={props.response}
-        onChange={props.handleResponseChange}
+        value={response}
+        onChange={handleResponseChange}
       />
     </ModalFormControl>
 
     <div className="modalFooter">
       {edit &&
-        <Button className="Remove" onClick={props.remove}>
-        Remove
+        <Button className="Remove" onClick={handleRemove}>
+        Delete
       </Button>
       }
       <Button type="submit">

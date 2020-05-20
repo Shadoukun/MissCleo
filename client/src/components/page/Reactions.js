@@ -9,7 +9,7 @@ import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
-import { CommandListHeaderStyled, CommandEntryStyled } from './Commands';
+import { CommandListHeaderStyled, CommandEntryStyled, CommandForm } from './Commands';
 
 export const ReactionListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
@@ -107,14 +107,15 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
       </div>
 
       <div className="modalBody">
-        <ReactionForm
+        <CommandForm
+          type="Reaction"
           edit
           trigger={trigger}
           response={response}
           handleSubmit={handleSubmit}
           handleTriggerChange={handleTriggerChange}
           handleResponseChange={handleResponseChange}
-          remove={handleRemove}
+          handleRemove={handleRemove}
         />
       </div>
     </>
@@ -159,7 +160,8 @@ const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
       </div>
 
       <div className="modalBody">
-        <ReactionForm
+        <CommandForm
+          type="Reaction"
           trigger={trigger}
           response={response}
           handleSubmit={handleSubmit}
@@ -170,44 +172,3 @@ const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
     </>
   )
 }
-
-const ReactionForm = ({edit, ...props}) => (
-  <ModalForm onSubmit={props.handleSubmit} autoComplete="off">
-    <ModalFormControl>
-      <FormLabel>Trigger</FormLabel>
-      <Input
-        variant="filled"
-        label="Trigger"
-        id="trigger"
-        value={props.trigger}
-        onChange={props.handleTriggerChange}
-
-      />
-    </ModalFormControl>
-
-    <ModalFormControl>
-      <FormLabel>Response</FormLabel>
-      <Input
-        variant="filled"
-        label="Response"
-        id="response"
-        multiline
-        rows={3}
-        rowsMax={6}
-        value={props.response}
-        onChange={props.handleResponseChange}
-      />
-    </ModalFormControl>
-
-    <div className="modalFooter">
-      {edit &&
-        <Button className="Remove" onClick={props.remove}>
-          Remove
-      </Button>
-      }
-      <Button type="submit">
-        Save
-      </Button>
-    </div>
-  </ModalForm>
-)

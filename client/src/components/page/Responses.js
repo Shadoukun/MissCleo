@@ -9,7 +9,7 @@ import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
-import { CommandListHeaderStyled, CommandEntryStyled } from './Commands';
+import { CommandListHeaderStyled, CommandEntryStyled, CommandForm } from './Commands';
 
 export const ResponseListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
@@ -108,14 +108,15 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
       </div>
 
       <div className="modalBody">
-        <ResponseForm
+        <CommandForm
+          type="Response"
           edit
           trigger={trigger}
           response={response}
           handleSubmit={handleSubmit}
           handleTriggerChange={handleTriggerChange}
           handleResponseChange={handleResponseChange}
-          remove={handleRemove}
+          handleRemove={handleRemove}
         />
       </div>
     </>
@@ -161,7 +162,8 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
       </div>
 
       <div className="modalBody">
-        <ResponseForm
+        <CommandForm
+          type="Response"
           trigger={trigger}
           response={response}
           handleSubmit={handleSubmit}
