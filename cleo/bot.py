@@ -1,5 +1,6 @@
 import os
 import sys
+from aiohttp import web
 import aiohttp
 import asyncio
 import logging
@@ -7,6 +8,7 @@ import itertools
 import traceback
 from pathlib import Path
 from discord.ext import commands
+
 
 from . import utils
 from .tasks import update_all_guild_members, add_update_all_guilds
@@ -82,8 +84,11 @@ class MissCleo(commands.Bot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.db = session
         self.tokens = kwargs.get('tokens')
-        self.help_command = CustomHelpCommand()
 
+        # start REST api.
+        self.start_web_api()
+
+        self.help_command = CustomHelpCommand()
         self.load_cogs()
         self.loop.create_task(add_update_all_guilds(self))
 
@@ -144,3 +149,29 @@ class MissCleo(commands.Bot):
                 logger.debug("Loaded Cog: " + extension)
             except Exception as e:
                 logger.error(f'Failed to load extension {extension}\n{type(e).__name__}: {e}')
+
+    def start_web_api(self):
+        """ Start Rest API to trigger bot functions. """
+
+        # a list to hold dynamically added routes.
+        # route = ('name', callback)
+        self.api_routes = []
+
+        self.api = web.Application()
+        self.api.router.add_get('/{name}', self.api_handler)
+        handler = self.api.make_handler()
+        serv = self.loop.create_server(handler, '127.0.0.1', 10000)
+        self.loop.run_until_complete(serv)
+
+
+    async def api_handler(self, request):
+        """ Rest API handler """
+        name = request.match_info.get('name', "Anonymous")
+        for route in self.api_routes:
+            if name == route[0]:
+                await route[1]()
+                return web.Response(status=200)
+
+        return web.Response(status=404)
+
+

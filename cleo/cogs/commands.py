@@ -19,15 +19,10 @@ class CustomCommands(commands.Cog):
         self.responses = {}
         self.reactions = {}
 
-        app = web.Application()
-        app.router.add_get('/', self.handle)
-        app.router.add_get('/{name}', self.handle)
-
-
-        # crappy REST api for triggering triggering discord bot functions.
-        handler = app.make_handler()
-        f = self.bot.loop.create_server(handler, '0.0.0.0', 10000)
-        srv = self.bot.loop.run_until_complete(f)
+        # Rest API routes to trigger updates.
+        self.bot.api_routes.append(("update_commands", self.update_commands))
+        self.bot.api_routes.append(("update_responses", self.update_responses))
+        self.bot.api_routes.append(("update_reactions", self.update_reactions))
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -46,8 +41,8 @@ class CustomCommands(commands.Cog):
         await self._process_reactions(message)
 
     def _make_command(self, command):
-        '''Returns a generic send_message callback function
-           for custom commands'''
+        '''Returns a callback function
+           for sending custom commands'''
 
         logger.debug(f"creating command: {command.command}")
 
@@ -74,7 +69,7 @@ class CustomCommands(commands.Cog):
             cmd.category = 'Custom'
             self.bot.add_command(cmd)
 
-                # if commands cog is enabled, add command to auto-enabled commands.
+            # if commands cog is enabled, add command to auto-enabled commands.
             if c.command not in self.bot.auto_enable:
                 self.bot.auto_enable.append(c.command)
 
@@ -186,22 +181,6 @@ class CustomCommands(commands.Cog):
                 self.db.refresh(r)
                 trigger_exp = re.compile(fr'\b{r.trigger}\b')
                 self.reactions[r.trigger] = (trigger_exp, r.reaction.replace(':', ''))
-
-
-    async def handle(self, request):
-        '''crappy rest API'''
-        name = request.match_info.get('name', "Anonymous")
-        if name == "update_commands":
-            await self.update_commands()
-        elif name == "update_responses":
-            await self.update_responses()
-        elif name == "update_reactions":
-            await self.update_reactions()
-        elif name== "remove_command":
-            await self.remove_command(request.rel_url.query['id'])
-
-        text = "Hello, " + name
-        return web.Response(text=text)
 
 
 def setup(bot):
