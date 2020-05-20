@@ -148,6 +148,18 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     hideModal()
   }
 
+  const handleRemove = (event) => {
+    event.preventDefault();
+    backendCall.post(
+      '/removecommand',
+      { id: commandId },
+      requestconfig
+    );
+
+    setUpdate((update) => ++update)
+    hideModal()
+  }
+
   return (
     <>
       <div className="modalHeader">
@@ -161,11 +173,13 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
       <div className="modalBody">
         <CommandForm
+          edit
           command={command}
           response={response}
           handleSubmit={handleSubmit}
           handleCommandChange={handleCommandChange}
           handleResponseChange={handleResponseChange}
+          remove={handleRemove}
         />
       </div>
     </>
@@ -222,7 +236,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 }
 
 
-const CommandForm = (props) => (
+const CommandForm = ({edit, ...props}) => (
   <ModalForm onSubmit={props.handleSubmit} autoComplete="off">
     <ModalFormControl>
       <FormLabel>Command</FormLabel>
@@ -251,6 +265,11 @@ const CommandForm = (props) => (
     </ModalFormControl>
 
     <div className="modalFooter">
+      {edit &&
+        <Button className="Remove" onClick={props.remove}>
+        Remove
+      </Button>
+      }
       <Button type="submit">
         Save
       </Button>

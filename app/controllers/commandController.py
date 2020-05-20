@@ -54,14 +54,14 @@ def get_commands():
     return Response(cmds, mimetype='application/json')
 
 
-@blueprint.route('/removecommand', methods=['GET'])
+@blueprint.route('/removecommand', methods=['POST'])
 @jwt_required
 @cross_origin()
 def remove_command():
     data = request.json
     if data['id']:
-        db.session.query(CustomCommand).filter_by(id=data['id']).remove()
-
+        db.session.query(CustomCommand).filter_by(id=data['id']).delete()
+        db.session.commit()
         return Response(None, status=200, mimetype='application/json')
 
     return Response(None, status=500, mimetype='application/json')
@@ -111,13 +111,14 @@ def edit_response():
     return Response(None, status=200, mimetype='application/json')
 
 
-@blueprint.route('/removeresponse', methods=['GET'])
+@blueprint.route('/removeresponse', methods=['POST'])
 @jwt_required
 @cross_origin()
 def remove_response():
     data = request.json
     if data['id']:
-        db.session.query(CustomResponse).filter_by(id=data['id']).remove()
+        db.session.query(CustomResponse).filter_by(id=data['id']).delete()
+        db.session.commit()
         return Response(None, status=200, mimetype='application/json')
 
     return Response(None, status=500, mimetype='application/json')
@@ -167,13 +168,14 @@ def edit_reaction():
     return Response(None, status=200, mimetype='application/json')
 
 
-@blueprint.route('/removereaction', methods=['GET'])
+@blueprint.route('/removereaction', methods=['POST'])
 @jwt_required
 @cross_origin()
 def remove_reaction():
     data = request.json
     if data['id']:
-        db.session.query(CustomResponse).filter_by(id=data['id']).remove()
+        db.session.query(CustomReaction).filter_by(id=data['id']).delete()
+        db.session.commit()
         return Response(None, status=200, mimetype='application/json')
 
     return Response(None, status=500, mimetype='application/json')

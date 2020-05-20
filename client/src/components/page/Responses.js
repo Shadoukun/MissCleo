@@ -84,6 +84,18 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
       hideModal()
   }
 
+  const handleRemove = (event) => {
+    event.preventDefault();
+    backendCall.post(
+      '/removeresponse',
+      { id: responseId },
+      requestconfig
+    );
+
+    setUpdate((update) => ++update)
+    hideModal()
+  }
+
   return (
     <>
       <div className="modalHeader">
@@ -97,11 +109,13 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
 
       <div className="modalBody">
         <ResponseForm
+          edit
           trigger={trigger}
           response={response}
           handleSubmit={handleSubmit}
           handleTriggerChange={handleTriggerChange}
           handleResponseChange={handleResponseChange}
+          remove={handleRemove}
         />
       </div>
     </>
@@ -134,6 +148,7 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
     hideModal()
   }
 
+
   return (
     <>
       <div className="modalHeader">
@@ -158,7 +173,7 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   )
 }
 
-const ResponseForm = (props) => (
+const ResponseForm = ({edit, ...props}) => (
   <ModalForm onSubmit={props.handleSubmit} autoComplete="off">
     <ModalFormControl>
       <FormLabel>Trigger</FormLabel>
@@ -187,6 +202,11 @@ const ResponseForm = (props) => (
     </ModalFormControl>
 
     <div className="modalFooter">
+      {edit &&
+        <Button className="Remove" onClick={props.remove}>
+          Remove
+      </Button>
+      }
       <Button type="submit">
         Save
       </Button>

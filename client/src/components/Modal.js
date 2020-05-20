@@ -67,13 +67,14 @@ ${({ theme }) => `
   }
 
   .modalFooter {
-    padding: 20px 0 0 20px;
+    padding: 20px 0 0 0px;
     display: flex;
+
 
     button {
       font-size: 12px;
       margin: auto 0 auto auto;
-      background: #43B581 !important;
+      background: #43B581;
       color: ${theme.colors.primaryFontColor};
       border: 1px solid transparent !important;
       font-weight: bold;
@@ -82,7 +83,7 @@ ${({ theme }) => `
       &:hover {
         box-shadow: none;
         border: 1px solid transparent;
-        background: ${darken(0.2, "#43B581")} !important;
+        background: ${darken(0.2, "#43B581")};
         color: ${darken(0.2, theme.colors.primaryFontColor)}
       }
 
@@ -91,9 +92,21 @@ ${({ theme }) => `
       }
 
       &:active {
-        background: ${lighten(0.05, "#43B581")} !important;
+        background: ${darken(0.05, "#43B581")} !important;
       }
+    }
 
+    button.Remove {
+      color: ${darken(0.2, theme.colors.primaryFontColor)};
+      background: transparent;
+      margin-left: 0;
+      padding-left: 5px;
+      padding-right: 5px;
+      font-weight: normal;
+
+       &:hover {
+        background: ${darken(0.2, "#F04747")};
+      }
     }
   `}`
 
