@@ -64,6 +64,7 @@ async def update_all_guild_members(self):
         async for member in guild.fetch_members():
             m = next(filter(lambda x: x.user_id == member.id, members))
             m.user.avatar_url = str(member.avatar_url_as(format=None, static_format="webp", size=512))
+            m.display_name = member.display_name
             m.top_role_id = m.top_role_id if m.top_role else 0
             logger.debug((f"Updating Member for '{guild.name}': "
                         f"({member.id}) {member.name} - {member.display_name}"))
