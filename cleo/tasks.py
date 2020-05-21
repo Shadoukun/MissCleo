@@ -55,19 +55,21 @@ async def add_update_all_guilds(self):
 async def update_all_guild_members(self):
 
     await self.wait_until_ready()
+    def _update():
+        for guild in self.guilds:
+            members = self.db.query(GuildMembership).filter_by(guild_id=guild.id).all()
+            if not members:
+                continue
 
-    async for guild in self.fetch_guilds():
-        members = self.db.query(GuildMembership).filter_by(guild_id=guild.id).all()
-        if not members:
-            continue
-
-        async for member in guild.fetch_members():
-            m = next(filter(lambda x: x.user_id == member.id, members))
-            m.user.avatar_url = str(member.avatar_url_as(format=None, static_format="webp", size=512))
-            m.display_name = member.display_name
-            m.top_role_id = m.top_role_id if m.top_role else 0
-            logger.debug((f"Updating Member for '{guild.name}': "
-                        f"({member.id}) {member.name} - {member.display_name}"))
+            for member in guild.members:
+                m = next(filter(lambda x: x.user_id == member.id, members))
+                m.user.avatar_url = str(member.avatar_url_as(format=None, static_format="webp", size=512))
+                m.display_name = member.display_name
+                m.top_role_id = member.top_role.id if member.top_role else 0
+                logger.debug((f"Updating Member for '{guild.name}': "
+                            f"({member.id}) {member.name} - {member.display_name}"))
 
 
-    self.db.commit()
+        self.db.commit()
+
+    await self.loop.run_in_executor(None, _update)
