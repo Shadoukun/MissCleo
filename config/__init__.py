@@ -9,4 +9,4 @@ PORT = int(os.environ.get('PORT', 5000))
 HOST_URL = f"http://{HOST}:{str(PORT)}/"
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.getcwd() + '/database.db'
+SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://<username>:<password>@localhost/cleo'

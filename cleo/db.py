@@ -6,9 +6,10 @@ from flask_sqlalchemy import Pagination
 from sqlalchemy.ext.declarative import DeclarativeMeta
 import json
 import datetime
+import config
 
 
-engine = create_engine('sqlite:///database.db')
+engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 Base = declarative_base()
 
 
