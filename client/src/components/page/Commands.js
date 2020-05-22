@@ -9,6 +9,7 @@ import { useModal } from '../../context/Modal';
 import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
+import { FormControlLabel, Switch } from '@material-ui/core';
 
 
 export const CommandListHeaderStyled = styled.div`
@@ -72,6 +73,13 @@ export const CommandEntryStyled = styled.div`
   }
 `}`
 
+export const CommandDescription = styled.div`
+${({ theme }) => `
+  margin: auto 0 auto 30px ;
+  font-weight: normal;
+  color: ${darken(0.5, theme.colors.primaryFontColor)}
+`}`
+
 
 export const CommandListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
@@ -111,6 +119,7 @@ export function CommandListMain({ commands, update, setUpdate }) {
       {commands.map((command, i) =>
         <CommandEntryStyled key={i}>
           <div className="command_name"> {"!" + command.command} </div>
+          <CommandDescription>{command.description}</CommandDescription>
           <Button onClick={() => handleClick(command)}>
             Edit
           </Button>
@@ -124,6 +133,8 @@ export function CommandListMain({ commands, update, setUpdate }) {
 const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [command, setCommand] = useState(props.command.command)
   const [response, setResponse] = useState(props.command.response)
+  const [description, setDescription] = useState(props.command.description)
+
   const [commandId,] = useState(props.command.id)
   const { requestconfig } = useAuth();
 
@@ -140,7 +151,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     backendCall.post(
       '/editcommand',
-      { id: commandId, command: command, response: response },
+      { id: commandId, command: command, response: response, description: description },
       requestconfig
     );
 
@@ -160,6 +171,10 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     hideModal()
   }
 
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value)
+  }
+
   return (
     <>
       <div className="modalHeader">
@@ -176,8 +191,10 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
           edit
           trigger={command}
           response={response}
+          description={description}
+          handleDescriptionChange={handleDescriptionChange}
           handleSubmit={handleSubmit}
-          handleCommandChange={handleCommandChange}
+          handleTriggerChange={handleCommandChange}
           handleResponseChange={handleResponseChange}
           handleRemove={handleRemove}
         />
@@ -190,6 +207,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const [command, setCommand] = useState("")
   const [response, setResponse] = useState("")
+  const [description, setDescription] = useState("")
   const { requestconfig } = useAuth();
 
 
@@ -205,12 +223,16 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     backendCall.post(
       '/addcommand',
-      { command: command, response: response },
+      { command: command, response: response, description: description },
       requestconfig
     );
 
     setUpdate(update => ++update)
     hideModal()
+  }
+
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value)
   }
 
   return (
@@ -226,8 +248,10 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
         <CommandForm
           trigger={command}
           response={response}
+          description={description}
+          handleDescriptionChange={handleDescriptionChange}
           handleSubmit={handleSubmit}
-          handleCommandChange={handleCommandChange}
+          handleTriggerChange={handleCommandChange}
           handleResponseChange={handleResponseChange}
         />
       </div>
@@ -237,48 +261,114 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
 
 export const CommandForm = ({
-    type="Command",
-    edit=false,
-    trigger,
-    response,
-    handleSubmit,
-    handleTriggerChange,
-    handleResponseChange,
-    handleRemove,
-    ...props
-  }) => (
-  <ModalForm onSubmit={handleSubmit} autoComplete="off">
-    <ModalFormControl>
-      <FormLabel>{type === "Command" ? "Command" : "Trigger"}</FormLabel>
-      <Input
-        id="trigger"
-        value={trigger}
-        onChange={handleTriggerChange}
+  type = "Command",
+  edit = false,
+  name,
+  description,
+  trigger,
+  response,
+  useRegex,
+  multiResponse,
+  handleSubmit,
+  handleNameChange,
+  handleDescriptionChange,
+  handleTriggerChange,
+  handleResponseChange,
+  toggleRegex,
+  toggleMultiResponse,
+  handleRemove,
+  ...props
+}) => (
+    <ModalForm onSubmit={handleSubmit} autoComplete="off">
 
-      />
-    </ModalFormControl>
+      {type === "Command" ? (
+        <>
+          <ModalFormControl>
+            <FormLabel>Command</FormLabel>
+            <Input
+              id="trigger"
+              value={trigger}
+              onChange={handleTriggerChange}
+            />
+          </ModalFormControl>
+        </>
+      ) : (
+          <>
+            <ModalFormControl>
+              <FormLabel>Name</FormLabel>
+              <Input
+                id="name"
+                value={name}
+                onChange={handleNameChange}
+              />
+            </ModalFormControl>
+            <ModalFormControl>
+              <FormLabel>Trigger</FormLabel>
+              <Input
+                id="trigger"
+                value={trigger}
+                onChange={handleTriggerChange}
+              />
+            </ModalFormControl>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={useRegex}
+                  onChange={toggleRegex}
+                  name="regex"
+                  color="primary"
+                />
+              }
+              label="Regex"
+            />
+          </>
+        )}
 
-    <ModalFormControl>
-      <FormLabel>Response</FormLabel>
-      <Input
-        id="response"
-        multiline
-        rows={3}
-        rowsMax={6}
-        value={response}
-        onChange={handleResponseChange}
-      />
-    </ModalFormControl>
+      <ModalFormControl>
+        <FormLabel>Response</FormLabel>
+        <Input
+          id="response"
+          multiline
+          rows={3}
+          rowsMax={6}
+          value={response}
+          onChange={handleResponseChange}
+        />
 
-    <div className="modalFooter">
-      {edit &&
-        <Button className="Remove" onClick={handleRemove}>
-        Delete
-      </Button>
-      }
-      <Button type="submit">
-        Save
-      </Button>
-    </div>
-  </ModalForm>
-)
+        {type === "Response" &&
+          <FormControlLabel
+            control={
+              <Switch
+                checked={multiResponse}
+                onChange={toggleMultiResponse}
+                name="regex"
+                color="primary"
+              />
+            }
+            label="Random Response"
+          />
+        }
+
+      </ModalFormControl>
+
+      <ModalFormControl>
+        <FormLabel>Description</FormLabel>
+        <Input
+          id="description"
+          value={description}
+          onChange={handleDescriptionChange}
+        />
+
+        <div className="modalFooter">
+          {edit &&
+            <Button className="Remove" onClick={handleRemove}>
+              Delete
+            </Button>
+          }
+          <Button type="submit">
+            Save
+          </Button>
+        </div>
+      </ModalFormControl>
+    </ModalForm>
+  )

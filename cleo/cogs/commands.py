@@ -1,12 +1,63 @@
 import random
 import logging
+import re
 from aiohttp import web
 from discord.ext import commands
-
 from cleo.db import CustomCommand, CustomResponse, CustomReaction
-import re
 
 logger = logging.getLogger(__name__)
+
+
+class ResponseData:
+    '''Class for parsed Response data from database'''
+
+    def __init__(self, response):
+        self.id = response.id
+        self.trigger = None
+        self.responses = None
+        self.useRegex = response.use_regex
+        self.multiResponse = response.multi_response
+
+        # trigger is regex expression if use_regex == True
+        # otherwise a regular string
+        if self.useRegex:
+            self.trigger = re.compile(fr'{response.trigger}')
+        else:
+            self.trigger = response.trigger
+
+        # split response in to lines if multi_response == True
+        if self.multiResponse:
+            self.responses = response.response.split('\n')
+        else:
+            self.responses = [response.response]
+
+
+class ReactionData:
+    '''Class for parsed Reaction data from database'''
+
+    def __init__(self, reaction, custom_emojis):
+        self.id = reaction.id
+        self.trigger = None
+        self.reactions = None
+        self.useRegex = reaction.use_regex
+        self.multiResponse = reaction.multi_response
+
+        # trigger is regex expression if use_regex == True
+        # otherwise a regular string
+        if self.useRegex:
+            self.trigger = re.compile(fr'{reaction.trigger}')
+        else:
+            self.trigger = reaction.trigger
+
+        # split response in to lines if multi_response == True
+        self.reactions = reaction.reaction.replace(':', '').split('\n')
+
+        # check and replace custom emojis
+        for i, r in enumerate(self.reactions):
+            for e in custom_emojis:
+                if r == e.name:
+                    self.reactions[i] = e
+                    break
 
 
 class CustomCommands(commands.Cog):
@@ -28,7 +79,7 @@ class CustomCommands(commands.Cog):
     async def on_ready(self):
         logger.debug("adding commands, responses, reactions")
 
-        await self._load_custom_commands()
+        await self.update_commands()
         await self.update_responses()
         await self.update_reactions()
 
@@ -40,7 +91,8 @@ class CustomCommands(commands.Cog):
         await self._process_responses(message)
         await self._process_reactions(message)
 
-    def _make_command(self, command):
+    @staticmethod
+    def _make_command(command):
         '''Returns a callback function
            for sending custom commands'''
 
@@ -53,17 +105,85 @@ class CustomCommands(commands.Cog):
 
         return _command
 
-    async def _load_custom_commands(self, command=None):
-        '''Load/Reload custom commands from database
-           takes individual commands to reload as optional arg'''
 
-        logger.debug("loading custom commands")
-        cmds = [command] if command else self.db.query(CustomCommand).all()
+    async def _process_responses(self, message):
+        '''Triggers a custom response if message containers trigger.'''
+
+        logger.debug("processing responses")
+
+        response = None
+        channel = message.channel
+        msg = message.content.lower()
+
+        # check for trigger in message
+        for _, r in self.responses.items():
+            if r.useRegex:
+                if r.trigger.search(msg):
+                    response = r
+                    break
+            else:
+                if r.trigger in msg:
+                    response = r
+                    break
+
+        # check if there are multiple possible responses.
+        if response:
+            # return random response
+            if response.multiResponse:
+                    resp = random.choice(response.responses)
+            # return full response
+            else:
+                resp = response.responses[0]
+
+            await channel.send(resp)
+
+    async def _process_reactions(self, message):
+        '''Triggers an automatic discord reaction if message containers trigger'''
+
+        logger.debug("processing reactions")
+
+        reaction = None
+        msg = message.content.lower()
+
+        # check for trigger in message
+        for _, r in self.reactions.items():
+            if r.useRegex:
+                if r.trigger.search(msg):
+                    reaction = r
+            else:
+                if r.trigger in msg:
+                    reaction = r
+
+        if reaction:
+            for react in reaction.reactions:
+                try:
+                    await message.add_reaction(react)
+                except:
+                    logger.error("EmojiError")
+
+    async def update_commands(self, request=None):
+        '''Update custom commands from database'''
+
+        logger.debug("updating commands")
+
+        # get command ID from update request if present.
+        if request:
+            command_id = request.rel_url.query['id']
+            cmds = self.db.query(CustomCommand).filter_by(id=command_id).all()
+        else:
+            cmds = self.db.query(CustomCommand).all()
+
+        if not cmds:
+            return
 
         for c in cmds:
-            if c.command in self.bot.commands:
+            # sqlalchemy seems to not refresh consistently.
+            self.db.refresh(c)
+
+            if c.command in [c.name for c in self.bot.commands]:
                 self.bot.remove_command(c.command)
 
+            # make command callback and add.
             func = self._make_command(c)
             cmd = commands.Command(func, name=c.command)
             cmd.category = 'Custom'
@@ -73,114 +193,59 @@ class CustomCommands(commands.Cog):
             if c.command not in self.bot.auto_enable:
                 self.bot.auto_enable.append(c.command)
 
-    async def _process_responses(self, message):
-        '''Triggers a custom response if message containers trigger.'''
-
-        logger.debug("processing responses")
-
-        resp = []
-        channel = message.channel
-        msg = message.content.lower()
-
-        # check for trigger in message
-        for _, r in self.responses.items():
-            if r[0].search(msg):
-                resp = r[1].split('\n')
-
-        # check if there are multiple possible responses
-        if resp:
-            if len(resp) > 1:
-                    resp = random.choice(resp)
-            else:
-                resp = resp[0]
-
-            await channel.send(resp)
-
-    async def _process_reactions(self, message):
-        '''Triggers an automatic discord reaction if message containers trigger'''
-
-        logger.debug("processing reactions")
-
-        reactions = []
-        react_emoji = None
-        msg = message.content.lower()
-        custom_emojis = self.bot.emojis
-
-        # check for trigger in message
-        for _, r in self.reactions.items():
-            if r[0].search(msg):
-                reactions = r[1].split('\n')
-
-        for react in reactions:
-            # check if a custom emoji
-            for e in custom_emojis:
-                if react == e.name:
-                    react_emoji = e
-                    break
-
-            # otherwise, try to pass literal string
-            if not react_emoji:
-                react_emoji = react
-
-            try:
-                await message.add_reaction(react_emoji)
-            except:
-                logger.error("EmojiError")
-
-    async def update_commands(self):
-        '''Update custom commands from database'''
-
-        logger.debug("updating commands")
-
-        cmds = self.db.query(CustomCommand).all()
-        if not cmds:
-            return
-
-        for command in cmds:
-            # sqlalchemy seems to not refresh consistently. I think
-            self.db.refresh(command)
-            if command.modified_flag == 1:
-                command.modified_flag = 0
-                self.db.commit()
-                await self._load_custom_commands(command)
 
     async def remove_commands(self, command_id):
         command = self.db.query(CustomCommand).filter_by(id=command_id).one()
-
-        custom_cmd = self.bot.get_command(command.command)
         self.bot.remove_command(command.command)
         self.db.query(CustomCommand).filter_by(id=command_id).delete()
         self.db.commit()
 
 
-    async def update_responses(self):
+    async def update_responses(self, request=None):
         '''Add custom responses from database'''
 
         logger.debug("updating responses")
-
         self.responses = {}
-        responses = self.db.query(CustomResponse).all()
-        if responses:
-            for r in responses:
-                # sqlalchemy seems to not refresh consistently. I think
-                self.db.refresh(r)
-                trigger_exp = re.compile(fr'\b{r.trigger}\b')
-                self.responses[r.trigger] = [trigger_exp, r.response]
+
+        # get command ID from update request if present.
+        if request:
+            response_id = request.rel_url.query['id']
+            responses = self.db.query(CustomResponse) \
+                                .filter_by(id=response_id).all()
+        else:
+            responses = self.db.query(CustomResponse).all()
+
+        if not responses:
+            return
+
+        for r in responses:
+            # sqlalchemy seems to not refresh consistently.
+            self.db.refresh(r)
+            response = ResponseData(r)
+            self.responses[response.id] = response
 
 
-    async def update_reactions(self):
+    async def update_reactions(self, request=None):
         '''Add custom reactions from database'''
 
         logger.debug("updating reactions")
 
         self.reactions = {}
-        reactions = self.db.query(CustomReaction).all()
-        if reactions:
-            for r in reactions:
-                # sqlalchemy seems to not refresh consistently
-                self.db.refresh(r)
-                trigger_exp = re.compile(fr'\b{r.trigger}\b')
-                self.reactions[r.trigger] = (trigger_exp, r.reaction.replace(':', ''))
+        if request:
+            reaction_id = request.rel_url.query['id']
+            reactions = self.db.query(CustomReaction) \
+                                .filter_by(id=reaction_id).all()
+        else:
+            reactions = self.db.query(CustomReaction).all()
+
+        if not reactions:
+            return
+
+        for r in reactions:
+            # sqlalchemy seems to not refresh consistently
+            self.db.refresh(r)
+            reaction = ReactionData(r, self.bot.emojis)
+            self.reactions[reaction.id] = reaction
 
 
 def setup(bot):

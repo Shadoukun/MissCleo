@@ -18,12 +18,13 @@ blueprint = Blueprint('commands', __name__)
 @cross_origin()
 def add_command():
     data = request.json
-    command = CustomCommand(data['command'], data['response'], 1)
+    command = CustomCommand(**data)
     print(f"{command.command}, {command.response}")
     db.session.add(command)
     db.session.commit()
+    db.session.refresh(command)
 
-    requests.get('http://127.0.0.1:10000/update_commands')
+    requests.get('http://127.0.0.1:10000/update_commands', {'id': command.id})
 
     return Response(None, status=200, mimetype='application/json')
 
@@ -37,10 +38,14 @@ def edit_command():
         command = db.session.query(CustomCommand).filter_by(id=data['id']).first()
         if not command:
             return Response(None, status=400, mimetype='application/json')
-        command.command = data['command']
-        command.response = data['response']
+
+        # set response entry columns from list.
+        fields = ['command', 'response', 'description']
+        for f in fields:
+           setattr(command, f, data[f])
+
         db.session.commit()
-        requests.get('http://127.0.0.1:10000/update_commands')
+        requests.get('http://127.0.0.1:10000/update_commands', {'id': command.id})
 
     return Response(None, status=200, mimetype='application/json')
 
@@ -83,11 +88,12 @@ def get_responses():
 @cross_origin()
 def add_response():
     data = request.json
-    response = CustomResponse(data['trigger'], data['response'])
+    response = CustomResponse(**data)
     db.session.add(response)
     db.session.commit()
+    db.session.refresh(response)
 
-    requests.get('http://127.0.0.1:10000/update_responses')
+    requests.get('http://127.0.0.1:10000/update_responses', {'id': response.id})
 
     return Response(None, status=200, mimetype='application/json')
 
@@ -98,15 +104,18 @@ def add_response():
 def edit_response():
     data = request.json
     if data['id']:
-        response = db.session.query(
-            CustomResponse).filter_by(id=data['id']).first()
+        response = db.session.query(CustomResponse) \
+                            .filter_by(id=data['id']).first()
         if not response:
             return Response(None, status=400, mimetype='application/json')
 
-        response.trigger = data['trigger']
-        response.response = data['response']
+        # set response entry columns from list.
+        fields = ['name', 'description', 'trigger', 'response', 'use_regex', 'multi_response']
+        for f in fields:
+           setattr(response, f, data[f])
+
         db.session.commit()
-        requests.get('http://127.0.0.1:10000/update_responses')
+        requests.get('http://127.0.0.1:10000/update_responses', {'id': response.id})
 
     return Response(None, status=200, mimetype='application/json')
 
@@ -139,11 +148,13 @@ def get_reactions():
 @cross_origin()
 def add_reaction():
     data = request.json
-    reaction = CustomReaction(data['trigger'], data['reaction'])
+    reaction = CustomReaction(**data)
     db.session.add(reaction)
     db.session.commit()
+    db.session.refresh(reaction)
 
-    requests.get('http://127.0.0.1:10000/update_reactions')
+
+    requests.get('http://127.0.0.1:10000/update_reactions', {'id': reaction.id})
 
     return Response(None, status=200, mimetype='application/json')
 
@@ -155,15 +166,18 @@ def edit_reaction():
 
     data = request.json
     if data['id']:
-        reaction = db.session.query(
-            CustomReaction).filter_by(id=data['id']).first()
+        reaction = db.session.query(CustomReaction) \
+                            .filter_by(id=data['id']).first()
         if not reaction:
             return Response(None, status=400, mimetype='application/json')
 
-        reaction.trigger = data['trigger']
-        reaction.reaction = data['reaction']
+        # set react entry columns from list.
+        fields = ['name', 'description', 'trigger', 'reaction', 'use_regex']
+        for f in fields:
+           setattr(reaction, f, data[f])
+
         db.session.commit()
-        requests.get('http://127.0.0.1:10000/update_reactions')
+        requests.get('http://127.0.0.1:10000/update_reactions', {'id': reaction.id})
 
     return Response(None, status=200, mimetype='application/json')
 

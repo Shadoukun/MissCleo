@@ -9,7 +9,9 @@ import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
-import { CommandListHeaderStyled, CommandEntryStyled, CommandForm } from './Commands';
+import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription, CommandForm } from './Commands';
+
+
 
 export const ResponseListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
@@ -47,7 +49,8 @@ export function ResponseListMain({ responses, update, setUpdate }) {
     <>
       {responses.map((response, i) =>
         <CommandEntryStyled key={i}>
-          <div className="command_name"> {response.trigger} </div>
+          <div className="command_name"> {response.name ? response.name : response.trigger} </div>
+          <CommandDescription>{response.description}</CommandDescription>
           <Button onClick={() => handleClick(response)}>
             Edit
           </Button>
@@ -58,11 +61,23 @@ export function ResponseListMain({ responses, update, setUpdate }) {
 }
 
 const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
+  const [responseId,] = useState(props.response.id)
+  const [name, setName] = useState(props.response.name)
+  const [description, setDescription] = useState(props.response.description)
   const [trigger, setTrigger] = useState(props.response.trigger)
   const [response, setResponse] = useState(props.response.response)
-  const [responseId,] = useState(props.response.id)
+  const [useRegex, setUseRegex] = useState(Boolean(props.response.use_regex))
+  const [multiResponse, setMultiResponse] = useState(Boolean(props.response.multi_response))
+
   const { requestconfig } = useAuth();
 
+  const handleNameChange = (event) => {
+    setName(event.target.value)
+  }
+
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value)
+  }
 
   const handleTriggerChange = (event) => {
     setTrigger(event.target.value)
@@ -73,15 +88,23 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   }
 
   const handleSubmit = (event) => {
-      event.preventDefault();
-      backendCall.post(
-          '/editresponse',
-          { id: responseId, trigger: trigger, response: response },
-          requestconfig
-      );
+    event.preventDefault();
+    backendCall.post(
+      '/editresponse',
+      {
+        id: responseId,
+        name: name,
+        description: description,
+        trigger: trigger,
+        response: response,
+        use_regex: useRegex,
+        multi_response: multiResponse,
+      },
+      requestconfig
+    );
 
-      setUpdate((update) => ++update)
-      hideModal()
+    setUpdate((update) => ++update)
+    hideModal()
   }
 
   const handleRemove = (event) => {
@@ -94,6 +117,14 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
 
     setUpdate((update) => ++update)
     hideModal()
+  }
+
+  const toggleMultiResponse = (event) => {
+    setMultiResponse(!multiResponse)
+  }
+
+  const toggleRegex = (event) => {
+    setUseRegex(!useRegex)
   }
 
   return (
@@ -111,11 +142,19 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
         <CommandForm
           type="Response"
           edit
+          name={name}
+          description={description}
           trigger={trigger}
           response={response}
+          useRegex={useRegex}
+          multiResponse={multiResponse}
+          handleNameChange={handleNameChange}
+          handleDescriptionChange={handleDescriptionChange}
           handleSubmit={handleSubmit}
           handleTriggerChange={handleTriggerChange}
           handleResponseChange={handleResponseChange}
+          toggleRegex={toggleRegex}
+          toggleMultiResponse={toggleMultiResponse}
           handleRemove={handleRemove}
         />
       </div>
@@ -124,9 +163,23 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
 }
 
 const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
   const [trigger, setTrigger] = useState("")
   const [response, setResponse] = useState("")
+  const [useRegex, setUseRegex] = useState(false)
+  const [multiResponse, setMultiResponse] = useState(false)
+
   const { requestconfig } = useAuth();
+
+  const handleNameChange = (event) => {
+    setName(event.target.value)
+  }
+
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value)
+  }
+
 
 
   const handleTriggerChange = (event) => {
@@ -139,16 +192,30 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-        backendCall.post(
-            '/addresponse',
-            { trigger: trigger, response: response },
-            requestconfig
-        );
+    backendCall.post(
+      '/addresponse',
+      {
+        name: name,
+        description: description,
+        trigger: trigger,
+        response: response,
+        use_regex: useRegex,
+        multi_response: multiResponse,
+      },
+      requestconfig
+    );
 
-        setUpdate((update) => ++update)
+    setUpdate((update) => ++update)
     hideModal()
   }
 
+  const toggleMultiResponse = (event) => {
+    setMultiResponse(!multiResponse)
+  }
+
+  const toggleRegex = (event) => {
+    setUseRegex(!useRegex)
+  }
 
   return (
     <>
@@ -164,54 +231,21 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
       <div className="modalBody">
         <CommandForm
           type="Response"
+          name={name}
+          description={description}
           trigger={trigger}
           response={response}
+          useRegex={useRegex}
+          multiResponse={multiResponse}
+          handleNameChange={handleNameChange}
+          handleDescriptionChange={handleDescriptionChange}
           handleSubmit={handleSubmit}
           handleTriggerChange={handleTriggerChange}
           handleResponseChange={handleResponseChange}
+          toggleRegex={toggleRegex}
+          toggleMultiResponse={toggleMultiResponse}
         />
       </div>
     </>
   )
 }
-
-const ResponseForm = ({edit, ...props}) => (
-  <ModalForm onSubmit={props.handleSubmit} autoComplete="off">
-    <ModalFormControl>
-      <FormLabel>Trigger</FormLabel>
-      <Input
-        variant="filled"
-        label="Trigger"
-        id="trigger"
-        value={props.trigger}
-        onChange={props.handleTriggerChange}
-
-      />
-    </ModalFormControl>
-
-    <ModalFormControl>
-      <FormLabel>Response</FormLabel>
-      <Input
-        variant="filled"
-        label="Response"
-        id="response"
-        multiline
-        rows={3}
-        rowsMax={6}
-        value={props.response}
-        onChange={props.handleResponseChange}
-      />
-    </ModalFormControl>
-
-    <div className="modalFooter">
-      {edit &&
-        <Button className="Remove" onClick={props.remove}>
-          Remove
-      </Button>
-      }
-      <Button type="submit">
-        Save
-      </Button>
-    </div>
-  </ModalForm>
-)

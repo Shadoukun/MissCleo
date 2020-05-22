@@ -57,9 +57,13 @@ export function ReactionListMain({ reactions, update, setUpdate }) {
 }
 
 const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
+  const [reactionId,] = useState(props.reaction.id)
+  const [name, setName] = useState(props.reaction.name)
+  const [description, setDescription] = useState(props.reaction.description)
   const [trigger, setTrigger] = useState(props.reaction.trigger)
   const [response, setResponse] = useState(props.reaction.reaction)
-  const [reactionId,] = useState(props.reaction.id)
+  const [useRegex, setUseRegex] = useState(Boolean(props.reaction.use_regex))
+
   const { requestconfig } = useAuth();
 
 
@@ -75,7 +79,15 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     backendCall.post(
       '/editreaction',
-      { id: reactionId, trigger: trigger, reaction: response },
+      {
+        id: reactionId,
+        name: name,
+        description: description,
+        trigger: trigger,
+        reaction: response,
+        response: response,
+        use_regex: useRegex,
+      },
       requestconfig
     );
 
@@ -95,6 +107,18 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
     hideModal()
   }
 
+  const toggleRegex = (event) => {
+    setUseRegex(!useRegex)
+  }
+
+  const handleNameChange = (event) => {
+    setName(event.target.value)
+  }
+
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value)
+  }
+
   return (
     <>
       <div className="modalHeader">
@@ -110,12 +134,18 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
         <CommandForm
           type="Reaction"
           edit
+          name={name}
+          description={description}
           trigger={trigger}
           response={response}
+          useRegex={useRegex}
+          handleNameChange={handleNameChange}
+          handleDescriptionChange={handleDescriptionChange}
           handleSubmit={handleSubmit}
           handleTriggerChange={handleTriggerChange}
           handleResponseChange={handleResponseChange}
           handleRemove={handleRemove}
+          toggleRegex={toggleRegex}
         />
       </div>
     </>
@@ -123,8 +153,12 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
 }
 
 const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
   const [trigger, setTrigger] = useState("")
   const [response, setResponse] = useState("")
+  const [useRegex, setUseRegex] = useState(false)
+
   const { requestconfig } = useAuth();
 
 
@@ -140,12 +174,24 @@ const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     backendCall.post(
       '/addreaction',
-      { trigger: trigger, reaction: response },
+      { trigger: trigger, reaction: response, name: name, description: description },
       requestconfig
     );
 
     setUpdate((update) => ++update)
     hideModal()
+  }
+
+  const toggleRegex = (event) => {
+    setUseRegex(!useRegex)
+  }
+
+  const handleNameChange = (event) => {
+    setName(event.target.value)
+  }
+
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value)
   }
 
   return (
@@ -162,11 +208,17 @@ const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
       <div className="modalBody">
         <CommandForm
           type="Reaction"
+          name={name}
+          description={description}
           trigger={trigger}
           response={response}
+          useRegex={useRegex}
+          handleNameChange={handleNameChange}
+          handleDescriptionChange={handleDescriptionChange}
           handleSubmit={handleSubmit}
           handleTriggerChange={handleTriggerChange}
           handleResponseChange={handleResponseChange}
+          toggleRegex={toggleRegex}
         />
       </div>
     </>

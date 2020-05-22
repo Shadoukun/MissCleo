@@ -162,14 +162,18 @@ class CustomCommand(Base):
     __tablename__ = "custom_commands"
 
     id              = Column(Integer, primary_key=True)
+    name            = Column(String, unique=True)
+    description     = Column(String)
     command         = Column(String, unique=True)
     response        = Column(String)
-    modified_flag   = Column(Integer)
+    multi_response  = Column(Boolean)
 
-    def __init__(self, command, response, modified_flag=None):
+    def __init__(self, command, response, description=None, name=None, multi_response=False):
         self.command = command
         self.response = response
-        self.modified_flag = modified_flag
+        self.name = name
+        self.description = description
+        self.multi_response = multi_response
 
 
 class CustomResponse(Base):
@@ -178,12 +182,21 @@ class CustomResponse(Base):
     __tablename__ = "custom_responses"
 
     id              = Column(Integer, primary_key=True)
+    name            = Column(String, unique=True)
+    description     = Column(String)
     trigger         = Column(String, unique=True)
     response        = Column(String)
+    use_regex       = Column(Boolean)
+    multi_response  = Column(Boolean)
 
-    def __init__(self, trigger, response):
+    def __init__(self, trigger, response, name=None, description=None, use_regex=False, multi_response=False):
         self.trigger = trigger
         self.response = response
+        self.name = name
+        self.description = description
+        self.use_regex = use_regex
+        self.multi_response = multi_response
+
 
 
 class CustomReaction(Base):
@@ -192,12 +205,21 @@ class CustomReaction(Base):
     __tablename__ = "custom_reactions"
 
     id              = Column(Integer, primary_key=True)
+    name            = Column(String, unique=True)
+    description     = Column(String)
     trigger         = Column(String, unique=True)
     reaction        = Column(String)
+    use_regex       = Column(Boolean)
+    multi_response  = Column(Boolean)
 
-    def __init__(self, trigger, reaction):
+
+    def __init__(self, trigger, reaction, name=None, description=None, use_regex=False, multi_response=False):
         self.trigger = trigger
         self.reaction = reaction
+        self.name = name
+        self.description = description
+        self.use_regex = use_regex
+        self.multi_response = multi_response
 
 
 class Admin(Base):

@@ -169,7 +169,7 @@ class MissCleo(commands.Bot):
         name = request.match_info.get('name', "Anonymous")
         for route in self.api_routes:
             if name == route[0]:
-                await route[1]()
+                await route[1](request)
                 return web.Response(status=200)
 
         return web.Response(status=404)
