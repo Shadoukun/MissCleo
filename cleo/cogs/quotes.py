@@ -33,10 +33,27 @@ class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db = self.bot.db
+
         # Used to prevent duplicate messages in quick succession.
         self.cache = TTLCache(ttl=300, maxsize=120)
 
-    def _create_embed(self, quote):
+    @staticmethod
+    def quote_or_user(arg):
+        """
+        Returns:
+            True:  arg is an integer (a quote ID)
+            False: arg is a string (a username)
+        """
+        try:
+            _ = int(arg)
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def _create_embed(quote):
+        """Parse quote and create discord.py embed."""
+
         embed = discord.Embed().from_dict({
             "title": "\n",
             "description": quote.message,
@@ -53,6 +70,8 @@ class Quotes(commands.Cog):
         return embed
 
     async def _add_quote(self, ctx, quote:dict):
+        """Add a quote to the database"""
+
         quote = Quote(**quote)
         self.db.add(quote)
         self.db.commit()
@@ -60,7 +79,7 @@ class Quotes(commands.Cog):
         return quote
 
     async def _remove_quote(self, ctx, message):
-        '''Remove a quote from the database.'''
+        """Remove a quote from the database."""
 
         self.db.query(Quote).filter_by(guild_id=ctx.guild.id) \
                                 .filter_by(message_id=message.id) \
@@ -69,12 +88,15 @@ class Quotes(commands.Cog):
         await ctx.channel.send(REMOVED_MSG)
 
     async def _get_quote(self, ctx, user_id=None, quote_id=None, limit=None):
-        '''Get quote by the user on the current server.
-           If 'user' is provided, get quote by that user.
-           Otherwise, get a random quote.
+        """
+        Get quote from the current server.
+        All keywords are optional.
 
-           if limit is given, return n number of quotes.
-           '''
+        Keyword Arguments:
+            user_id:  retrieves from a specific user
+            quote_id: retrieves a specific quote
+            limit:    limit query to limit-n of quotes.
+        """
 
         filters = [Quote.guild_id == ctx.guild.id]
         if user_id:
@@ -92,13 +114,20 @@ class Quotes(commands.Cog):
         return quote
 
     async def _get_quote_user(self, ctx, username):
+        """
+        Get user who send quote from the database.
+        Attempts to use findUser. Otherwise falls back
+        to quering the guild_membership from the database.
 
+        Returns user_id of user found or None.
+        """
+
+        # find user using findUser
         user = await findUser(ctx, username)
         if user:
             return user.id
 
-        # try to find user in database.
-        # For users that are no longer in the server.
+        # fallback and try to find user in database.
         user = self.db.query(GuildMembership).filter(and_(
             GuildMembership.display_name == username,
             GuildMembership.guild_id == ctx.guild.id)).first()
@@ -108,20 +137,19 @@ class Quotes(commands.Cog):
         else:
             return None
 
-    def quote_or_user(self, arg):
-        '''Returns true if arg is an int (quote ID),
-        else returns false (user)'''
-
-        try:
-            _ = int(arg)
-            return True
-        except:
-            return False
-
 
     @commands.guild_only()
     @commands.command(name='quote')
     async def quote(self, ctx, *args):
+        """
+        Send a message from the quote database.
+        First argument can either be a user's id or a message id.
+
+        Possible Arguments:
+        user_id:  Retrieves a quote from a specific user
+        quote_id: Retrieves a specific quote
+        """
+
         user = None
         quote = None
 
@@ -171,8 +199,14 @@ class Quotes(commands.Cog):
     @admin_only()
     @commands.command(name="add_quote")
     async def quote_add(self, ctx, *args):
-        '''Takes an arbitrary number of message IDs
-           and adds them as quotes in the database'''
+        """
+        Add quote Command
+
+        Takes an arbitrary number of message IDs
+        and adds them as quotes in the database
+
+        If multiple ids are provided, messages are merged.
+        """
 
         # no message ids given
         if not args:
@@ -190,7 +224,7 @@ class Quotes(commands.Cog):
             # if there are multiple messages being quoted
             if len(messagelist) > 1:
                 if root_msg.attachments:
-                    # no attachments
+                    # no attachments in multi-quote messages. (for now)
                     raise QuoteAttachmentError
 
                 for m in messagelist[1:]:
@@ -236,6 +270,8 @@ class Quotes(commands.Cog):
     @admin_only()
     @commands.command(name="remove_quote")
     async def remove(self, ctx, *, message_id:int):
+        """Remove quote command"""
+
         message = await ctx.channel.fetch_message(message_id)
         if message:
             await self._remove_quote(ctx, message)
@@ -245,7 +281,10 @@ class Quotes(commands.Cog):
 
     @commands.command(name="cleo")
     async def cleo(self, ctx, *args):
+        """Command to post a link to a server's quote page"""
+
         await ctx.channel.send(config.HOST_URL + "quotes/" + str(ctx.guild.id))
+
 
 def setup(bot):
     bot.add_cog(Quotes(bot))
