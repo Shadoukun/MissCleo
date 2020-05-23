@@ -168,12 +168,17 @@ class CustomCommands(commands.Cog):
 
         # get command ID from update request if present.
         if request:
+            command_name = request.rel_url.query['name']
             command_id = request.rel_url.query['id']
+            print(command_name)
             cmds = self.db.query(CustomCommand).filter_by(id=command_id).all()
         else:
             cmds = self.db.query(CustomCommand).all()
 
+        # if command not in the DB, but is in bot's list of commands, remove it.
         if not cmds:
+            if command_name in [c.name for c in self.bot.commands]:
+                self.bot.remove_command(command_name)
             return
 
         for c in cmds:
@@ -205,17 +210,19 @@ class CustomCommands(commands.Cog):
         '''Add custom responses from database'''
 
         logger.debug("updating responses")
-        self.responses = {}
 
         # get command ID from update request if present.
         if request:
-            response_id = request.rel_url.query['id']
+            response_id = int(request.rel_url.query['id'])
             responses = self.db.query(CustomResponse) \
                                 .filter_by(id=response_id).all()
         else:
             responses = self.db.query(CustomResponse).all()
 
+        # if response not in the DB, but is in bot's list of responses, remove it.
         if not responses:
+            if response_id in self.responses.keys():
+                del self.responses[response_id]
             return
 
         for r in responses:
@@ -230,15 +237,17 @@ class CustomCommands(commands.Cog):
 
         logger.debug("updating reactions")
 
-        self.reactions = {}
         if request:
-            reaction_id = request.rel_url.query['id']
+            reaction_id = int(request.rel_url.query['id'])
             reactions = self.db.query(CustomReaction) \
                                 .filter_by(id=reaction_id).all()
         else:
             reactions = self.db.query(CustomReaction).all()
 
+        # if reaction not in the DB, but is in bot's list of reactions, remove it.
         if not reactions:
+            if reaction_id in self.reactions.keys():
+                del self.reactions[reaction_id]
             return
 
         for r in reactions:

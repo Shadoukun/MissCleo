@@ -67,6 +67,8 @@ def remove_command():
     if data['id']:
         db.session.query(CustomCommand).filter_by(id=data['id']).delete()
         db.session.commit()
+        requests.get('http://127.0.0.1:10000/update_commands', {'id': data['id'], 'name': data['name']})
+
         return Response(None, status=200, mimetype='application/json')
 
     return Response(None, status=500, mimetype='application/json')
@@ -128,6 +130,9 @@ def remove_response():
     if data['id']:
         db.session.query(CustomResponse).filter_by(id=data['id']).delete()
         db.session.commit()
+
+        requests.get('http://127.0.0.1:10000/update_responses', {'id': data['id']})
+
         return Response(None, status=200, mimetype='application/json')
 
     return Response(None, status=500, mimetype='application/json')
@@ -190,6 +195,8 @@ def remove_reaction():
     if data['id']:
         db.session.query(CustomReaction).filter_by(id=data['id']).delete()
         db.session.commit()
+        requests.get('http://127.0.0.1:10000/remove_reaction', {'id': data['id']})
+
         return Response(None, status=200, mimetype='application/json')
 
     return Response(None, status=500, mimetype='application/json')

@@ -162,7 +162,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     event.preventDefault();
     backendCall.post(
       '/removecommand',
-      { id: commandId },
+      { id: commandId, name: command },
       requestconfig
     );
 
