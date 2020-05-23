@@ -146,8 +146,8 @@ class Quotes(commands.Cog):
         First argument can either be a user's id or a message id.
 
         Possible Arguments:
-        user_id:  Retrieves a quote from a specific user
-        quote_id: Retrieves a specific quote
+            user_id:  Retrieves a quote from a specific user
+            quote_id: Retrieves a specific quote
         """
 
         user = None
@@ -213,44 +213,48 @@ class Quotes(commands.Cog):
             return
 
         try:
-            messagelist = []
+            child_messages = []
+            attachments = []
             # group all messages.
-            for arg in args:
-                m = await ctx.channel.fetch_message(int(arg))
-                messagelist += [m]
+            for i, arg in enumerate(args):
+                # first message is the main quote message.
+                if i == 0:
+                    root_message = await ctx.channel.fetch_message(int(arg))
+                else:
+                    m = await ctx.channel.fetch_message(int(arg))
+                    child_messages.append(m)
 
-            root_msg = messagelist[0]
+            # if there is only one quote message
+            if not child_messages:
+                # If there are message attachments, save them
+                # and add file path to list of attachments.
+                if root_message.attachments:
+                    for a in root_message.attachments:
+                        filename = f"{str(time.time())}_{a.filename}"
+                        fp = Path(f"./public/files/{filename}")
+                        await a.save(fp)
+                        attachments.append(filename)
 
-            # if there are multiple messages being quoted
-            if len(messagelist) > 1:
-                if root_msg.attachments:
-                    # no attachments in multi-quote messages. (for now)
+            # multiple quote messages
+            else:
+                # no attachments in multi-quote messages. (for now)
+                if root_message.attachments:
                     raise QuoteAttachmentError
-
-                for m in messagelist[1:]:
+                for m in child_messages:
+                    # no attachments in multi-quote messages. (for now)
                     if m.attachments:
-                        # no attachments in multi-quote messages. (for now)
                         raise QuoteAttachmentError
-
                     # Check that all messages retrieved are from the same user.
-                    if m.author.id != root_msg.author.id:
+                    if m.author.id != root_message.author.id:
                         raise QuoteAuthorError
 
-            attachments = []
-            if root_msg.attachments:
-                for a in root_msg.attachments:
-                    filename = f"{str(time.time())}_{a.filename}"
-                    fp = Path(f"./public/files/{filename}")
-                    await a.save(fp)
-                    attachments.append(filename)
-
             quote = dict(
-                message_id=root_msg.id,
-                message="\n".join([m.content for m in messagelist]),
-                timestamp=root_msg.created_at,
-                user_id=root_msg.author.id,
-                channel_id=root_msg.channel.id,
-                guild_id=root_msg.guild.id,
+                message_id=root_message.id,
+                message="\n".join([root_message.content] + [m.content for m in child_messages]),
+                timestamp=root_message.created_at,
+                user_id=root_message.author.id,
+                channel_id=root_message.channel.id,
+                guild_id=root_message.guild.id,
                 attachments=[a for a in attachments]
                 )
 
