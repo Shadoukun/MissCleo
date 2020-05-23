@@ -9,7 +9,8 @@ import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
-import { CommandListHeaderStyled, CommandEntryStyled, CommandForm } from './Commands';
+import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription } from './Commands';
+import CommandForm from './CommandForm'
 
 export const ReactionListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()
@@ -47,6 +48,7 @@ export function ReactionListMain({ reactions, update, setUpdate }) {
       {reactions.map((reaction, i) =>
         <CommandEntryStyled key={i}>
           <div className="command_name"> {reaction.trigger} </div>
+          <CommandDescription>{reaction.description}</CommandDescription>
           <Button onClick={() => handleClick(reaction)}>
             Edit
           </Button>
@@ -134,6 +136,7 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
         <CommandForm
           type="Reaction"
           edit
+          hideMultiResponse
           name={name}
           description={description}
           trigger={trigger}
@@ -208,6 +211,7 @@ const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
       <div className="modalBody">
         <CommandForm
           type="Reaction"
+          hideMultiResponse
           name={name}
           description={description}
           trigger={trigger}

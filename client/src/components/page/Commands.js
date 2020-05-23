@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { lighten, darken } from 'polished';
-import { Input, FormLabel } from '../Form'
 import { Button } from "../Button"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -8,8 +7,8 @@ import styled from 'styled-components';
 import { useModal } from '../../context/Modal';
 import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
-import { ModalForm, ModalFormControl } from '../Modal';
-import { FormControlLabel, Switch } from '@material-ui/core';
+
+import CommandForm from './CommandForm';
 
 
 export const CommandListHeaderStyled = styled.div`
@@ -189,6 +188,9 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
       <div className="modalBody">
         <CommandForm
           edit
+          hideName
+          hideRegex
+          hideMultiResponse
           trigger={command}
           response={response}
           description={description}
@@ -246,6 +248,9 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
 
       <div className="modalBody">
         <CommandForm
+          hideName
+          hideRegex
+          hideMultiResponse
           trigger={command}
           response={response}
           description={description}
@@ -258,117 +263,3 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
     </>
   )
 }
-
-
-export const CommandForm = ({
-  type = "Command",
-  edit = false,
-  name,
-  description,
-  trigger,
-  response,
-  useRegex,
-  multiResponse,
-  handleSubmit,
-  handleNameChange,
-  handleDescriptionChange,
-  handleTriggerChange,
-  handleResponseChange,
-  toggleRegex,
-  toggleMultiResponse,
-  handleRemove,
-  ...props
-}) => (
-    <ModalForm onSubmit={handleSubmit} autoComplete="off">
-
-      {type === "Command" ? (
-        <>
-          <ModalFormControl>
-            <FormLabel>Command</FormLabel>
-            <Input
-              id="trigger"
-              value={trigger}
-              onChange={handleTriggerChange}
-            />
-          </ModalFormControl>
-        </>
-      ) : (
-          <>
-            <ModalFormControl>
-              <FormLabel>Name</FormLabel>
-              <Input
-                id="name"
-                value={name}
-                onChange={handleNameChange}
-              />
-            </ModalFormControl>
-            <ModalFormControl>
-              <FormLabel>Trigger</FormLabel>
-              <Input
-                id="trigger"
-                value={trigger}
-                onChange={handleTriggerChange}
-              />
-            </ModalFormControl>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={useRegex}
-                  onChange={toggleRegex}
-                  name="regex"
-                  color="primary"
-                />
-              }
-              label="Regex"
-            />
-          </>
-        )}
-
-      <ModalFormControl>
-        <FormLabel>Response</FormLabel>
-        <Input
-          id="response"
-          multiline
-          rows={3}
-          rowsMax={6}
-          value={response}
-          onChange={handleResponseChange}
-        />
-
-        {type === "Response" &&
-          <FormControlLabel
-            control={
-              <Switch
-                checked={multiResponse}
-                onChange={toggleMultiResponse}
-                name="regex"
-                color="primary"
-              />
-            }
-            label="Random Response"
-          />
-        }
-
-      </ModalFormControl>
-
-      <ModalFormControl>
-        <FormLabel>Description</FormLabel>
-        <Input
-          id="description"
-          value={description}
-          onChange={handleDescriptionChange}
-        />
-
-        <div className="modalFooter">
-          {edit &&
-            <Button className="Remove" onClick={handleRemove}>
-              Delete
-            </Button>
-          }
-          <Button type="submit">
-            Save
-          </Button>
-        </div>
-      </ModalFormControl>
-    </ModalForm>
-  )

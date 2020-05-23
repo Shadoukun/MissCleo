@@ -9,7 +9,8 @@ import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
-import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription, CommandForm } from './Commands';
+import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription } from './Commands';
+import CommandForm from './CommandForm'
 
 
 
