@@ -47,7 +47,7 @@ export function ReactionListMain({ reactions, update, setUpdate }) {
     <>
       {reactions.map((reaction, i) =>
         <CommandEntryStyled key={i}>
-          <div className="command_name"> {reaction.trigger} </div>
+          <div className="command_name">{reaction.name ? reaction.name : reaction.trigger}</div>
           <CommandDescription>{reaction.description}</CommandDescription>
           <Button onClick={() => handleClick(reaction)}>
             Edit
