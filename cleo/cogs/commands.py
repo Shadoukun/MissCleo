@@ -71,9 +71,9 @@ class CustomCommands(commands.Cog):
         self.reactions = {}
 
         # Rest API routes to trigger updates.
-        self.bot.api_routes.append(("update_commands", self.update_commands))
-        self.bot.api_routes.append(("update_responses", self.update_responses))
-        self.bot.api_routes.append(("update_reactions", self.update_reactions))
+        self.bot.api.routes["update_commands"] = self.update_commands
+        self.bot.api.routes["update_responses"] = self.update_responses
+        self.bot.api.routes["update_reactions"] = self.update_reactions
 
     @commands.Cog.listener()
     async def on_ready(self):
