@@ -142,24 +142,25 @@ class CustomCommands(commands.Cog):
 
         logger.debug("processing reactions")
 
-        reaction = None
+        matched = []
         msg = message.content.lower()
 
         # check for trigger in message
         for _, r in self.reactions.items():
             if r.useRegex:
                 if r.trigger.search(msg):
-                    reaction = r
+                    matched.append(r)
             else:
                 if r.trigger in msg:
-                    reaction = r
+                    matched.append(r)
 
-        if reaction:
-            for react in reaction.reactions:
-                try:
-                    await message.add_reaction(react)
-                except:
-                    logger.error("EmojiError")
+        if matched:
+            for m in matched:
+                for react in m.reactions:
+                    try:
+                        await message.add_reaction(react)
+                    except:
+                        logger.error("EmojiError")
 
     async def update_commands(self, request=None):
         '''Update custom commands from database'''
