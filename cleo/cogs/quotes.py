@@ -1,12 +1,15 @@
 import logging
 import os
+import time
 import discord
+from discord import Message
 import urllib.parse
 from cachetools import TTLCache
 from discord.ext import commands
 from sqlalchemy import and_, func
 from pathlib import Path
-import time
+from dataclasses import dataclass, field
+from typing import List
 
 import config
 from cleo.db import Quote, GuildMembership
@@ -19,6 +22,35 @@ NOQUOTE_MSG = "No quotes found."
 REMOVED_MSG = "Quote removed."
 ADDED_MSG = "Quote added."
 ALLSEEN_MSG = "All quotes have already been seen."
+
+@dataclass
+class QuoteData:
+    """dataclass for storing new quote data"""
+
+    root_message: Message = None
+    child_messages: list = field(default_factory=list)
+    attachments: list = field(default_factory=list)
+
+    @property
+    def messages(self) -> str:
+        """Return merged quote messages"""
+
+        root = [self.root_message.content]
+        children = [m.content for m in self.child_messages]
+        return "\n".join(root + children)
+
+    def to_dict(self) -> dict:
+        """Return database compatible dict"""
+
+        return dict(
+            message_id=self.root_message.id,
+            message=self.messages,
+            timestamp=self.root_message.created_at,
+            user_id=self.root_message.author.id,
+            channel_id=self.root_message.channel.id,
+            guild_id=self.root_message.guild.id,
+            attachments=self.attachments
+        )
 
 
 class QuoteAttachmentError(Exception):
@@ -38,7 +70,7 @@ class Quotes(commands.Cog):
         self.cache = TTLCache(ttl=300, maxsize=120)
 
     @staticmethod
-    def quote_or_user(arg):
+    def int_or_string(arg):
         """
         Returns:
             True:  arg is an integer (a quote ID)
@@ -69,10 +101,10 @@ class Quotes(commands.Cog):
 
         return embed
 
-    async def _add_quote(self, ctx, quote:dict):
+    async def _add_quote(self, ctx, quote:QuoteData):
         """Add a quote to the database"""
 
-        quote = Quote(**quote)
+        quote = Quote(**quote.to_dict())
         self.db.add(quote)
         self.db.commit()
         self.db.refresh(quote)
@@ -154,8 +186,8 @@ class Quotes(commands.Cog):
         quote = None
 
         if args:
-            type_check = self.quote_or_user(args[0])
-            if type_check:
+            is_int = self.int_or_string(args[0])
+            if is_int:
                 # arg is a quote_id
                 quote = await self._get_quote(ctx, quote_id=args[0])
                 if not quote:
@@ -212,53 +244,44 @@ class Quotes(commands.Cog):
         if not args:
             return
 
+        data = QuoteData()
+
         try:
-            child_messages = []
-            attachments = []
-            # group all messages.
+            # group messages.
             for i, arg in enumerate(args):
                 # first message is the main quote message.
                 if i == 0:
-                    root_message = await ctx.channel.fetch_message(int(arg))
+                    data.root_message = await ctx.channel.fetch_message(int(arg))
+                # any additional messages are child messages.
                 else:
                     m = await ctx.channel.fetch_message(int(arg))
-                    child_messages.append(m)
+                    data.child_messages.append(m)
 
             # if there is only one quote message
-            if not child_messages:
+            if not data.child_messages:
                 # If there are message attachments, save them
                 # and add file path to list of attachments.
-                if root_message.attachments:
-                    for a in root_message.attachments:
+                if data.root_message.attachments:
+                    for a in data.root_message.attachments:
                         filename = f"{str(time.time())}_{a.filename}"
                         fp = Path(f"./public/files/{filename}")
                         await a.save(fp)
-                        attachments.append(filename)
+                        data.attachments.append(filename)
 
             # multiple quote messages
             else:
                 # no attachments in multi-quote messages. (for now)
-                if root_message.attachments:
+                if data.root_message.attachments:
                     raise QuoteAttachmentError
-                for m in child_messages:
+                for m in data.child_messages:
                     # no attachments in multi-quote messages. (for now)
                     if m.attachments:
                         raise QuoteAttachmentError
                     # Check that all messages retrieved are from the same user.
-                    if m.author.id != root_message.author.id:
+                    if m.author.id != data.root_message.author.id:
                         raise QuoteAuthorError
 
-            quote = dict(
-                message_id=root_message.id,
-                message="\n".join([root_message.content] + [m.content for m in child_messages]),
-                timestamp=root_message.created_at,
-                user_id=root_message.author.id,
-                channel_id=root_message.channel.id,
-                guild_id=root_message.guild.id,
-                attachments=[a for a in attachments]
-                )
-
-            quote = await self._add_quote(ctx, quote)
+            quote = await self._add_quote(ctx, data)
             embed = self._create_embed(quote)
             await ctx.channel.send(embed=embed)
 
