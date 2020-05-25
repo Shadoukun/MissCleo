@@ -91,7 +91,7 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/editresponse',
+      '/edit_response',
       {
         id: responseId,
         name: name,
@@ -111,7 +111,7 @@ const ResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleRemove = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/removeresponse',
+      '/remove_response',
       { id: responseId },
       requestconfig
     );
@@ -194,7 +194,7 @@ const NewResponseModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/addresponse',
+      '/add_response',
       {
         name: name,
         description: description,

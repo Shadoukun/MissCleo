@@ -13,7 +13,7 @@ const CommandsPage = () => {
 
   useEffect(() => {
     (async () => {
-      let request = await backendCall.get('/getcommands', requestconfig)
+      let request = await backendCall.get('/get_commands', requestconfig)
       setCommands(request.data)
     })()
   }, [update, requestconfig])

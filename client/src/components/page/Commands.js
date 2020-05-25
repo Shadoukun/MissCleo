@@ -149,7 +149,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/editcommand',
+      '/edit_command',
       { id: commandId, command: command, response: response, description: description },
       requestconfig
     );
@@ -161,7 +161,7 @@ const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleRemove = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/removecommand',
+      '/remove_command',
       { id: commandId, name: command },
       requestconfig
     );
@@ -224,7 +224,7 @@ const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/addcommand',
+      '/add_command',
       { command: command, response: response, description: description },
       requestconfig
     );

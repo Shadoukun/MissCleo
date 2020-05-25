@@ -9,8 +9,8 @@ import traceback
 from pathlib import Path
 from discord.ext import commands
 
-
 from . import utils
+from cleo.api import CleoAPI
 from .tasks import update_all_guild_members, add_update_all_guilds
 from cleo.db import Base, engine, session
 
@@ -86,7 +86,9 @@ class MissCleo(commands.Bot):
         self.tokens = kwargs.get('tokens')
 
         # start REST api.
-        self.start_web_api()
+        self.api = CleoAPI()
+        serv = self.loop.create_server(self.api.handler, '127.0.0.1', 10000)
+        self.loop.run_until_complete(serv)
 
         self.help_command = CustomHelpCommand()
         self.load_cogs()
@@ -149,29 +151,3 @@ class MissCleo(commands.Bot):
                 logger.debug("Loaded Cog: " + extension)
             except Exception as e:
                 logger.error(f'Failed to load extension {extension}\n{type(e).__name__}: {e}')
-
-    def start_web_api(self):
-        """ Start Rest API to trigger bot functions. """
-
-        # a list to hold dynamically added routes.
-        # route = ('name', callback)
-        self.api_routes = []
-
-        self.api = web.Application()
-        self.api.router.add_get('/{name}', self.api_handler)
-        handler = self.api.make_handler()
-        serv = self.loop.create_server(handler, '127.0.0.1', 10000)
-        self.loop.run_until_complete(serv)
-
-
-    async def api_handler(self, request):
-        """ Rest API handler """
-        name = request.match_info.get('name', "Anonymous")
-        for route in self.api_routes:
-            if name == route[0]:
-                await route[1](request)
-                return web.Response(status=200)
-
-        return web.Response(status=404)
-
-

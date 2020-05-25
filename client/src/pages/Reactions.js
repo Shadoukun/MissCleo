@@ -13,7 +13,7 @@ export const ReactionsPage = () => {
 
     useEffect(() => {
         (async () => {
-            let request = await backendCall.get('/getreactions', requestconfig)
+            let request = await backendCall.get('/get_reactions', requestconfig)
             setReactions(request.data)
         })()
     }, [update, requestconfig])
