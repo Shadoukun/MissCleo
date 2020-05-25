@@ -17,11 +17,15 @@ from cleo.utils import admin_only, findUser
 
 logger = logging.getLogger(__name__)
 
-NORESULTS_MSG = "Message not found."
-NOQUOTE_MSG = "No quotes found."
-REMOVED_MSG = "Quote removed."
-ADDED_MSG = "Quote added."
-ALLSEEN_MSG = "All quotes have already been seen."
+NORESULTS_MSG     = "Message not found."
+NOQUOTE_MSG       = "No quotes found."
+NOUSER_MSG        = "User not found."
+REMOVED_MSG       = "Quote removed."
+ADDED_MSG         = "Quote added."
+ALLSEEN_MSG       = "All quotes have already been seen."
+SAMEUSER_MSG      = "All messages must be from the same user."
+NOATTACHMENTS_MSG = "Multi-message quotes can't have attachments."
+
 
 @dataclass
 class QuoteData:
@@ -191,7 +195,7 @@ class Quotes(commands.Cog):
                 # arg is a quote_id
                 quote = await self._get_quote(ctx, quote_id=args[0])
                 if not quote:
-                    await ctx.channel.send("Quote not found.")
+                    await ctx.channel.send(NOQUOTE_MSG)
                     return
 
                 embed = self._create_embed(quote)
@@ -202,7 +206,7 @@ class Quotes(commands.Cog):
                 # arg is a username
                 user = await self._get_quote_user(ctx, args[0])
                 if not user:
-                    await ctx.channel.send("User not found.")
+                    await ctx.channel.send(NOUSER_MSG)
                     return
 
         # limit retries from cached duplicates.
@@ -286,11 +290,11 @@ class Quotes(commands.Cog):
             await ctx.channel.send(embed=embed)
 
         except QuoteResultError:
-            await ctx.channel.send("Message not found.")
+            await ctx.channel.send(NORESULTS_MSG)
         except QuoteAuthorError:
-            await ctx.channel.send("All messages must be from the same user.")
+            await ctx.channel.send(SAMEUSER_MSG)
         except QuoteAttachmentError:
-            await ctx.channel.send("Multi-message quotes can't have attachments.")
+            await ctx.channel.send(NOATTACHMENTS_MSG)
 
 
     @commands.guild_only()
