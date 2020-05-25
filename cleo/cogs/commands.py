@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class ResponseData:
-    '''Class for parsed Response data from database'''
+    """Class for parsed Response data from database"""
 
     def __init__(self, response):
         self.id = response.id
@@ -34,7 +34,7 @@ class ResponseData:
 
 
 class ReactionData:
-    '''Class for parsed Reaction data from database'''
+    """Class for parsed Reaction data from database"""
 
     def __init__(self, reaction, custom_emojis):
         self.id = reaction.id
@@ -71,8 +71,15 @@ class CustomCommands(commands.Cog):
 
         self.responses = {}
         self.reactions = {}
+        self.add_api_routes()
 
-        # Rest API routes.
+    def add_api_routes(self):
+        """
+        Add command/reaction/response routes to REST API
+
+        Routes are added here as callbacks so that API can update the bot.
+        """
+
         self.bot.api.private_routes['get_commands'] = self.api_get_commands
         self.bot.api.private_routes['add_command'] = self.api_add_command
         self.bot.api.private_routes['edit_command'] = self.api_edit_command
@@ -92,23 +99,24 @@ class CustomCommands(commands.Cog):
     async def on_ready(self):
         logger.debug("adding commands, responses, reactions")
 
-        await self.update_commands()
-        await self.update_responses()
-        await self.update_reactions()
+        await self.add_custom_commands()
+        await self.add_custom_responses()
+        await self.add_custom_reactions()
 
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
             return
 
-        await self._process_responses(message)
-        await self._process_reactions(message)
+        await self.process_responses(message)
+        await self.process_reactions(message)
 
     @staticmethod
-    def _make_command(command):
-        '''Returns a callback function
-           for sending custom commands'''
-
+    def make_command(command):
+        """
+        Accepts a command from database and returns
+        a callback for sending discord message.
+        """
         logger.debug(f"creating command: {command.command}")
 
         # callback function for custom commands
@@ -119,9 +127,11 @@ class CustomCommands(commands.Cog):
         return _command
 
 
-    async def _process_responses(self, message):
-        '''Triggers a custom response if message containers trigger.'''
-
+    async def process_responses(self, message):
+        """
+        Check message for triggers from self.responses.
+        Adds responses if found.
+        """
         logger.debug("processing responses")
 
         response = None
@@ -150,9 +160,11 @@ class CustomCommands(commands.Cog):
 
             await channel.send(resp)
 
-    async def _process_reactions(self, message):
-        '''Triggers an automatic discord reaction if message containers trigger'''
-
+    async def process_reactions(self, message):
+        """
+        Check message for triggers from self.reactions.
+        Adds reaction if found.
+        """
         logger.debug("processing reactions")
 
         matched = []
@@ -175,35 +187,17 @@ class CustomCommands(commands.Cog):
                     except:
                         logger.error("EmojiError")
 
-    async def update_commands(self, request=None):
-        '''Update custom commands from database'''
 
-        logger.debug("updating commands")
+    async def add_custom_commands(self):
+        """Adds custom commands from the database to the bot"""
 
-        # get command ID from update request if present.
-        if request:
-            command_name = request.rel_url.query['name']
-            command_id = request.rel_url.query['id']
-            print(command_name)
-            cmds = self.db.query(CustomCommand).filter_by(id=command_id).all()
-        else:
-            cmds = self.db.query(CustomCommand).all()
-
-        # if command not in the DB, but is in bot's list of commands, remove it.
-        if not cmds:
-            if command_name in [c.name for c in self.bot.commands]:
-                self.bot.remove_command(command_name)
-            return
-
+        cmds = self.db.query(CustomCommand).all()
         for c in cmds:
-            # sqlalchemy seems to not refresh consistently.
-            self.db.refresh(c)
-
             if c.command in [c.name for c in self.bot.commands]:
                 self.bot.remove_command(c.command)
 
             # make command callback and add.
-            func = self._make_command(c)
+            func = self.make_command(c)
             cmd = commands.Command(func, name=c.command)
             cmd.category = 'Custom'
             self.bot.add_command(cmd)
@@ -213,32 +207,10 @@ class CustomCommands(commands.Cog):
                 self.bot.auto_enable.append(c.command)
 
 
-    async def remove_commands(self, command_id):
-        command = self.db.query(CustomCommand).filter_by(id=command_id).one()
-        self.bot.remove_command(command.command)
-        self.db.query(CustomCommand).filter_by(id=command_id).delete()
-        self.db.commit()
+    async def add_custom_responses(self):
+        """Adds custom responses from the database to the bot"""
 
-
-    async def update_responses(self, request=None):
-        '''Add custom responses from database'''
-
-        logger.debug("updating responses")
-
-        # get command ID from update request if present.
-        if request:
-            response_id = int(request.rel_url.query['id'])
-            responses = self.db.query(CustomResponse) \
-                                .filter_by(id=response_id).all()
-        else:
-            responses = self.db.query(CustomResponse).all()
-
-        # if response not in the DB, but is in bot's list of responses, remove it.
-        if not responses:
-            if response_id in self.responses.keys():
-                del self.responses[response_id]
-            return
-
+        responses = self.db.query(CustomResponse).all()
         for r in responses:
             # sqlalchemy seems to not refresh consistently.
             self.db.refresh(r)
@@ -246,24 +218,10 @@ class CustomCommands(commands.Cog):
             self.responses[response.id] = response
 
 
-    async def update_reactions(self, request=None):
-        '''Add custom reactions from database'''
+    async def add_custom_reactions(self):
+        """Adds custom reactions to the bot"""
 
-        logger.debug("updating reactions")
-
-        if request:
-            reaction_id = int(request.rel_url.query['id'])
-            reactions = self.db.query(CustomReaction) \
-                                .filter_by(id=reaction_id).all()
-        else:
-            reactions = self.db.query(CustomReaction).all()
-
-        # if reaction not in the DB, but is in bot's list of reactions, remove it.
-        if not reactions:
-            if reaction_id in self.reactions.keys():
-                del self.reactions[reaction_id]
-            return
-
+        reactions = self.db.query(CustomReaction).all()
         for r in reactions:
             # sqlalchemy seems to not refresh consistently
             self.db.refresh(r)
@@ -279,6 +237,8 @@ class CustomCommands(commands.Cog):
     async def api_get_commands(self, request):
         """API callback for getting Commands"""
 
+        logger.debug("api_get_commands")
+
         cmds = self.db.query(CustomCommand).all()
         cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
         return web.json_response(text=cmds)
@@ -286,6 +246,8 @@ class CustomCommands(commands.Cog):
 
     async def api_add_command(self, request):
         """API callback for adding a Command"""
+
+        logger.debug("api_add_commands")
 
         data = await request.json()
         command = CustomCommand(**data)
@@ -296,7 +258,7 @@ class CustomCommands(commands.Cog):
         self.db.commit()
         self.db.refresh(command)
 
-        func = self._make_command(command)
+        func = self.make_command(command)
         cmd = commands.Command(func, name=command.command)
         cmd.category = 'Custom'
         self.bot.add_command(cmd)
@@ -309,6 +271,8 @@ class CustomCommands(commands.Cog):
 
     async def api_edit_command(self, request):
         """API callback for editing a Command"""
+
+        logger.debug("api_edit_commands")
 
         data = await request.json()
         command_id = data.get('id', None)
@@ -326,7 +290,7 @@ class CustomCommands(commands.Cog):
             self.bot.remove_command(c.command)
 
         # make command callback and readd it.
-        func = self._make_command(c)
+        func = self.make_command(c)
         cmd = commands.Command(func, name=c.command)
         cmd.category = 'Custom'
         self.bot.add_command(cmd)
@@ -339,6 +303,8 @@ class CustomCommands(commands.Cog):
 
     async def api_remove_command(self, request):
         """API callback for removing a Command"""
+
+        logger.debug("api_remove_commands")
 
         data = await request.json()
         query = self.db.query(CustomCommand).filter_by(id=data['id'])
@@ -358,12 +324,16 @@ class CustomCommands(commands.Cog):
     async def api_get_responses(self, request):
         """API callback for getting Responses"""
 
+        logger.debug("api_get_response")
+
         responses = self.db.query(CustomResponse).all()
         responses = json.dumps(responses, cls=new_alchemy_encoder(False, []))
         return web.json_response(text=responses)
 
     async def api_add_response(self, request):
         """API callback for adding a Response"""
+
+        logger.debug("api_add_response")
 
         data = await request.json()
         response = CustomResponse(**data)
@@ -378,6 +348,8 @@ class CustomCommands(commands.Cog):
 
     async def api_edit_response(self, request):
         """API callback for editing a Response"""
+
+        logger.debug("api_edit_response")
 
         data = await request.json()
         response = self.db.query(CustomResponse) \
@@ -403,6 +375,8 @@ class CustomCommands(commands.Cog):
     async def api_remove_response(self, request):
         """API callback for removing a Response"""
 
+        logger.debug("api_remove_response")
+
         data = await request.json()
         query = self.db.query(CustomResponse).filter_by(id=data['id'])
         response = query.first()
@@ -419,12 +393,16 @@ class CustomCommands(commands.Cog):
     async def api_get_reactions(self, request):
         """API callback for getting Reactions"""
 
+        logger.debug("api_get_reactions")
+
         reactions = self.db.query(CustomReaction).all()
         reactions = json.dumps(reactions, cls=new_alchemy_encoder(False, []))
         return web.json_response(text=reactions)
 
     async def api_add_reaction(self, request):
         """API callback for adding a Reaction"""
+
+        logger.debug("api_add_reactions")
 
         data = await request.json()
         reaction = CustomReaction(**data)
@@ -439,6 +417,8 @@ class CustomCommands(commands.Cog):
 
     async def api_edit_reaction(self, request):
         """API callback for editing a Reaction"""
+
+        logger.debug("api_edit_reactions")
 
         data = await request.json()
         reaction = self.db.query(CustomReaction).filter_by(id=data['id']).first()
@@ -461,6 +441,8 @@ class CustomCommands(commands.Cog):
 
     async def api_remove_reaction(self, request):
         """API callback for removing a Reaction"""
+
+        logger.debug("api_remove_reactions")
 
         data = await request.json()
         query = self.db.query(CustomReaction).filter_by(id=data['id'])
