@@ -13,11 +13,11 @@ def getGuilds():
 
 def getMembers(guild_id):
 
-    members = session.query(GuildMembership).filter(GuildMembership.quotes.any(Quote.guild_id == guild_id)) \
-                                                            .order_by(func.lower(GuildMembership.display_name)) \
-                                                            .join(GuildMembership.top_role).all()
+    members = session.query(GuildMembership) \
+                        .filter(GuildMembership.quotes.any(Quote.guild_id == guild_id)) \
+                        .order_by(func.lower(GuildMembership.display_name)) \
+                        .join(GuildMembership.top_role).all()
     return members
-
 
 def getQuotes(guild_id, user_id, page):
 
@@ -26,24 +26,29 @@ def getQuotes(guild_id, user_id, page):
     if user_id:
         filters += [Quote.user_id == user_id]
 
-    quote_page = session.query(Quote).filter(and_(*filters)) \
-                                        .order_by(Quote.timestamp.desc()) \
-                                        .join(Quote.member) \
-                                        .paginate(page, 10, False)
+    quote_page = session.query(Quote) \
+                            .filter(and_(*filters)) \
+                            .order_by(Quote.timestamp.desc()) \
+                            .join(Quote.member) \
+                            .paginate(page, 10, False)
     return quote_page
+
 
 @quote_routes.get('/guilds')
 def guilds(request):
     guilds = json.dumps(getGuilds(), cls=new_alchemy_encoder(False))
     return web.json_response(text=guilds)
 
+
 @quote_routes.get('/members')
 def members(request):
     guild_id = request.rel_url.query.get('guild', None)
 
-    members = json.dumps(getMembers(guild_id), cls=new_alchemy_encoder(False, ['user', 'top_role']))
+    members = json.dumps(getMembers(guild_id),
+                         cls=new_alchemy_encoder(False, ['user', 'top_role']))
 
     return web.json_response(text=members)
+
 
 @quote_routes.get('/quotes')
 def quotes(request):
@@ -57,6 +62,7 @@ def quotes(request):
         "pages": quotes.pages
     }
 
-    quotes = json.dumps(data, cls=new_alchemy_encoder(False, ['member', 'user', 'top_role']))
+    quotes = json.dumps(data, cls=new_alchemy_encoder(
+                        False, ['member', 'user', 'top_role']))
 
     return web.json_response(text=quotes)

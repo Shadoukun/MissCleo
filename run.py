@@ -5,11 +5,8 @@ import logging
 import yaml
 from pathlib import Path
 from threading import Thread
-from gevent.pywsgi import WSGIServer
-
 from config import PORT
 from cleo.bot import MissCleo
-from app import app
 
 
 def setup_logging():
@@ -28,10 +25,6 @@ def main():
     # load tokens
     with open('config/tokens.yaml', 'r') as tokenfile:
         globals()['TOKENS'] = yaml.load(tokenfile, Loader=yaml.FullLoader)
-
-    http = WSGIServer(('0.0.0.0', PORT), app.wsgi_app, log=app.logger)
-    web_thread = Thread(target=http.serve_forever)
-    web_thread.start()
 
     client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=TOKENS)
     client.run(TOKENS['discord'])

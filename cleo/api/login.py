@@ -20,12 +20,8 @@ def check_password_hash(pw_hash, password):
 @login_routes.post('/auth/login')
 async def handle_login(request):
     data = await request.json()
-    print(data)
-
     username = data.get('userName', None)
     password = data.get('password', None)
-    print(username)
-    print(password)
 
     if not username or not password:
         return web.Response(status=500)
