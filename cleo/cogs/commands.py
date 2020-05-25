@@ -4,6 +4,7 @@ import re
 import json
 from aiohttp import web
 from discord.ext import commands
+from sqlalchemy import func
 from cleo.db import CustomCommand, CustomResponse, CustomReaction, new_alchemy_encoder
 
 logger = logging.getLogger(__name__)
@@ -239,7 +240,7 @@ class CustomCommands(commands.Cog):
 
         logger.debug("api_get_commands")
 
-        cmds = self.db.query(CustomCommand).all()
+        cmds = self.db.query(CustomCommand).order_by(func.lower(CustomCommand.command)).all()
         cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
         return web.json_response(text=cmds)
 
@@ -326,7 +327,10 @@ class CustomCommands(commands.Cog):
 
         logger.debug("api_get_response")
 
-        responses = self.db.query(CustomResponse).all()
+        responses = self.db.query(CustomResponse) \
+            .order_by(func.lower(CustomResponse.trigger)) \
+            .order_by(func.lower(CustomResponse.name)).all()
+
         responses = json.dumps(responses, cls=new_alchemy_encoder(False, []))
         return web.json_response(text=responses)
 
@@ -395,7 +399,10 @@ class CustomCommands(commands.Cog):
 
         logger.debug("api_get_reactions")
 
-        reactions = self.db.query(CustomReaction).all()
+        reactions = self.db.query(CustomReaction) \
+            .order_by(func.lower(CustomReaction.trigger)) \
+            .order_by(func.lower(CustomReaction.name)).all()
+
         reactions = json.dumps(reactions, cls=new_alchemy_encoder(False, []))
         return web.json_response(text=reactions)
 
