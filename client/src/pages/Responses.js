@@ -13,7 +13,7 @@ export const ResponsesPage = () => {
 
     useEffect(() => {
         (async () => {
-            let request = await backendCall.get('/getresponses', requestconfig)
+            let request = await backendCall.get('/get_responses', requestconfig)
             setResponses(request.data)
         })()
     }, [update, requestconfig])

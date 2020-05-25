@@ -4,8 +4,9 @@ from aiohttp_middlewares import cors_middleware
 from aiohttp_middlewares.cors import DEFAULT_ALLOW_HEADERS
 from aiohttp_jwt import JWTMiddleware, login_required
 
-from cleo import config
+import config
 from .login import login_routes
+from .quotes import quote_routes
 
 class CleoAPI:
 
@@ -31,11 +32,11 @@ class CleoAPI:
         )
 
         self.app.router.add_routes(login_routes)
-        self.app.router.add_get('/public/{name}', self.public_handler)
-        self.app.router.add_get('/secure/{name}', self.private_handler)
+        self.app.router.add_routes(quote_routes)
+        self.app.router.add_route('*', '/public/{name}', self.public_handler)
+        self.app.router.add_route('*', '/{name}', self.private_handler)
 
         self.handler = self.app.make_handler()
-
 
     async def public_handler(self, request):
         """Handler for unprotected public routes"""
@@ -55,6 +56,7 @@ class CleoAPI:
         """
         name = request.match_info.get('name', "Anonymous")
         if name in self.private_routes.keys():
-            await self.private_routes[name](request)
+            response = await self.private_routes[name](request)
+            return response
         else:
             return web.Response(status=404)

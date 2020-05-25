@@ -1,0 +1,62 @@
+from aiohttp import web
+
+import config
+from cleo.db import session, Guild, new_alchemy_encoder, GuildMembership, Quote
+import json
+from sqlalchemy import and_, func
+
+quote_routes = web.RouteTableDef()
+
+
+def getGuilds():
+    return session.query(Guild).all()
+
+def getMembers(guild_id):
+
+    members = session.query(GuildMembership).filter(GuildMembership.quotes.any(Quote.guild_id == guild_id)) \
+                                                            .order_by(func.lower(GuildMembership.display_name)) \
+                                                            .join(GuildMembership.top_role).all()
+    return members
+
+
+def getQuotes(guild_id, user_id, page):
+
+    filters = [Quote.guild_id == guild_id]
+
+    if user_id:
+        filters += [Quote.user_id == user_id]
+
+    quote_page = session.query(Quote).filter(and_(*filters)) \
+                                        .order_by(Quote.timestamp.desc()) \
+                                        .join(Quote.member) \
+                                        .paginate(page, 10, False)
+    return quote_page
+
+@quote_routes.get('/guilds')
+def guilds(request):
+    guilds = json.dumps(getGuilds(), cls=new_alchemy_encoder(False))
+    return web.json_response(text=guilds)
+
+@quote_routes.get('/members')
+def members(request):
+    guild_id = request.rel_url.query.get('guild', None)
+
+    members = json.dumps(getMembers(guild_id), cls=new_alchemy_encoder(False, ['user', 'top_role']))
+
+    return web.json_response(text=members)
+
+@quote_routes.get('/quotes')
+def quotes(request):
+    guild = request.rel_url.query.get('guild', None)
+    user = request.rel_url.query.get('user', None)
+    page = int(request.rel_url.query.get('page', 1))
+
+    quotes = getQuotes(guild, user, page)
+    data = {
+        "quotes": quotes.items,
+        "pages": quotes.pages
+    }
+
+    quotes = json.dumps(data, cls=new_alchemy_encoder(False, ['member', 'user', 'top_role']))
+
+    return web.json_response(text=quotes)

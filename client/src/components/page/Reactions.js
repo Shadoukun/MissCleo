@@ -80,7 +80,7 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/editreaction',
+      '/edit_reaction',
       {
         id: reactionId,
         name: name,
@@ -100,7 +100,7 @@ const ReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleRemove = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/removereaction',
+      '/remove_reaction',
       { id: reactionId },
       requestconfig
     );
@@ -176,7 +176,7 @@ const NewReactionModal = ({ update, setUpdate, hideModal, ...props }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     backendCall.post(
-      '/addreaction',
+      '/add_reaction',
       { trigger: trigger, reaction: response, name: name, description: description },
       requestconfig
     );

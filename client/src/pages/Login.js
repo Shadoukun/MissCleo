@@ -14,8 +14,9 @@ export const Login = (props) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    backendCall.post("/auth/login", { userName, password })
+    backendCall.post("/auth/login", { userName: userName, password: password })
       .then(result => {
+        console.log(result)
         if (result.status === 200) {
           setAuthToken(result.data.access_token);
           setLoggedIn(true);

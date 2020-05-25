@@ -10,7 +10,7 @@ from pathlib import Path
 from discord.ext import commands
 
 from . import utils
-from .api import CleoAPI
+from cleo.api import CleoAPI
 from .tasks import update_all_guild_members, add_update_all_guilds
 from cleo.db import Base, engine, session
 
