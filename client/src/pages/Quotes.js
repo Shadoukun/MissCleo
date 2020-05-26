@@ -8,6 +8,7 @@ const QuotePage = (props) => {
   const { guildId, userId } = useParams();
   const [guild, setGuild] = useState();
   const [user, setUser] = useState();
+  const [searchString, setSearchString] = useState("");
 
   useEffect(() => {
     setUser(userId);
@@ -22,7 +23,7 @@ const QuotePage = (props) => {
         activeUserId={user}
         setUser={setUser}
       />
-      <QuoteList guildId={guild} userId={user} />
+      <QuoteList guildId={guild} userId={user} searchString={searchString} setSearchString={setSearchString} />
     </>
   )
 

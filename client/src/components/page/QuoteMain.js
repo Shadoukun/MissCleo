@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import ReactPaginate from 'react-paginate';
 import { lighten, darken } from 'polished';
 import styled from 'styled-components';
+import { fade } from '@material-ui/core/styles';
+import InputBase from '@material-ui/core/InputBase';
+import SearchIcon from '@material-ui/icons/Search';
+import { Typography } from '@material-ui/core';
 
 import { backendCall } from '../../utilities';
 
@@ -52,13 +56,68 @@ ${({ theme }) => `
   }
 `}`
 
+const QuoteListHeader = styled.div`
+${({theme}) => `
+  display: flex;
+`}`
 
+const Search = styled.form`
+${({theme}) => `
+  position: relative;
+  border-radius: ${theme.shape.borderRadius}px;
+  transition: ${theme.transitions.create('background-color')};
+  background-color: ${fade(theme.palette.common.white, 0.10)};
 
-export const QuoteList = ({ guildId, userId }) => {
+  &:hover {
+    background-color: ${fade(theme.palette.common.white, 0.15)};
+  }
+
+  margin-right: ${theme.spacing(2)};
+  margin-left: auto;
+  margin-bottom: ${theme.spacing(2)}px;
+  width: 100%;
+
+  ${theme.breakpoints.up('sm')} {
+    margin-left: ${theme.spacing(3)};
+    width: auto;
+  }
+`}`
+
+const SearchIconWrapper = styled.div`
+${({theme}) => `
+  padding: ${theme.spacing(0, 2, 0, 1)};
+  height: 100%;
+  position: absolute;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`}`
+
+const SearchInput = styled(InputBase)`
+${({theme}) => `
+  .MuiInputBase-root {
+    color: inherit;
+  }
+
+  .MuiInputBase-input {
+    padding: ${theme.spacing(1,1,1,0)};
+    padding-left: calc(1em + ${theme.spacing(3)}px);
+    transition: ${theme.transitions.create('width')};
+    width: 100%;
+
+    ${theme.breakpoints.up('md')} {
+      width: 20ch;
+    }
+  }
+`}`
+
+export const QuoteList = ({ guildId, userId, setUser, searchString, setSearchString }) => {
 
   const [quoteList, setQuoteList] = useState([]);
-  const [pageCount, setPageCount] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [pageCount, setPageCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchContent, setSearchContent] = useState("")
 
   const url = "/quotes"
 
@@ -72,22 +131,50 @@ export const QuoteList = ({ guildId, userId }) => {
       let params = []
 
       if (guildId) { params.push(`guild=${guildId}`) }
-      if (userId) { params.push(`user=${userId}`) }
+      if (userId && !searchString) { params.push(`user=${userId}`) }
+      if (searchString) {params.push(`search=${encodeURIComponent(searchString)}`)}
       if (currentPage) { params.push(`page=${currentPage}`) }
 
       let result = await backendCall.get(url + `?${params.join('&')}`)
       setQuoteList(result.data.quotes)
       setPageCount(result.data.pages)
     })()
-  }, [guildId, userId, currentPage])
+  }, [guildId, userId, searchString, currentPage])
 
   const handlePageClick = (data) => {
     setCurrentPage(data.selected + 1)
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
   }
 
+  const searchSubmit = (event) => {
+    event.preventDefault();
+    setSearchString(searchContent)
+  }
+
+
   return (
     <QuoteListStyled>
+      <QuoteListHeader>
+
+       {searchString &&
+        <Typography>
+          Search: {searchString}
+        </Typography>
+       }
+
+        <Search onSubmit={searchSubmit}>
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+          <SearchInput
+            placeholder="Search…"
+            inputProps={{ 'aria-label': 'search' }}
+            value={searchContent}
+            onChange={e => {setSearchContent(e.target.value)}}
+          />
+        </Search>
+      </QuoteListHeader>
+
       {quoteList.map((quote, i) =>
         <QuoteEntry key={i} quote={quote} />
       )}

@@ -19,12 +19,15 @@ def getMembers(guild_id):
                         .join(GuildMembership.top_role).all()
     return members
 
-def getQuotes(guild_id, user_id, page):
+def getQuotes(guild_id, user_id, search, page):
 
     filters = [Quote.guild_id == guild_id]
 
     if user_id:
         filters += [Quote.user_id == user_id]
+
+    if search:
+        filters += [Quote.message.match(search)]
 
     quote_page = session.query(Quote) \
                             .filter(and_(*filters)) \
@@ -54,9 +57,10 @@ def members(request):
 def quotes(request):
     guild = request.rel_url.query.get('guild', None)
     user = request.rel_url.query.get('user', None)
+    search = request.rel_url.query.get('search', None)
     page = int(request.rel_url.query.get('page', 1))
 
-    quotes = getQuotes(guild, user, page)
+    quotes = getQuotes(guild, user, search, page)
     data = {
         "quotes": quotes.items,
         "pages": quotes.pages
