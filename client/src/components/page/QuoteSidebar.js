@@ -32,6 +32,11 @@ ${({ theme }) => `
     left: 0;
     height: 50px;
   }
+
+  .MuiListItemText-primary {
+    line-height: 1.2;
+  }
+
 `}`
 
 export const QuotesSidebar = ({ activeGuildId, activeUserId, setUser, setGuild }) => (
