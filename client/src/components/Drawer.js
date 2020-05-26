@@ -1,111 +1,125 @@
 import React, { useState } from 'react';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
+import { IconButton } from './Button';
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { theme } from '../theme';
+import styled from 'styled-components';
 
 
-export const drawerWidth = theme.drawerWidth;
+const DrawerNav = styled.div
+  .attrs({ className: "DrawerNav" })`
+${({ theme }) => `
+  display: flex;
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        display: 'flex',
-    },
-    drawer: {
-        [theme.breakpoints.up('sm')]: {
-            width: drawerWidth,
-            flexShrink: 0,
-        },
-    },
-    appBar: {
-        zIndex: theme.zIndex.drawer + 1,
-    },
-    menuButton: {
-        margin: 0,
-        display: 'flex',
-        color: theme.colors.primaryFontColor,
-        [theme.breakpoints.up('sm')]: {
-            display: 'none',
-        },
-        '&:focus': {
-            outline: "none",
-            border: "none",
-            boxShadow: "none",
-        },
-    },
-    toolbar: theme.mixins.toolbar,
-    drawerPaper: {
-        background: theme.colors.secondaryBackground,
-        scrollbarWidth: "none",
-        width: drawerWidth
-    },
-    content: {
-        flexGrow: 1,
-        padding: theme.spacing(3),
-    },
-    closeMenuButton: {
-        marginRight: 'auto',
-        marginLeft: 0,
-        '&:focus': {
-            outline: "none",
-            border: "none",
-            boxShadow: "none",
-        },
-    },
-}));
+  ${theme.breakpoints.up('sm')} {
+    width: ${theme.drawerWidth};
+      flex-shrink: 0;
+  }
+
+`}`
+
+const StyledDrawer = styled(Drawer)
+  .attrs({ className: "StyledDrawer" })`
+${({ theme }) => `
+
+  ${theme.breakpoints.up('sm')} {
+    width: ${theme.drawerWidth}px;
+    flex-shrink: 0;
+  }
+
+  .MuiDrawer-paper {
+    width: ${theme.drawerWidth}px;
+    background: ${theme.colors.secondaryBackground};
+    border: none;
+    scrollbar-width: none;
+  }
+
+  .MuiBackdrop-root {
+    opacity: 0.5 !important;
+  }
+
+`}`
+
+const DrawerToolbar = styled.div
+  .attrs({ className: "DrawerToolbar" })`
+${({ theme }) => ({
+    ...theme.mixins.toolbar
+  })}
+`
+
+const DrawerMenuButton = styled(IconButton)
+  .attrs({ className: "DrawerMenuButton" })`
+${({ theme }) => `
+  display: flex;
+  margin: 0;
+  margin-left: ${theme.spacing(2)}px;
+  margin-top: ${theme.spacing(1)}px;
+  color: ${theme.colors.primaryFontColor};
+  border-radius: ${theme.shape.borderRadius}px;
+
+  ${theme.breakpoints.up('sm')} {
+    display: none;
+  }
+
+`}`
+
+const CloseMenuButton = styled(DrawerMenuButton)
+  .attrs({ className: "DrawerCloseMenuButton" })`
+${({ theme }) => `
+  margin-right: 0;
+  margin-left: auto;
+
+`}`
 
 
 const ResponsiveDrawer = (props) => {
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const theme = useTheme();
-    const classes = useStyles();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
 
-    const handleDrawerToggle = () => { setMobileOpen(!mobileOpen) }
+  const handleDrawerToggle = () => { setMobileOpen(!mobileOpen) }
 
-    return (
-        <nav className={classes.drawer}>
-            {/* Desktop */}
-            <Hidden smUp implementation="js">
-                <Drawer
-                    variant="temporary"
-                    anchor={theme.direction === 'rtl' ? 'right' : 'left'}
-                    open={mobileOpen}
-                    onClose={handleDrawerToggle}
-                    classes={{ paper: classes.drawerPaper, }}
-                    ModalProps={{ keepMounted: true, }} // Better open performance on mobile.
-                >
-                    <IconButton onClick={handleDrawerToggle} className={classes.closeMenuButton}>
-                        <CloseIcon />
-                    </IconButton>
-                    {props.children}
-                </Drawer>
-            </Hidden>
+  return (
+    <DrawerNav>
+      {/* Desktop */}
+      <Hidden smUp implementation="js">
+        <StyledDrawer
+          variant="temporary"
+          anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{ keepMounted: true, }} // Better open performance on mobile.
+        >
+          <CloseMenuButton onClick={handleDrawerToggle}>
+            <CloseIcon />
+          </CloseMenuButton>
+          {props.children}
+        </StyledDrawer>
+      </Hidden>
 
-            {/* Mobile */}
-            <Hidden xsDown implementation="js">
-                <Drawer
-                    className={classes.drawer}
-                    variant="permanent"
-                    classes={{ paper: classes.drawerPaper, }}
-                >
-                    <div className={classes.toolbar} />
-                    {props.children}
-                </Drawer>
-            </Hidden>
+      {/* Mobile */}
+      <Hidden xsDown implementation="js">
+        <StyledDrawer
+          variant="permanent"
+        >
+          <DrawerToolbar />
+          {props.children}
+        </StyledDrawer>
+      </Hidden>
 
-            <IconButton
-                color="inherit"
-                aria-label="Open drawer"
-                edge="start"
-                onClick={handleDrawerToggle}
-                className={classes.menuButton} >
-                <MenuIcon />
-            </IconButton>
-        </nav>
-    );
+      <DrawerMenuButton
+        className="DrawerMenuButton"
+        color="inherit"
+        aria-label="Open drawer"
+        edge="start"
+        onClick={handleDrawerToggle}
+      >
+        <MenuIcon />
+      </DrawerMenuButton>
+    </DrawerNav>
+  );
 }
 
 export default ResponsiveDrawer;
