@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { lighten, darken } from 'polished';
+import Fade from '@material-ui/core/Fade';
 import { Button } from "../Button"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -10,73 +11,74 @@ import { backendCall } from '../../utilities';
 
 import CommandForm from './CommandForm';
 import CommandModal from './CommandModal';
+import { fade } from '@material-ui/core/styles';
 
 
 export const CommandListHeaderStyled = styled.div`
  ${({ theme }) => `
   display: flex;
   justify-content: space-between;
-  padding: 2em 0;
+  padding: ${theme.spacing(4, 0, 5, 0)};
 
   h1 {
     color: ${theme.colors.primaryFontColor};
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: bold;
     margin: auto 0;
   }
 
+  button {
+    transition: ${theme.transitions.create(['color', 'background'])};
+  }
+
   button, &:focus  {
     font-size: 12px;
-    margin: auto 0 auto auto;
     background: #43B581 !important;
-    color: ${theme.colors.primaryFontColor};
-    border: 1px solid transparent !important;
+    color: white;
+    border: 1px solid ${fade('#000', 0.05)} !important;
     font-weight: bold;
-    padding: 0.75em 1em;
-
-    &:hover {
-      box-shadow: none;
-      border: 1px solid transparent;
-      background: ${props => darken(0.2, "#43B581")} !important;
-      color: ${darken(0.2, theme.colors.primaryFontColor)}
-    }
+    padding: ${theme.spacing(1, 2)};
 
     &:active {
       background: ${lighten(0.05, "#43B581")} !important;
     }
-
-    &:focus {
-      color: ${theme.colors.primaryFontColor};
-      box-shadow: none !important;
-    }
   }
+
+  button:hover {
+      border: 1px solid transparent;
+      background: ${darken(0.2, "#43B581")} !important;
+      color: ${darken(0.3, 'white')};
+    }
 `}`
 
 export const CommandEntryStyled = styled.div`
  ${({ theme }) => `
   display: flex;
   background: gray;
-  padding: 1em;
-  margin-bottom: 1em;
+  padding: ${theme.spacing(2,2,2,2)};
+  margin-bottom: ${theme.spacing(1)}px;
   color: ${theme.colors.primaryFontColor};
   background: ${theme.colors.secondaryBackground};
-  border-radius: 5px;
-  font-weight: bold;
+  border-radius: ${theme.shape.borderRadius}px;
 
   .command_name {
+    font-weight: bold;
     margin: auto 0;
   }
 
   button {
     margin-left: auto;
+    font-weight: bold;
+    font-size: 12px;
+    padding: ${theme.spacing(1, 1, 1, 1)};
+    border: 1px solid ${fade('#000', 0.3)};
     background: ${theme.colors.backgroundColor};
   }
 `}`
 
 export const CommandDescription = styled.div`
 ${({ theme }) => `
-  margin: auto 0 auto 30px ;
-  font-weight: normal;
+  margin: auto 0 auto ${theme.spacing(4)}px;
   color: ${darken(0.5, theme.colors.primaryFontColor)}
 `}`
 
