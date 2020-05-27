@@ -13,7 +13,8 @@ import {
 const QuoteDropdownButton = styled(IconButton)`
 ${({ theme }) => `
   border-radius: 5px;
-  padding: 10px;
+  padding: ${theme.spacing(1)};
+  padding-top: 0;
   transition: ${theme.transitions.create(['color'])};
 
   &:hover, &:hover svg {

@@ -8,7 +8,7 @@ import {
   Paper,
   Link
 } from '@material-ui/core';
-import { darken } from 'polished';
+import { lighten, darken } from 'polished';
 import styled from 'styled-components';
 
 import { rgbToHex } from '../../utilities';
@@ -16,75 +16,57 @@ import { DiscordAvatar } from '../Avatar';
 import { QuoteDropdown } from './QuoteDropdown';
 import { fade } from '@material-ui/core/styles';
 
+const QuoteTimestamp = styled.div`
+${({ theme }) => `
+  color: ${darken(0.5, theme.colors.primaryFontColor)};
+`}`
 
-const QuoteEntryStyled = styled.div`
+const QuoteEntryStyled = styled(Box)`
 ${({ theme }) => `
   flex-grow: 1;
-  margin-bottom: 10px;
-  background-color: "gray";
-  padding: 10px;
-  padding-bottom: 20px;
-  padding-right: 5px;
-  background: #36393f;
-  border: 1px solid ${fade(theme.colors.secondaryBackground, 1)};
+  margin-bottom: ${theme.spacing(1)}px;
+  background-color: ${lighten(0.03, theme.colors.backgroundColor)};
+  padding: ${theme.spacing(1)}px;
+  padding-bottom: ${theme.spacing(2)}px;
+  border: 1px solid ${fade(theme.colors.secondaryBackground, 0.9)};
 
-
-  .quoteHeader {
-    padding: 5px;
-    display: flex;
-  }
-
-  .quoteInfo {
-    display: flex;
-    flex-grow: 1;
-    margin-bottom: auto;
-    margin-left: 15px;
-  }
-
-  .quoteUsername {
-    margin-right: 5px;
-    font-weight: bold;
-  }
-
-  .quoteTimestamp {
-    color: ${darken(0.5, theme.colors.primaryFontColor)};
-  }
-
-  .quoteBody {
-    text-align: left;
-    margin-left: 60px;
-    margin-top: -15px;
-    max-width: 100%;
-    padding-right: 20px;
-
-    a, a:visited {
-      color: #00b0f4;
-    }
-
-    img {
-      height: auto;
-      max-height: 300px;
-    }
+  a, a:visited {
+    color: #00b0f4;
   }
 `}`
 
-const QuoteHeader = ({ quote }) => (
-  <div className="quoteHeader">
-    <DiscordAvatar src={quote.user.avatar_url} />
-    <div className="quoteInfo">
-      <Link
-        className="quoteUsername"
+
+const QuoteHeader = ({ quote }) => {
+
+  const QuoteInfo = () => (
+    <Box className="quoteInfo" display="flex" flexGrow={1} ml={2} mb="auto" p={0}>
+      <Box
+        classname="quoteUserName"
         component={RouterLink}
         to={`/quotes/${quote.guild_id}/${quote.user_id}`}
-        style={{ color: rgbToHex(quote.member.top_role.color) }}
+        mr={1} fontWeight="fontWeightBold"
+        style={{
+          color: rgbToHex(quote.member.top_role.color),
+          textDecoration: 'none'
+        }}
       >
         {quote.member.display_name}
-      </Link>
-      <div className="quoteTimestamp">{quote.timestamp}</div>
-    </div>
-    <QuoteDropdown quote={quote} />
-  </div>
-)
+      </Box>
+
+      <QuoteTimestamp>
+        {quote.timestamp}
+      </QuoteTimestamp>
+    </Box>
+  )
+
+  return (
+    <Box display="flex" p={1} pr={0}>
+      <DiscordAvatar src={quote.user.avatar_url} />
+      <QuoteInfo />
+     <QuoteDropdown quote={quote} />
+    </Box>
+  )
+}
 
 export const QuoteEntry = ({ quote }) => {
   const [message, setMessage] = useState([]);
@@ -109,9 +91,9 @@ export const QuoteEntry = ({ quote }) => {
   return (
     <QuoteEntryStyled>
       <QuoteHeader quote={quote} />
-      <div className="quoteBody">
+      <Box className="quoteBody" ml={8} mt={-2}>
         {message}
-      </div>
+      </Box>
     </QuoteEntryStyled>
   )
 }
