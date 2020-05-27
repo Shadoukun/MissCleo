@@ -4,6 +4,7 @@ import parse from 'html-react-parser';
 
 import { Link as RouterLink } from 'react-router-dom';
 import {
+  Box,
   Paper,
   Link
 } from '@material-ui/core';
@@ -13,10 +14,10 @@ import styled from 'styled-components';
 import { rgbToHex } from '../../utilities';
 import { DiscordAvatar } from '../Avatar';
 import { QuoteDropdown } from './QuoteDropdown';
+import { fade } from '@material-ui/core/styles';
 
 
-
-const QuoteEntryStyled = styled(Paper)`
+const QuoteEntryStyled = styled.div`
 ${({ theme }) => `
   flex-grow: 1;
   margin-bottom: 10px;
@@ -25,6 +26,8 @@ ${({ theme }) => `
   padding-bottom: 20px;
   padding-right: 5px;
   background: #36393f;
+  border: 1px solid ${fade(theme.colors.secondaryBackground, 1)};
+
 
   .quoteHeader {
     padding: 5px;
@@ -104,7 +107,7 @@ export const QuoteEntry = ({ quote }) => {
   }, [quote]);
 
   return (
-    <QuoteEntryStyled elevation={2}>
+    <QuoteEntryStyled>
       <QuoteHeader quote={quote} />
       <div className="quoteBody">
         {message}

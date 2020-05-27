@@ -65,17 +65,18 @@ const Search = styled.form`
 ${({theme}) => `
   position: relative;
   border-radius: ${theme.shape.borderRadius}px;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
   transition: ${theme.transitions.create('background-color')};
-  background-color: ${fade(theme.palette.common.white, 0.10)};
-
-  &:hover {
-    background-color: ${fade(theme.palette.common.white, 0.15)};
-  }
 
   margin-right: ${theme.spacing(2)};
   margin-left: auto;
   margin-bottom: ${theme.spacing(2)}px;
   width: 100%;
+
+  &:hover {
+    background-color: ${fade(theme.palette.common.white, 0.1)};
+  }
 
   ${theme.breakpoints.up('sm')} {
     margin-left: ${theme.spacing(3)};
@@ -92,21 +93,39 @@ ${({theme}) => `
   display: flex;
   align-items: center;
   justify-content: center;
+
 `}`
+
 
 const SearchInput = styled(InputBase)`
 ${({theme}) => `
+  background-color: ${fade(theme.palette.common.white, 0.1)};
+  width: 100%;
+
   .MuiInputBase-root {
     color: inherit;
   }
 
   .MuiInputBase-input {
-    padding: ${theme.spacing(1,1,1,0)};
+    padding: ${theme.spacing(1, 1, 1, 0)};
     padding-left: calc(1em + ${theme.spacing(3)}px);
     transition: ${theme.transitions.create('width')};
-    width: 100%;
+    width: 10ch;
+  }
 
-    ${theme.breakpoints.up('md')} {
+  ${theme.breakpoints.up('sm')} {
+    background: none;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+
+    .MuiInputBase-input {
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+      width: 0;
+    }
+
+    &.Mui-focused .MuiInputBase-input {
+      background-color: ${fade(theme.palette.common.white, 0.1)};
       width: 20ch;
     }
   }
@@ -162,7 +181,7 @@ export const QuoteList = ({ guildId, userId, setUser, searchString, setSearchStr
         </Typography>
        }
 
-        <Search onSubmit={searchSubmit}>
+        <Search onSubmit={searchSubmit} border={1} >
           <SearchIconWrapper>
             <SearchIcon />
           </SearchIconWrapper>
