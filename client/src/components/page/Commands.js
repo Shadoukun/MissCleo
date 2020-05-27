@@ -9,6 +9,7 @@ import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 
 import CommandForm from './CommandForm';
+import CommandModal from './CommandModal';
 
 
 export const CommandListHeaderStyled = styled.div`
@@ -85,8 +86,18 @@ export const CommandListHeader = ({ update, setUpdate }) => {
 
   const handleClick = () => {
     showModal({
-      content: NewCommandModal,
-      contentProps: { hideModal, update, setUpdate },
+      content: CommandModal,
+      contentProps: {
+        type: "Command",
+        edit: false,
+        submitURL: "/add_command",
+        hideModal: hideModal,
+        update: update,
+        setUpdate: setUpdate,
+        hideName: true,
+        hideRegex: true,
+        hideMultiResponse: true,
+      },
       ModalProps: {}
     })
   }
@@ -108,7 +119,19 @@ export function CommandListMain({ commands, update, setUpdate }) {
   const handleClick = (command) => {
     showModal({
       content: CommandModal,
-      contentProps: { command, hideModal, update, setUpdate },
+      contentProps: {
+        type: "Command",
+        edit: true,
+        entry: command,
+        submitURL: "/edit_command",
+        removeURL: "/remove_command",
+        hideModal: hideModal,
+        update: update,
+        setUpdate: setUpdate,
+        hideName: true,
+        hideRegex: true,
+        hideMultiResponse: true,
+      },
       ModalProps: {}
     })
   }
@@ -128,138 +151,3 @@ export function CommandListMain({ commands, update, setUpdate }) {
   );
 }
 
-
-const CommandModal = ({ update, setUpdate, hideModal, ...props }) => {
-  const [command, setCommand] = useState(props.command.command)
-  const [response, setResponse] = useState(props.command.response)
-  const [description, setDescription] = useState(props.command.description)
-
-  const [commandId,] = useState(props.command.id)
-  const { requestconfig } = useAuth();
-
-
-  const handleCommandChange = (event) => {
-    setCommand(event.target.value)
-  }
-
-  const handleResponseChange = (event) => {
-    setResponse(event.target.value)
-  }
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    backendCall.post(
-      '/edit_command',
-      { id: commandId, command: command, response: response, description: description },
-      requestconfig
-    );
-
-    setUpdate((update) => ++update)
-    hideModal()
-  }
-
-  const handleRemove = (event) => {
-    event.preventDefault();
-    backendCall.post(
-      '/remove_command',
-      { id: commandId, name: command },
-      requestconfig
-    );
-
-    setUpdate((update) => ++update)
-    hideModal()
-  }
-
-  const handleDescriptionChange = (event) => {
-    setDescription(event.target.value)
-  }
-
-  return (
-    <>
-      <div className="modalHeader">
-        <div className="modalTitle">
-          <h1>{"!" + props.command.command}</h1>
-        </div>
-        <Button onClick={hideModal}>
-          <FontAwesomeIcon icon={faTimes} />
-        </Button>
-      </div>
-
-      <div className="modalBody">
-        <CommandForm
-          edit
-          hideName
-          hideRegex
-          hideMultiResponse
-          trigger={command}
-          response={response}
-          description={description}
-          handleDescriptionChange={handleDescriptionChange}
-          handleSubmit={handleSubmit}
-          handleTriggerChange={handleCommandChange}
-          handleResponseChange={handleResponseChange}
-          handleRemove={handleRemove}
-        />
-      </div>
-    </>
-  )
-}
-
-
-const NewCommandModal = ({ update, setUpdate, hideModal, ...props }) => {
-  const [command, setCommand] = useState("")
-  const [response, setResponse] = useState("")
-  const [description, setDescription] = useState("")
-  const { requestconfig } = useAuth();
-
-
-  const handleCommandChange = (event) => {
-    setCommand(event.target.value)
-  }
-
-  const handleResponseChange = (event) => {
-    setResponse(event.target.value)
-  }
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    backendCall.post(
-      '/add_command',
-      { command: command, response: response, description: description },
-      requestconfig
-    );
-
-    setUpdate(update => ++update)
-    hideModal()
-  }
-
-  const handleDescriptionChange = (event) => {
-    setDescription(event.target.value)
-  }
-
-  return (
-    <>
-      <div className="modalHeader">
-        <div className="modalTitle">
-          <h1>New Command</h1>
-        </div>
-        <Button onClick={hideModal}><FontAwesomeIcon icon={faTimes} /></Button>
-      </div>
-
-      <div className="modalBody">
-        <CommandForm
-          hideName
-          hideRegex
-          hideMultiResponse
-          trigger={command}
-          response={response}
-          description={description}
-          handleDescriptionChange={handleDescriptionChange}
-          handleSubmit={handleSubmit}
-          handleTriggerChange={handleCommandChange}
-          handleResponseChange={handleResponseChange}
-        />
-      </div>
-    </>
-  )
-}

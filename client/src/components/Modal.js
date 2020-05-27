@@ -28,7 +28,7 @@ export const Fade = ({ children, ...props }) => {
   );
 }
 
-export const Backdrop = styled("div")`
+export const Backdrop = styled("div").attrs({ className: 'backdrop' })`
   position: fixed;
   z-index: 1040;
   top: 0;
@@ -46,12 +46,12 @@ ${({ theme }) => `
   left: 50%;
   z-index: 1040;
   transform: translate(-50%, -50%);
-  width: 60%;
+  width: 50%;
   outline: none;
   background: ${theme.colors.secondaryBackground};
   color: ${theme.colors.primaryFontColor};
-  padding: 20px;
-  border-radius: 5px;
+  padding: ${theme.spacing(2)}px;
+  border-radius: ${theme.shape.borderRadius}px;
 
   h1 {
     font-size: 25px;
@@ -59,7 +59,7 @@ ${({ theme }) => `
 
   .modalHeader {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: ${theme.spacing(2)}px;
 
     button {
       margin-left: auto;
@@ -67,7 +67,7 @@ ${({ theme }) => `
   }
 
   .modalFooter {
-    padding: 20px 0 0 0px;
+    padding: ${theme.spacing(3,0,0,0)};
     display: flex;
 
 
@@ -78,7 +78,7 @@ ${({ theme }) => `
       color: ${theme.colors.primaryFontColor};
       border: 1px solid transparent !important;
       font-weight: bold;
-      padding: 0.75em 3em;
+      padding: ${theme.spacing(1, 4)};
 
       &:hover {
         box-shadow: none;
@@ -98,10 +98,9 @@ ${({ theme }) => `
 
     button.Remove {
       color: ${darken(0.2, theme.colors.primaryFontColor)};
-      background: transparent;
+      background: rgba(0,0,0,0.1);
       margin-left: 0;
-      padding-left: 5px;
-      padding-right: 5px;
+      padding: ${theme.spacing(1, 2)};
       font-weight: normal;
 
        &:hover {
@@ -117,7 +116,8 @@ export const ModalForm = styled.form`
 
 
 export const ModalFormControl = styled(FormControl)`
+${({theme}) => `
   div.MuiFormControl-root + & {
-    margin-top: 15px;
+    margin-top: ${theme.spacing(2)}px;
   }
-`
+`}`
