@@ -33,6 +33,12 @@ ${({ theme }) => `
   a, a:visited {
     color: #00b0f4;
   }
+
+  .quoteBody {
+    img {
+      max-width: 80%;
+    }
+  }
 `}`
 
 
