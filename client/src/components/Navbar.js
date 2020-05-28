@@ -14,8 +14,25 @@ ${({ theme }) => `
   background-color: ${theme.colors.secondaryBackground};
   z-index: ${theme.zIndex.drawer + 1};
 
+  ${theme.breakpoints.down('xs')} {
+    position: relative;
+    margin-bottom: 36px;
+
   .navWrapper {
     margin-right: auto;
+
+    ${theme.breakpoints.down('xs')} {
+    display: flex;
+    justify-content: space-around;
+    position: absolute;
+    top: 56px;
+    width: 100%;
+    margin-left: ${theme.spacing(-2)}px;
+    padding-left: ${theme.spacing(2)}px;
+    padding-right: ${theme.spacing(2)}px;
+
+    background-color: ${theme.colors.secondaryBackground};
+    }
   }
 
   .active {
@@ -24,31 +41,58 @@ ${({ theme }) => `
 `}`
 
 const NavTitle = styled(Typography)`
-  font-size: 20px;
-  margin-right: 20px;
-`
+${({theme}) => `
+  font-size: 24px;
+  margin-right: ${theme.spacing(3)}px;
+
+  ${theme.breakpoints.down('xs')} {
+    font-size: 20px;
+  }
+`}`
 
 
-const LoginButton = styled(IconButton)`
-  border-radius: 5px;
-  margin-right: 0;
+const LoginButtonStyled = styled(IconButton)`
+${({ theme }) => `
+  border-radius: ${theme.shape.borderRadius}px;
+  margin-left: auto;
+  text-transform: capitalize;
 
   p {
+
     font-size: 14px;
     font-weight: bold;
   }
 
   svg {
-    margin-right: 5px;
+    margin-right: ${theme.spacing(0.5)}px;
   }
-`
+`}`
+
+const NavButton = styled(Button)`
+${({ theme }) => `
+  padding: ${theme.spacing(1, 1, 1, 1)};
+  font-size: 14px;
+  font-weight: bold;
+
+  ${theme.breakpoints.down('xs')} {
+    font-size: 12px;
+  }
+`}`
+
+const RouterButton = (props) => {
+  const isActive = (value) => (props.location.pathname.startsWith(value) ? "active" : '')
+
+  return (
+    <NavButton className={isActive(props.to)} component={RouterLink} to={props.to}>
+      {props.name}
+    </NavButton>
+  )
+}
 
 const Navbar = (props) => {
   const location = useLocation();
   const { authToken } = useAuth();
 
-
-  const isActive = (value) => (location.pathname.startsWith(value) ? "active" : '')
 
   return (
     <StyledAppBar className="Navbar" position="sticky" elevation={0}>
@@ -56,18 +100,10 @@ const Navbar = (props) => {
         <NavTitle className="navTitle" type="title" color="inherit">MissCleo</NavTitle>
 
         <Box className="navWrapper">
-          <Button className={isActive('/quotes')} component={RouterLink} to="/quotes">
-            Quotes
-        </Button>
-          <Button className={isActive('/commands')} component={RouterLink} to="/commands">
-            Commands
-        </Button>
-          <Button className={isActive('/responses')} component={RouterLink} to="/responses">
-            Responses
-        </Button>
-          <Button className={isActive('/reactions')} component={RouterLink} to="/reactions">
-            Reactions
-        </Button>
+          <RouterButton to="/quotes" name="Quotes" location={location} />
+          <RouterButton to="/commands" name="Commands" location={location} />
+          <RouterButton to="/responses" name="Responses" location={location} />
+          <RouterButton to="/reactions" name="Reactions" location={location} />
         </Box>
 
         <LoginBar isLoggedIn={authToken} />
@@ -76,76 +112,26 @@ const Navbar = (props) => {
   )
 }
 
-const LoginBar = ({ isLoggedIn }) => (
-  <div className="login">
-    {!isLoggedIn ? (
-      <LoginButton component={RouterLink} to="/login">
-        <AccountCircle />
-        <Typography>
-          Login
-          </Typography>
-      </LoginButton>
-    ) : (
-        <LoginButton component={RouterLink} to="/logout">
-          <AccountCircle />
-          <Typography>
-            Logout
-          </Typography>
-        </LoginButton>
-      )
-    }
-  </div>
-)
+const LoginBar = ({ isLoggedIn }) => {
 
-// const StyledNavbar = styled(Navbar)`
-//     background: ${props => props.theme.secondaryBackground} !important;
-//     position: sticky;
-//     top: 0;
-//     z-index: 100;
+  const LoginButton = (props) => (
+    <LoginButtonStyled component={RouterLink} to={`/${props.type}`}>
+      <AccountCircle />
+      <Typography>
+        {props.type}
+      </Typography>
+    </LoginButtonStyled>
+  )
 
-//     .navbar-nav {
-//       flex-grow: 1;
-//     }
-// `
-
-// const LoginButtons = styled.div`
-//   margin-left: auto;
-// `
-// export const CleoNavbar = () => {
-//   const { authToken } = useAuth()
-
-//   return (
-//     <StyledNavbar expand="lg" variant="dark">
-//       <Navbar.Brand href="#home">Miss Cleo</Navbar.Brand>
-//       <Navbar.Toggle aria-controls="basic-navbar-nav" />
-//       <Navbar.Collapse id="basic-navbar-nav">
-//         <Nav className="mr-auto">
-
-//           <LinkContainer to="/quotes">
-//             <Nav.Link>Quotes</Nav.Link>
-//           </LinkContainer>
-
-//           <LinkContainer to="/commands">
-//             <Nav.Link>Commands</Nav.Link>
-//           </LinkContainer>
-
-//           <LoginButtons>
-//             {authToken ? (
-//               <LinkContainer to="/admin">
-//                 <Nav.Link>Logout</Nav.Link>
-//               </LinkContainer>
-//             ) : (
-//               <LinkContainer to="/login">
-//                 <Nav.Link>Login</Nav.Link>
-//               </LinkContainer>
-//               )
-//             }
-//           </LoginButtons>
-
-//         </Nav>
-//       </Navbar.Collapse>
-//     </StyledNavbar>
-//   )
-// }
+  return (
+    <Box className="login" style={{ marginLeft: "auto"}}>
+      {!isLoggedIn ? (
+        <LoginButton type="login" />
+      ) : (
+          <LoginButton type="logout" />
+        )}
+    </Box>
+  )
+}
 
 export default Navbar
