@@ -168,7 +168,7 @@ class CustomCommand(Base):
     response        = Column(String)
     multi_response  = Column(Boolean)
 
-    def __init__(self, command, response, description=None, name=None, multi_response=False):
+    def __init__(self, command, response, description=None, name=None, multi_response=False, **kwargs):
         self.command = command
         self.response = response
         self.name = name
@@ -189,7 +189,7 @@ class CustomResponse(Base):
     use_regex       = Column(Boolean)
     multi_response  = Column(Boolean)
 
-    def __init__(self, trigger, response, name=None, description=None, use_regex=False, multi_response=False):
+    def __init__(self, trigger, response, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
         self.trigger = trigger
         self.response = response
         self.name = name
@@ -212,8 +212,7 @@ class CustomReaction(Base):
     use_regex       = Column(Boolean)
     multi_response  = Column(Boolean)
 
-
-    def __init__(self, trigger, reaction, name=None, description=None, use_regex=False, multi_response=False):
+    def __init__(self, trigger, reaction, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
         self.trigger = trigger
         self.reaction = reaction
         self.name = name

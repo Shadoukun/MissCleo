@@ -19,7 +19,7 @@ class CleoAPI:
         # CORS middleware allows CORS from localhost
         self.app.middlewares.append(
             cors_middleware(
-                origins=[re.compile(r"^https?\:\/\/localhost")]
+                origins=[re.compile(r"^https?\:\/\/localhost.*")]
             )
         )
 

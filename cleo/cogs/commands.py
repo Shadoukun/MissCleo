@@ -251,6 +251,11 @@ class CustomCommands(commands.Cog):
         logger.debug("api_add_commands")
 
         data = await request.json()
+
+        # lol command uses a different variable
+        # and I'm not changing it right now.
+        data['command'] = data['trigger']
+
         command = CustomCommand(**data)
 
         logger.debug(f"{command.command}, {command.response}")
@@ -412,6 +417,11 @@ class CustomCommands(commands.Cog):
         logger.debug("api_add_reactions")
 
         data = await request.json()
+
+        # lol reactions uses a different variable
+        # and I'm not changing it right now.
+        data['reaction'] = data['response']
+
         reaction = CustomReaction(**data)
         self.db.add(reaction)
         self.db.commit()
