@@ -10,7 +10,6 @@ import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
 import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription } from './Commands';
-import CommandForm from './CommandForm'
 import CommandModal from './CommandModal'
 
 

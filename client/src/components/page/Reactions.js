@@ -10,7 +10,6 @@ import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
 import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription } from './Commands';
-import CommandForm from './CommandForm';
 import CommandModal from './CommandModal';
 
 export const ReactionListHeader = ({ update, setUpdate }) => {
@@ -26,8 +25,7 @@ export const ReactionListHeader = ({ update, setUpdate }) => {
         hideModal: hideModal,
         update: update,
         setUpdate: setUpdate,
-        hideName: true,
-        hideRegex: true
+        hideMultiResponse: true
       },
       ModalProps: {}
     })
