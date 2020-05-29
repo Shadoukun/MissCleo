@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table, DateTime, Boolean, UniqueConstraint, JSON
+from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table, DateTime, Boolean, UniqueConstraint, JSON, Float
 from sqlalchemy.orm import relationship, backref, sessionmaker, Query
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -161,12 +161,19 @@ class CustomCommand(Base):
 
     __tablename__ = "custom_commands"
 
-    id              = Column(Integer, primary_key=True)
-    name            = Column(String, unique=True)
-    description     = Column(String)
-    command         = Column(String, unique=True)
-    response        = Column(String)
-    multi_response  = Column(Boolean)
+    id                  = Column(Integer, primary_key=True)
+    name                = Column(String, unique=True)
+    description         = Column(String)
+    command             = Column(String, unique=True)
+    response            = Column(String)
+    multi_response      = Column(Boolean)
+
+    cooldown            = Column(Boolean)
+    cooldown_rate       = Column(Integer)
+    cooldown_per        = Column(Float)
+    cooldown_bucket     = Column(Integer)
+    cooldown_multiplier = Column(Integer)
+
 
     def __init__(self, command, response, description=None, name=None, multi_response=False, **kwargs):
         self.command = command
@@ -175,19 +182,32 @@ class CustomCommand(Base):
         self.description = description
         self.multi_response = multi_response
 
+        self.cooldown = kwargs.get('cooldown', False)
+        self.cooldown_rate = kwargs.get('cooldown_rate', 1)
+        self.coldown_per = kwargs.get('cooldown_per', 0)
+        self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
+        self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
+
 
 class CustomResponse(Base):
     """Custom Responses"""
 
     __tablename__ = "custom_responses"
 
-    id              = Column(Integer, primary_key=True)
-    name            = Column(String, unique=True)
-    description     = Column(String)
-    trigger         = Column(String, unique=True)
-    response        = Column(String)
-    use_regex       = Column(Boolean)
-    multi_response  = Column(Boolean)
+    id                  = Column(Integer, primary_key=True)
+    name                = Column(String, unique=True)
+    description         = Column(String)
+    trigger             = Column(String, unique=True)
+    response            = Column(String)
+    use_regex           = Column(Boolean)
+    multi_response      = Column(Boolean)
+
+    cooldown            = Column(Boolean)
+    cooldown_rate       = Column(Integer)
+    cooldown_per        = Column(Float)
+    cooldown_bucket     = Column(Integer)
+    cooldown_multiplier = Column(Integer)
+
 
     def __init__(self, trigger, response, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
         self.trigger = trigger
@@ -197,6 +217,12 @@ class CustomResponse(Base):
         self.use_regex = use_regex
         self.multi_response = multi_response
 
+        self.cooldown = kwargs.get('cooldown', False)
+        self.cooldown_rate = kwargs.get('cooldown_rate', 1)
+        self.coldown_per = kwargs.get('cooldown_per', 0)
+        self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
+        self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
+
 
 
 class CustomReaction(Base):
@@ -204,13 +230,19 @@ class CustomReaction(Base):
 
     __tablename__ = "custom_reactions"
 
-    id              = Column(Integer, primary_key=True)
-    name            = Column(String, unique=True)
-    description     = Column(String)
-    trigger         = Column(String, unique=True)
-    reaction        = Column(String)
-    use_regex       = Column(Boolean)
-    multi_response  = Column(Boolean)
+    id                  = Column(Integer, primary_key=True)
+    name                = Column(String, unique=True)
+    description         = Column(String)
+    trigger             = Column(String, unique=True)
+    reaction            = Column(String)
+    use_regex           = Column(Boolean)
+    multi_response      = Column(Boolean)
+
+    cooldown            = Column(Boolean)
+    cooldown_rate       = Column(Integer)
+    cooldown_per        = Column(Float)
+    cooldown_bucket     = Column(Integer)
+    cooldown_multiplier = Column(Integer)
 
     def __init__(self, trigger, reaction, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
         self.trigger = trigger
@@ -219,6 +251,12 @@ class CustomReaction(Base):
         self.description = description
         self.use_regex = use_regex
         self.multi_response = multi_response
+
+        self.cooldown = kwargs.get('cooldown', False)
+        self.cooldown_rate = kwargs.get('cooldown_rate', 1)
+        self.coldown_per = kwargs.get('cooldown_per', 0)
+        self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
+        self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
 
 class Admin(Base):

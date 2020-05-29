@@ -3,64 +3,141 @@ import logging
 import re
 import json
 from aiohttp import web
+import datetime
 from discord.ext import commands
+from discord.ext.commands.errors import CommandOnCooldown
+from discord.ext.commands.cooldowns import Cooldown, CooldownMapping, BucketType
 from sqlalchemy import func
 from cleo.db import CustomCommand, CustomResponse, CustomReaction, new_alchemy_encoder
 
 logger = logging.getLogger(__name__)
 
 
+
 class ResponseData:
     """Class for parsed Response data from database"""
 
     def __init__(self, response):
+        self._response = response
         self.id = response.id
         self.trigger = None
         self.responses = None
         self.useRegex = response.use_regex
         self.multiResponse = response.multi_response
 
+        self.cooldown = False
+        self.cooldown_rate = 0
+        self.cooldown_per = 0
+        self.cooldown_bucket = 0
+        self._buckets = None
+
+        self.process_trigger()
+        self.process_response()
+        self.process_cooldown()
+
+    def process_trigger(self):
         # trigger is regex expression if use_regex == True
         # otherwise a regular string
         if self.useRegex:
-            self.trigger = re.compile(fr'{response.trigger}')
+            self.trigger = re.compile(fr'{self._response.trigger}')
         else:
-            self.trigger = response.trigger
+            self.trigger = self._response.trigger
 
+    def process_response(self):
         # split response in to lines if multi_response == True
         if self.multiResponse:
-            self.responses = response.response.split('\n')
+            self.responses = self._response.response.split('\n')
         else:
-            self.responses = [response.response]
+            self.responses = [self._response.response]
+
+    def process_cooldown(self):
+        self.cooldown = self._response.cooldown
+        if self.cooldown:
+            self.cooldown_rate = self._response.cooldown_rate
+            self.cooldown_per = self._response.cooldown_per
+            self.cooldown_bucket = self._response.cooldown_bucket
+
+            cooldown_vars = [self.cooldown_rate, self.cooldown_per, BucketType(self.cooldown_bucket)]
+            self._buckets = CooldownMapping(Cooldown(*cooldown_vars))
+
+
+    def prepare_cooldowns(self, message):
+        # Skip if cooldown is false
+        if not self.cooldown:
+            return
+
+        if self._buckets.valid:
+            current = message.created_at.timestamp()
+            bucket = self._buckets.get_bucket(message, current)
+            retry_after = bucket.update_rate_limit(current)
+            if retry_after:
+                raise Exception
 
 
 class ReactionData:
     """Class for parsed Reaction data from database"""
 
     def __init__(self, reaction, custom_emojis):
+        self._reaction = reaction
         self.id = reaction.id
         self.trigger = None
         self.reactions = None
         self.useRegex = reaction.use_regex
         self.multiResponse = reaction.multi_response
 
+        self.cooldown = False
+        self.cooldown_rate = 0
+        self.cooldown_per = 0
+        self.cooldown_bucket = 0
+        self._buckets = None
+
+        self.process_trigger()
+        self.process_responses()
+        self.process_cooldown()
+        self.process_custom_emojis(custom_emojis)
+
+    def process_trigger(self):
         # trigger is regex expression if use_regex == True
         # otherwise a regular string
         if self.useRegex:
-            self.trigger = re.compile(fr'{reaction.trigger}')
+            self.trigger = re.compile(fr'{self._reaction.trigger}')
         else:
-            self.trigger = reaction.trigger
+            self.trigger = self._reaction.trigger
 
+    def process_responses(self):
         # split response in to lines if multi_response == True
-        self.reactions = reaction.reaction.replace(':', '').split('\n')
+        self.reactions = self._reaction.reaction.replace(':', '').split('\n')
 
-        # check and replace custom emojis
-        for i, r in enumerate(self.reactions):
-            for e in custom_emojis:
-                if r == e.name:
-                    self.reactions[i] = e
+    def process_custom_emojis(self, custom_emojis):
+        """check and set custom emojis in list of reactions to correct emoji type."""
+        for i, react in enumerate(self.reactions):
+            for emoji in custom_emojis:
+                if react == emoji.name:
+                    self.reactions[i] = emoji
                     break
 
+    def process_cooldown(self):
+        self.cooldown = self._reaction.cooldown
+
+        if self.cooldown:
+            self.cooldown_rate = self._reaction.cooldown_rate
+            self.cooldown_per = self._reaction.cooldown_per
+            self.cooldown_bucket = self._reaction.cooldown_bucket
+
+            cooldown_vars = [self.cooldown_rate, self.cooldown_per, BucketType(self.cooldown_bucket)]
+            self._buckets = CooldownMapping(Cooldown(*cooldown_vars))
+
+    def prepare_cooldowns(self, message):
+        # Skip if cooldown is false
+        if not self.cooldown:
+            return
+
+        if self._buckets.valid:
+            current = message.created_at.timestamp()
+            bucket = self._buckets.get_bucket(message, current)
+            retry_after = bucket.update_rate_limit(current)
+            if retry_after:
+                raise Exception
 
 
 class CustomCommands(commands.Cog):
@@ -113,7 +190,7 @@ class CustomCommands(commands.Cog):
         await self.process_reactions(message)
 
     @staticmethod
-    def make_command(command):
+    async def make_command(command):
         """
         Accepts a command from database and returns
         a callback for sending discord message.
@@ -125,7 +202,17 @@ class CustomCommands(commands.Cog):
             nonlocal command
             await ctx.channel.send(command.response)
 
-        return _command
+        cmd = commands.Command(_command, name=command.command)
+        cmd.category = 'Custom'
+
+        # create cooldown to command if there is one.
+        if command.cooldown:
+            rate = command.cooldown_rate
+            per = command.cooldown_per
+            bucket = command.cooldown_bucket
+            cmd._buckets = commands.CooldownMapping(Cooldown(rate, per, BucketType(bucket)))
+
+        return cmd
 
 
     async def process_responses(self, message):
@@ -152,9 +239,18 @@ class CustomCommands(commands.Cog):
 
         # check if there are multiple possible responses.
         if response:
+
+            # Check/Set cooldowns. pass if on cooldown
+            # I have no idea how this works.
+            try:
+                response.prepare_cooldowns(message)
+            except:
+                logger.debug("RESPONSE ON COOLDOWN")
+                return
+
             # return random response
             if response.multiResponse:
-                    resp = random.choice(response.responses)
+                resp = random.choice(response.responses)
             # return full response
             else:
                 resp = response.responses[0]
@@ -164,14 +260,15 @@ class CustomCommands(commands.Cog):
     async def process_reactions(self, message):
         """
         Check message for triggers from self.reactions.
-        Adds reaction if found.
+        Add all matching reactions to message.
         """
         logger.debug("processing reactions")
 
         matched = []
         msg = message.content.lower()
 
-        # check for trigger in message
+        # check for trigger. in message.
+        # append to list of matching reactions
         for _, r in self.reactions.items():
             if r.useRegex:
                 if r.trigger.search(msg):
@@ -180,8 +277,19 @@ class CustomCommands(commands.Cog):
                 if r.trigger in msg:
                     matched.append(r)
 
+        # Iterate and add matching reactions to message.
         if matched:
+            # list of matching entries
             for m in matched:
+                # Check/Set cooldown. pass if on cooldown
+                # I have no idea how this works.
+                try:
+                    m.prepare_cooldowns(message)
+                except:
+                    logger.debug("REACTION ON COOLDOWN")
+                    continue
+
+                # iterate each reaction for entry.
                 for react in m.reactions:
                     try:
                         await message.add_reaction(react)
@@ -194,13 +302,11 @@ class CustomCommands(commands.Cog):
 
         cmds = self.db.query(CustomCommand).all()
         for c in cmds:
+            # check if a command already exists before trying to re-add it.
             if c.command in [c.name for c in self.bot.commands]:
                 self.bot.remove_command(c.command)
 
-            # make command callback and add.
-            func = self.make_command(c)
-            cmd = commands.Command(func, name=c.command)
-            cmd.category = 'Custom'
+            cmd = await self.make_command(c)
             self.bot.add_command(cmd)
 
             # if commands cog is enabled, add command to auto-enabled commands.
@@ -240,7 +346,10 @@ class CustomCommands(commands.Cog):
 
         logger.debug("api_get_commands")
 
-        cmds = self.db.query(CustomCommand).order_by(func.lower(CustomCommand.command)).all()
+        cmds = self.db.query(CustomCommand) \
+                        .order_by(func.lower(CustomCommand.command)) \
+                        .all()
+
         cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
         return web.json_response(text=cmds)
 
@@ -259,14 +368,11 @@ class CustomCommands(commands.Cog):
         command = CustomCommand(**data)
 
         logger.debug(f"{command.command}, {command.response}")
-
         self.db.add(command)
         self.db.commit()
         self.db.refresh(command)
 
-        func = self.make_command(command)
-        cmd = commands.Command(func, name=command.command)
-        cmd.category = 'Custom'
+        cmd = await self.make_command(command)
         self.bot.add_command(cmd)
 
         # if commands cog is enabled, add command to auto-enabled commands.
@@ -285,20 +391,31 @@ class CustomCommands(commands.Cog):
 
         c = self.db.query(CustomCommand).filter_by(id=command_id).first()
 
-        fields = ['command', 'response', 'description']
+        # replace command.f with data[f]
+        data['command'] = data['trigger']
+
+        fields = [
+            'command',
+            'response',
+            'description',
+            'cooldown',
+            'cooldown_rate',
+            'cooldown_per',
+            'cooldown_bucket',
+            'cooldown_multiplier'
+            ]
+
         for f in fields:
            setattr(c, f, data[f])
 
         self.db.commit()
 
-        # remove command from the bot before readding it.
+        # remove command from the bot before re-adding it.
         if c.command in [c.name for c in self.bot.commands]:
             self.bot.remove_command(c.command)
 
-        # make command callback and readd it.
-        func = self.make_command(c)
-        cmd = commands.Command(func, name=c.command)
-        cmd.category = 'Custom'
+        # make command and readd it.
+        cmd = await self.make_command(c)
         self.bot.add_command(cmd)
 
         # if commands cog is enabled, add command to auto-enabled commands.
@@ -367,8 +484,19 @@ class CustomCommands(commands.Cog):
             return web.Response(status=500)
 
         # replace response.f with data[f]
-        fields = ['name', 'description', 'trigger',
-                  'response', 'use_regex', 'multi_response']
+        fields = [
+            'name',
+            'description',
+            'trigger',
+            'response',
+            'use_regex',
+            'multi_response',
+            'cooldown',
+            'cooldown_rate',
+            'cooldown_per',
+            'cooldown_bucket',
+            'cooldown_multiplier'
+            ]
 
         for f in fields:
            setattr(response, f, data[f])
@@ -444,7 +572,21 @@ class CustomCommands(commands.Cog):
             return web.Response(status=500)
 
         # replace reaction.f with data[f]
-        fields = ['name', 'description', 'trigger', 'reaction', 'use_regex']
+        data['reaction'] = data['response']
+
+        fields = [
+            'name',
+            'description',
+            'trigger',
+            'reaction',
+            'use_regex',
+            'cooldown',
+            'cooldown_rate',
+            'cooldown_per',
+            'cooldown_bucket',
+            'cooldown_multiplier'
+            ]
+
         for f in fields:
            setattr(reaction, f, data[f])
 

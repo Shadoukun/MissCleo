@@ -50,7 +50,7 @@ export function ReactionListMain({ reactions, update, setUpdate }) {
         type: "Reaction",
         edit: true,
         entry: reaction,
-        submitURL: "/add_reaction",
+        submitURL: "/edit_reaction",
         removeURL: "/remove_reaction",
         hideModal: hideModal,
         update: update,
