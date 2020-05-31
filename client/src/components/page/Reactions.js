@@ -10,7 +10,7 @@ import { backendCall } from '../../utilities';
 import { ModalForm, ModalFormControl } from '../Modal';
 
 import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription } from './Commands';
-import CommandModal from './CommandModal';
+import { CommandModal } from './CommandModal';
 
 export const ReactionListHeader = ({ update, setUpdate }) => {
   const { showModal, hideModal } = useModal()

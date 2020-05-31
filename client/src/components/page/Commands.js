@@ -9,7 +9,7 @@ import { useModal } from '../../context/Modal';
 import { useAuth } from '../../context/Auth';
 import { backendCall } from '../../utilities';
 
-import CommandModal from './CommandModal';
+import { CommandModal } from './CommandModal';
 import { fade } from '@material-ui/core/styles';
 
 
