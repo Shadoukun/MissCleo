@@ -49,7 +49,7 @@ const QuoteHeader = ({ quote }) => {
   const QuoteInfo = () => (
     <Box className="quoteInfo" display="flex" flexGrow={1} ml={2} mb="auto" p={0}>
       <Box
-        classname="quoteUserName"
+        className="quote-username"
         component={RouterLink}
         to={`/quotes/${quote.guild_id}/${quote.user_id}`}
         mr={1} fontWeight="fontWeightBold"
@@ -76,36 +76,38 @@ const QuoteHeader = ({ quote }) => {
   )
 }
 
-export const QuoteEntry = ({ quote, memberList }) => {
-  const [message, setMessage] = useState([]);
+export const QuoteEntry = ({ quote, memberList, ...props }) => {
+  const [message, setMessage] = useState("");
+  const [attachments, setAttachments] = useState([]);
 
   useEffect(() => {
-    let msg = []
     if (quote.message) {
-      msg.push(parse(toHTML(quote.message, {
-        escapeHTML: false,
-        discordCallback: { user: node => { return '@' + memberList[node.id].display_name } }
-      })))
-
-      if (quote.attachments) {
-        msg.push(<br />)
-      }
+      setMessage(
+        parse(toHTML(quote.message, {
+          escapeHTML: false,
+          discordCallback: {
+            user: node => { return memberList ? '@' + memberList[node.id].display_name : node } }
+          }
+        ))
+      )
     }
 
     if (quote.attachments) {
-      for (let file of quote.attachments) {
-        msg.push(<img src={window.location.origin + `/files/${file}`} alt="" />)
-      }
+      setAttachments(quote.attachments)
+    } else {
+      setAttachments([])
     }
-
-    setMessage(msg)
-  }, [quote]);
+  }, [quote, memberList]);
 
   return (
-    <QuoteEntryStyled>
+    <QuoteEntryStyled key={props.key}>
       <QuoteHeader quote={quote} />
       <Box className="quoteBody" ml={8} mt={-2}>
         {message}
+        {attachments && <br />}
+        {attachments.map((attachment, i) =>
+          <img src={window.location.origin + `/files/${attachment}`} alt="" />
+        )}
       </Box>
     </QuoteEntryStyled>
   )

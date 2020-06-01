@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { QuoteList } from '../components/page/QuoteMain';
-import { QuotesSidebar } from '../components/page/QuoteSidebar';
+import { GuildList, MemberList } from '../components/page/QuoteSidebar';
+import ResponsiveDrawer from '../components/Drawer'
 import { backendCall } from '../utilities';
 
 
@@ -33,12 +34,13 @@ const QuotePage = (props) => {
 
   return (
     <>
-      <QuotesSidebar
-        setGuild={setGuild}
-        activeGuildId={guild}
-        activeUserId={user}
-        setUser={setUser}
-      />
+      <ResponsiveDrawer>
+        <GuildList setGuild={setGuild} activeGuildId={guild} />
+
+        {guild &&
+          <MemberList guildId={guild} activeUserId={user} setUser={setUser} />}
+      </ResponsiveDrawer>
+
       <QuoteList
         guildId={guild}
         userId={user}

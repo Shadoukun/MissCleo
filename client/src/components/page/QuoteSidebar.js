@@ -39,16 +39,6 @@ ${({ theme }) => `
 
 `}`
 
-export const QuotesSidebar = ({ activeGuildId, activeUserId, setUser, setGuild }) => (
-  <ResponsiveDrawer>
-    <GuildList setGuild={setGuild} activeGuildId={activeGuildId} />
-    {activeGuildId &&
-      <MemberList
-        guildId={activeGuildId}
-        activeUserId={activeUserId}
-        setUser={setUser} />}
-  </ResponsiveDrawer>
-)
 
 const SidebarListHeader = ({ name }) => (
   <ListSubheader component="div" id={`nested-list-${name}`}>
@@ -56,7 +46,7 @@ const SidebarListHeader = ({ name }) => (
   </ListSubheader>
 )
 
-const GuildList = ({ setGuild }) => {
+export const GuildList = ({ setGuild }) => {
   const [guildList, setGuildList] = useState([]);
   const { guildId } = useParams();
 
@@ -77,10 +67,12 @@ const GuildList = ({ setGuild }) => {
       subheader={<SidebarListHeader name="Servers" />}
     >
       {guildList.map((guild, i) =>
-        <GuildEntry key={i}
+        <SidebarEntry
+          key={i}
+          to={`/quotes/${guild.id}`}
+          name={guild.name}
+          icon={guild.icon_url}
           activeClass={isActive(guild.id)}
-          guild={guild}
-          onClick={() => setGuild(guild.id)}
         />
       )}
 
@@ -88,7 +80,7 @@ const GuildList = ({ setGuild }) => {
   )
 }
 
-const MemberList = ({ guildId, activeUserId, setUser }) => {
+export const MemberList = ({ guildId, activeUserId, setUser }) => {
   const [userList, setUserList] = useState([]);
   const { userId } = useParams();
 
@@ -106,36 +98,29 @@ const MemberList = ({ guildId, activeUserId, setUser }) => {
       subheader={<SidebarListHeader name="Members" />}
     >
       {userList.map((user, i) =>
-        <MemberEntry key={i}
+        <SidebarEntry
+          key={i}
+          to={`/quotes/${guildId}/${user.user_id}`}
+          name={user.display_name}
+          icon={user.user.avatar_url}
           activeClass={isActive(user.user_id)}
-          user={user}
-          guildId={guildId}
+          textProps={{
+            style: { color: rgbToHex(user.top_role.color) }
+          }}
+
         />
       )}
     </List>
   )
 }
 
-const GuildEntry = ({ guild, activeClass }) => {
-  return (
-    <SidebarLink className={activeClass} component={RouterLink} to={`/quotes/${guild.id}`} underline="none">
-      <ListItem button>
-        <ListItemAvatar className="sidebarAvatar">
-          <DiscordAvatar src={guild.icon_url} />
-        </ListItemAvatar>
-        <ListItemText primary={guild.name} />
-      </ListItem>
-    </SidebarLink>
-  )
-}
-
-const MemberEntry = ({ activeClass, guildId, user }) => (
-  <SidebarLink className={activeClass} component={RouterLink} to={`/quotes/${guildId}/${user.user_id}`}>
+const SidebarEntry = ({ to, name, icon, activeClass, textProps }) => (
+  <SidebarLink className={activeClass} component={RouterLink} to={to} underline="none">
     <ListItem button>
-      <ListItemAvatar>
-        <DiscordAvatar src={user.user.avatar_url} />
+      <ListItemAvatar className="sidebarIcon">
+        <DiscordAvatar src={icon} />
       </ListItemAvatar>
-      <ListItemText primary={user.display_name} style={{ color: rgbToHex(user.top_role.color) }} />
+      <ListItemText primary={name} {...textProps} />
     </ListItem>
   </SidebarLink>
 )
