@@ -94,10 +94,10 @@ export const CommandModal = ({ update, entry, ...props }) => {
         cooldown_multiplier: form.multiplier
       },
       requestconfig
-    );
-
+    ).then(() => {
     props.setUpdate(() => ++props.update)
     props.hideModal()
+    });
   }
 
   // Handles removing an entry.
@@ -107,10 +107,10 @@ export const CommandModal = ({ update, entry, ...props }) => {
       props.removeURL,
       { id: form.id },
       requestconfig
-    );
-
+    ).then(() => {
     props.setUpdate(() => ++props.update)
     props.hideModal()
+    });
   }
 
   return (
