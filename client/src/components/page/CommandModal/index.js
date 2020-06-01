@@ -95,8 +95,8 @@ export const CommandModal = ({ update, entry, ...props }) => {
       },
       requestconfig
     ).then(() => {
-    props.setUpdate(() => ++props.update)
-    props.hideModal()
+      props.setUpdate(() => ++props.update)
+      props.hideModal()
     });
   }
 
@@ -108,8 +108,8 @@ export const CommandModal = ({ update, entry, ...props }) => {
       { id: form.id },
       requestconfig
     ).then(() => {
-    props.setUpdate(() => ++props.update)
-    props.hideModal()
+      props.setUpdate(() => ++props.update)
+      props.hideModal()
     });
   }
 
@@ -192,6 +192,7 @@ CommandModal.defaultProps = {
 CommandModal.propTypes = {
   // Modal type
   type: PropTypes.oneOf(['Command', 'Response', 'Trigger']).isRequired,
+  edit: PropTypes.bool,
 
   // entry data
   entry: PropTypes.shape({
@@ -202,8 +203,13 @@ CommandModal.propTypes = {
     command: PropTypes.string,
     response: PropTypes.string.isRequired,
     use_regex: PropTypes.bool,
-    multi_response: PropTypes.bool
-  }),
+    multi_response: PropTypes.bool,
+    cooldown: PropTypes.bool,
+    cooldown_rate: PropTypes.number,
+    cooldown_per: PropTypes.number,
+    cooldown_bucket: PropTypes.number,
+    cooldown_multiplier: PropTypes.number
+  }).isRequired,
 
   // API endpoint URLs
   submitURL: PropTypes.string.isRequired,
@@ -214,9 +220,9 @@ CommandModal.propTypes = {
   hideRegex: PropTypes.bool,
   hideMultiResponse: PropTypes.bool,
 
-  update: PropTypes.number.isRequired,
-  setUpdate: PropTypes.func.isRequired,
-  hideModal: PropTypes.func.isRequired,
+  update: PropTypes.number.isRequired.isRequired,
+  setUpdate: PropTypes.func.isRequired.isRequired,
+  hideModal: PropTypes.func.isRequired.isRequired,
 
 
 }
