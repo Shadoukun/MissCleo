@@ -77,7 +77,7 @@ export const CooldownDurationSelect = ({ duration, setDuration, type, setType, .
 
   useEffect(() => {
     setDuration(displayDuration * type)
-  }, [displayDuration, setDuration, type])
+  }, [displayDuration, type])
 
   const isValid = (value) => value.match(/^(\d{1,2}\.?(\d{1,2})?|)$/) ? true : false
 
@@ -164,7 +164,6 @@ export const CooldownControl = ({ form, setForm, ...props }) => {
 
       {form.cooldown &&
         <Box pl={1} pr={1}>
-          <CooldownFormControl>
             <Typography style={{ marginRight: "auto" }}>Duration:</Typography>
             <CooldownDurationSelect
               duration={form.cooldownDuration}
@@ -172,7 +171,6 @@ export const CooldownControl = ({ form, setForm, ...props }) => {
               type={form.multiplier}
               setType={(e) => { setForm({ ...form, multiplier: e.target.value }) }}
             />
-          </CooldownFormControl>
 
           <CooldownFormControl>
             <Typography style={{ marginRight: "auto" }}>Cooldown Type:</Typography>
