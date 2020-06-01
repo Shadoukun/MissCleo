@@ -11,6 +11,9 @@ import { backendCall } from '../../utilities';
 
 import { QuoteEntry } from './QuoteEntry';
 
+import { toHTML } from 'discord-markdown';
+import parse from 'html-react-parser';
+
 
 const QuoteListStyled = styled.div`
 ${({ theme }) => `
@@ -131,7 +134,7 @@ ${({theme}) => `
   }
 `}`
 
-export const QuoteList = ({ guildId, userId, setUser, searchString, setSearchString }) => {
+export const QuoteList = ({ guildId, userId, setUser, searchString, setSearchString, memberList }) => {
 
   const [quoteList, setQuoteList] = useState([]);
   const [pageCount, setPageCount] = useState(0);
@@ -170,7 +173,6 @@ export const QuoteList = ({ guildId, userId, setUser, searchString, setSearchStr
     setSearchString(searchContent)
   }
 
-
   return (
     <QuoteListStyled>
       <QuoteListHeader>
@@ -195,7 +197,7 @@ export const QuoteList = ({ guildId, userId, setUser, searchString, setSearchStr
       </QuoteListHeader>
 
       {quoteList.map((quote, i) =>
-        <QuoteEntry key={i} quote={quote} />
+        <QuoteEntry key={i} quote={quote} memberList={memberList} />
       )}
 
       {!!quoteList.length &&

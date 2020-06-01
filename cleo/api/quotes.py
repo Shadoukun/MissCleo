@@ -12,11 +12,22 @@ def getGuilds():
     return session.query(Guild).all()
 
 def getMembers(guild_id):
+    """Returns members that have quotes in a guild."""
 
     members = session.query(GuildMembership) \
                         .filter(GuildMembership.quotes.any(Quote.guild_id == guild_id)) \
                         .order_by(func.lower(GuildMembership.display_name)) \
                         .join(GuildMembership.top_role).all()
+    return members
+
+def getAllMembers(guild_id):
+    """Returns ALL members in a guild"""
+
+    members = session.query(GuildMembership) \
+                        .filter(GuildMembership.guild_id == guild_id) \
+                        .order_by(func.lower(GuildMembership.display_name)) \
+                        .join(GuildMembership.top_role).all()
+
     return members
 
 def getQuotes(guild_id, user_id, search, page):
@@ -51,6 +62,17 @@ def members(request):
                          cls=new_alchemy_encoder(False, ['user', 'top_role']))
 
     return web.json_response(text=members)
+
+
+@quote_routes.get('/all_members')
+def allmembers(request):
+    guild_id = request.rel_url.query.get('guild', None)
+
+    members = json.dumps(getAllMembers(guild_id),
+                         cls=new_alchemy_encoder(False, ['user', 'top_role']))
+
+    return web.json_response(text=members)
+
 
 
 @quote_routes.get('/quotes')

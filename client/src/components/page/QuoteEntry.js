@@ -35,6 +35,12 @@ ${({ theme }) => `
       max-width: 80%;
     }
   }
+
+  .d-user {
+    color: #7289da;
+    background: rgba(114,137,218,.1);
+    font-weight: bold;
+  }
 `}`
 
 
@@ -65,18 +71,22 @@ const QuoteHeader = ({ quote }) => {
     <Box display="flex" p={1} pr={0}>
       <DiscordAvatar src={quote.user.avatar_url} />
       <QuoteInfo />
-     <QuoteDropdown quote={quote} />
+      <QuoteDropdown quote={quote} />
     </Box>
   )
 }
 
-export const QuoteEntry = ({ quote }) => {
+export const QuoteEntry = ({ quote, memberList }) => {
   const [message, setMessage] = useState([]);
 
   useEffect(() => {
     let msg = []
     if (quote.message) {
-      msg.push(parse(toHTML(quote.message, { escapeHTML: false })))
+      msg.push(parse(toHTML(quote.message, {
+        escapeHTML: false,
+        discordCallback: { user: node => { return '@' + memberList[node.id].display_name } }
+      })))
+
       if (quote.attachments) {
         msg.push(<br />)
       }
@@ -87,6 +97,7 @@ export const QuoteEntry = ({ quote }) => {
         msg.push(<img src={window.location.origin + `/files/${file}`} alt="" />)
       }
     }
+
     setMessage(msg)
   }, [quote]);
 
