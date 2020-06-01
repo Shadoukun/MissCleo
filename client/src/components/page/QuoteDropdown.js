@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, IconButton } from '../Button';
+import { IconButton } from '../Button';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import styled from 'styled-components';
 import Copy from 'copy-to-clipboard';

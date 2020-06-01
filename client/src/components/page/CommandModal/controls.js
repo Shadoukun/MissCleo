@@ -29,7 +29,7 @@ export const NameControl = (props) => (
 
 export const TriggerControl = (props) => (
   <ModalFormControl>
-    <FormLabel>{props.type == "Command" ? "Command" : "Trigger"}</FormLabel>
+    <FormLabel>{props.type === "Command" ? "Command" : "Trigger"}</FormLabel>
     <Input
       id="trigger"
       value={props.trigger}

@@ -2,8 +2,8 @@ import React from 'react';
 import { Transition } from 'react-transition-group';
 import { Modal } from 'react-overlays'
 import styled from 'styled-components';
-import { Input, FormLabel, FormControl } from './Form'
-import { lighten, darken } from 'polished';
+import { FormControl } from './Form'
+import { darken } from 'polished';
 
 const FADE_DURATION = 200;
 

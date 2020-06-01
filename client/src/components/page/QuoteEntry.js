@@ -3,11 +3,7 @@ import { toHTML } from 'discord-markdown';
 import parse from 'html-react-parser';
 
 import { Link as RouterLink } from 'react-router-dom';
-import {
-  Box,
-  Paper,
-  Link
-} from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { lighten, darken } from 'polished';
 import styled from 'styled-components';
 

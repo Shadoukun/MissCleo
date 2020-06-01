@@ -4,8 +4,7 @@ import Hidden from '@material-ui/core/Hidden';
 import { IconButton } from './Button';
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { theme } from '../theme';
+import { useTheme } from '@material-ui/core/styles';
 import styled from 'styled-components';
 
 

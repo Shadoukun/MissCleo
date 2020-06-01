@@ -30,7 +30,7 @@ export const AuthProvider = (props) => {
       switch (status) {
         case 200:
           return true
-        case 401:
+        default:
           history.push('/login')
       }
     }

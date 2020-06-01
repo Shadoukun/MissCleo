@@ -1,14 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { lighten, darken } from 'polished';
-import Fade from '@material-ui/core/Fade';
 import { Button } from "../Button"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 import { useModal } from '../../context/Modal';
-import { useAuth } from '../../context/Auth';
-import { backendCall } from '../../utilities';
-
 import { CommandModal } from './CommandModal';
 import { fade } from '@material-ui/core/styles';
 

@@ -1,13 +1,6 @@
-
-import React, { useState } from 'react';
-import { Input, FormLabel } from '../Form'
+import React from 'react';
 import { Button } from "../Button"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useModal } from '../../context/Modal';
-import { useAuth } from '../../context/Auth';
-import { backendCall } from '../../utilities';
-import { ModalForm, ModalFormControl } from '../Modal';
 
 import { CommandListHeaderStyled, CommandEntryStyled, CommandDescription } from './Commands';
 import { CommandModal } from './CommandModal';

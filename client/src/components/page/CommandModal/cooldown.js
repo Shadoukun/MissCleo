@@ -77,7 +77,7 @@ export const CooldownDurationSelect = ({ duration, setDuration, type, setType, .
 
   useEffect(() => {
     setDuration(displayDuration * type)
-  }, [displayDuration, type])
+  }, [displayDuration, setDuration, type])
 
   const isValid = (value) => value.match(/^(\d{1,2}\.?(\d{1,2})?|)$/) ? true : false
 
