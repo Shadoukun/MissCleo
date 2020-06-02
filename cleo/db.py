@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table
 from sqlalchemy.orm import relationship, backref, sessionmaker, Query
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
-from flask_sqlalchemy import Pagination
 from sqlalchemy.ext.declarative import DeclarativeMeta
 import json
 import datetime
@@ -294,6 +293,77 @@ class FlaskUser(Base):
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
         return False
+
+
+class Pagination:
+    """Internal helper class returned by :meth:`BaseQuery.paginate`.  You
+    can also construct it from any other SQLAlchemy query object if you are
+    working with other libraries.  Additionally it is possible to pass `None`
+    as query object in which case the :meth:`prev` and :meth:`next` will
+    no longer work.
+
+    Stolen from FLask-SQLAlchemy
+    """
+
+    def __init__(self, query, page, per_page, total, items):
+        #: the unlimited query object that was used to create this
+        #: pagination object.
+        self.query = query
+        #: the current page number (1 indexed)
+        self.page = page
+        #: the number of items to be displayed on a page.
+        self.per_page = per_page
+        #: the total number of items matching the query
+        self.total = total
+        #: the items for the current page
+        self.items = items
+
+    @property
+    def pages(self):
+        """The total number of pages"""
+        if self.per_page == 0 or self.total is None:
+            pages = 0
+        else:
+            pages = int(ceil(self.total / float(self.per_page)))
+        return pages
+
+    def prev(self, error_out=False):
+        """Returns a :class:`Pagination` object for the previous page."""
+        assert (
+            self.query is not None
+        ), "a query object is required for this method to work"
+        return self.query.paginate(self.page - 1, self.per_page, error_out)
+
+    @property
+    def prev_num(self):
+        """Number of the previous page."""
+        if not self.has_prev:
+            return None
+        return self.page - 1
+
+    @property
+    def has_prev(self):
+        """True if a previous page exists"""
+        return self.page > 1
+
+    def next(self, error_out=False):
+        """Returns a :class:`Pagination` object for the next page."""
+        assert (
+            self.query is not None
+        ), "a query object is required for this method to work"
+        return self.query.paginate(self.page + 1, self.per_page, error_out)
+
+    @property
+    def has_next(self):
+        """True if a next page exists."""
+        return self.page < self.pages
+
+    @property
+    def next_num(self):
+        """Number of the next page"""
+        if not self.has_next:
+            return None
+        return self.page + 1
 
 
 class CustomQuery(Query):

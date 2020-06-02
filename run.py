@@ -1,5 +1,3 @@
-from gevent import monkey; monkey.patch_all()
-import werkzeug.serving
 import logging.config
 import logging
 import yaml
@@ -18,16 +16,17 @@ def setup_logging():
     else:
         logging.basicConfig(level=logging.INFO)
 
-@werkzeug.serving.run_with_reloader
 def main():
     setup_logging()
 
     # load tokens
     with open('config/tokens.yaml', 'r') as tokenfile:
-        globals()['TOKENS'] = yaml.load(tokenfile, Loader=yaml.FullLoader)
+        tokens = yaml.load(tokenfile, Loader=yaml.FullLoader)
+        # make tokens global cuz I'm lazy.
+        globals()['TOKENS'] = tokens
 
-    client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=TOKENS)
-    client.run(TOKENS['discord'])
+    client = MissCleo(command_prefix="!", description="Miss Cleo", tokens=tokens)
+    client.run(tokens['discord'])
 
 if __name__ == "__main__":
     main()
