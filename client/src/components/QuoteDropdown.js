@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { IconButton } from '../Button';
+import { IconButton } from './Button';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import styled from 'styled-components';
 import Copy from 'copy-to-clipboard';
 import { darken } from 'polished';
-
 import {
   Menu,
   MenuItem

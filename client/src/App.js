@@ -4,6 +4,7 @@ import {
   Switch,
   Route
 } from "react-router-dom";
+import ContextRoute from './components/ContextRoute';
 
 import { AuthProvider } from './context/Auth';
 import { Login, Logout } from './pages/Login';
@@ -17,6 +18,7 @@ import { theme, GlobalStyle } from './theme';
 
 import {ResponsesPage} from './pages/Responses';
 import ReactionsPage from './pages/Reactions';
+import { QuotesProvider } from './context/Quote'
 
 function App() {
 
@@ -32,7 +34,7 @@ function App() {
                 <Navbar />
 
                 <Switch>
-                  <Route path={`/quotes/:guildId?/:userId?`} component={QuotePage} />
+                  <ContextRoute path={`/quotes/:guildId?/:userId?`} provider={QuotesProvider} component={QuotePage} />
                   <Route path={'/commands'} component={CommandsPage} />
                   <Route path={'/responses'} component={ResponsesPage} />
                   <Route path={'/reactions'} component={ReactionsPage} />
