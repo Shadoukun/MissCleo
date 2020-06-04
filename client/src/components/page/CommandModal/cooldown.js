@@ -164,6 +164,8 @@ export const CooldownControl = ({ form, setForm, ...props }) => {
 
       {form.cooldown &&
         <Box pl={1} pr={1}>
+        <CooldownFormControl>
+
             <Typography style={{ marginRight: "auto" }}>Duration:</Typography>
             <CooldownDurationSelect
               duration={form.cooldownDuration}
@@ -171,6 +173,7 @@ export const CooldownControl = ({ form, setForm, ...props }) => {
               type={form.multiplier}
               setType={(e) => { setForm({ ...form, multiplier: e.target.value }) }}
             />
+        </CooldownFormControl>
 
           <CooldownFormControl>
             <Typography style={{ marginRight: "auto" }}>Cooldown Type:</Typography>
