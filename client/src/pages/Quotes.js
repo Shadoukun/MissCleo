@@ -1,28 +1,20 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Typography, Box } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-
 import { QuotesContext } from '../context/Quote';
 import { GuildList, MemberList } from '../components/QuoteSidebarList';
 import QuoteList from '../components/QuoteList';
 import { QuoteEntry } from '../components/QuoteEntry';
-import { Search, SearchIconWrapper, SearchInput } from '../components/QuoteSearch'
+import QuoteSearch from '../components/QuoteSearch'
 import ReactPaginate from 'react-paginate';
 import ResponsiveDrawer from '../components/Drawer'
 
 
 const QuotePage = (props) => {
   const context = useContext(QuotesContext);
-  const [searchContent, setSearchContent] = useState("");
 
   const handlePageClick = (data) => {
     context.setCurrentPage(data.selected + 1)
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-  }
-
-  const searchSubmit = (event) => {
-    event.preventDefault();
-    context.setSearchString(searchContent)
   }
 
   return (
@@ -42,8 +34,6 @@ const QuotePage = (props) => {
         }
       </ResponsiveDrawer>
 
-      {/* <QuoteList /> */}
-
       <QuoteList>
         <Box className="quote-list-header" display="flex">
 
@@ -54,18 +44,12 @@ const QuotePage = (props) => {
           }
 
           {context.guild &&
-          <Search onSubmit={searchSubmit} border={1} >
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <SearchInput
-              placeholder="Search…"
-              inputProps={{ 'aria-label': 'search' }}
-              value={searchContent}
-              onChange={e => { setSearchContent(e.target.value) }}
+            <QuoteSearch
+              searchString={context.searchString}
+              setSearchString={context.setsearchString}
             />
-          </Search>
           }
+
         </Box>
 
         {context.quoteList.map((quote, i) =>

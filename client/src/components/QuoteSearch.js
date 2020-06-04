@@ -1,9 +1,11 @@
+import React, { useState } from 'react';
 import { fade } from '@material-ui/core/styles';
 import InputBase from '@material-ui/core/InputBase';
 import styled from 'styled-components';
+import SearchIcon from '@material-ui/icons/Search';
 
 
-export const Search = styled.form`
+const Search = styled.form`
 ${({ theme }) => `
   position: relative;
   border-radius: ${theme.shape.borderRadius}px;
@@ -26,7 +28,7 @@ ${({ theme }) => `
   }
 `}`
 
-export const SearchIconWrapper = styled.div`
+const SearchIconWrapper = styled.div`
 ${({ theme }) => `
   padding: ${theme.spacing(0, 2, 0, 1)};
   height: 100%;
@@ -39,7 +41,7 @@ ${({ theme }) => `
 `}`
 
 
-export const SearchInput = styled(InputBase)`
+const SearchInput = styled(InputBase)`
 ${({ theme }) => `
   background-color: ${fade(theme.palette.common.white, 0.1)};
   width: 100%;
@@ -72,3 +74,29 @@ ${({ theme }) => `
     }
   }
 `}`
+
+
+const QuoteSearch = ({ searchString, setSearchString }) => {
+  const [searchContent, setSearchContent] = useState("");
+
+  const searchSubmit = (event) => {
+    event.preventDefault();
+    setSearchString(searchContent)
+  }
+
+  return (
+    <Search onSubmit={searchSubmit} border={1} >
+      <SearchIconWrapper>
+        <SearchIcon />
+      </SearchIconWrapper>
+      <SearchInput
+        placeholder="Search…"
+        inputProps={{ 'aria-label': 'search' }}
+        value={searchContent}
+        onChange={e => { setSearchContent(e.target.value) }}
+      />
+    </Search>
+  )
+}
+
+export default QuoteSearch
