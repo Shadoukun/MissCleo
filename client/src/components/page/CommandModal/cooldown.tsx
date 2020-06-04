@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Dispatch, ChangeEvent } from 'react';
 
 import { Input } from '../../Form'
 import { Switch, Box, Select, MenuItem, Typography } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import styled from 'styled-components';
-
+import { ToggleProps } from './controls'
+import { EntryFormData } from './index'
 
 const CooldownFormControl = styled(FormControl)`
   display: flex;
@@ -12,16 +13,16 @@ const CooldownFormControl = styled(FormControl)`
   width: 100%;
 `
 
-const CooldownSelect = styled(Select)`
+const CooldownSelect = styled(Select) <any>`
   flex-grow: 1;
   text-align: center;
 `
 
-const CooldownMenuItem = styled(MenuItem)`
+const CooldownMenuItem = styled(MenuItem) <any>`
   justify-content: center;
 `
 
-const CooldownDurationInput = styled(Input)`
+const CooldownDurationInput = styled(Input) <any>`
 ${({ theme }) => `
   width: 8ch;
   margin-right: ${theme.spacing(1)}px;
@@ -37,7 +38,8 @@ const CooldownBox = styled(Box)`
   width: 30%;
 `
 
-export const CooldownToggle = (props) => (
+
+export const CooldownToggle = (props: ToggleProps) => (
   <Box display="flex">
     <Typography style={{ marginRight: "auto" }}>Cooldown</Typography>
     <Switch
@@ -50,7 +52,54 @@ export const CooldownToggle = (props) => (
 )
 
 
-export const CooldownDurationSelect = ({ duration, setDuration, type, setType, ...props }) => {
+type CooldownControlProps = {
+  form: EntryFormData
+  setForm: Dispatch<any>
+}
+
+export const CooldownControl = ({ form, setForm, ...props }: CooldownControlProps) => {
+  return (
+    <>
+      <CooldownToggle
+        toggle={form.cooldown}
+        onToggle={() => { setForm({ ...form, cooldown: !form.cooldown }) }}
+      />
+
+      {form.cooldown &&
+        <Box pl={1} pr={1}>
+          <CooldownFormControl>
+
+            <Typography style={{ marginRight: "auto" }}>Duration:</Typography>
+            <CooldownDurationSelect
+              duration={form.cooldownDuration}
+              setDuration={(v) => { setForm({ ...form, cooldownDuration: v }) }}
+              type={form.multiplier}
+              setType={(e: ChangeEvent<HTMLSelectElement>) => { setForm({ ...form, multiplier: Number(e.target.value) }) }}
+            />
+          </CooldownFormControl>
+
+          <CooldownFormControl>
+            <Typography style={{ marginRight: "auto" }}>Cooldown Type:</Typography>
+            <CooldownTypeSelect
+              type={form.cooldownType}
+              setType={(e: ChangeEvent<HTMLSelectElement>) => { setForm({ ...form, cooldownType: Number(e.target.value) }) }}
+            />
+          </CooldownFormControl>
+        </Box>
+      }
+    </>
+  )
+}
+
+
+type DurationSelectProps = {
+  duration: number
+  setDuration: Dispatch<number>
+  type: number
+  setType: (e: ChangeEvent<HTMLSelectElement>) => void
+}
+
+export const CooldownDurationSelect = ({ duration, setDuration, type, setType, ...props }: DurationSelectProps) => {
   const [displayDuration, setDisplayDuration] = useState(duration / type || 0)
   const [error, setError] = useState(false)
 
@@ -79,11 +128,11 @@ export const CooldownDurationSelect = ({ duration, setDuration, type, setType, .
     setDuration(displayDuration * type)
   }, [displayDuration, type])
 
-  const isValid = (value) => value.match(/^(\d{1,2}\.?(\d{1,2})?|)$/) ? true : false
+  const isValid = (value: string) => value.match(/^(\d{1,2}\.?(\d{1,2})?|)$/) ? true : false
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (isValid(event.target.value)) {
-      setDisplayDuration(event.target.value)
+      setDisplayDuration(Number(event.target.value))
       setError(false)
     } else {
       setError(true)
@@ -118,8 +167,18 @@ export const CooldownDurationSelect = ({ duration, setDuration, type, setType, .
   )
 }
 
-export const CooldownTypeSelect = (props) => {
+
+type TypeSelectProps = {
+  type: number
+  setType: (e: ChangeEvent<HTMLSelectElement>) => void
+}
+
+export const CooldownTypeSelect = (props: TypeSelectProps) => {
   // list of cooldown types mapped to BucketType values
+  type TypeMapProps = {
+    value: number
+    label: string
+  }
   const cooldownTypeMap = [
     {
       value: 2,
@@ -139,7 +198,7 @@ export const CooldownTypeSelect = (props) => {
         value={props.type}
         onChange={props.setType}
       >
-        {cooldownTypeMap.map((ctype, i) =>
+        {cooldownTypeMap.map((ctype: any, i) =>
           <CooldownMenuItem
             ListItemClasses="cooldownListItem"
             key={i}
@@ -150,41 +209,6 @@ export const CooldownTypeSelect = (props) => {
         )}
       </CooldownSelect>
     </CooldownBox>
-  )
-}
-
-
-export const CooldownControl = ({ form, setForm, ...props }) => {
-  return (
-    <>
-      <CooldownToggle
-        toggle={form.cooldown}
-        onToggle={() => { setForm({ ...form, cooldown: !form.cooldown }) }}
-      />
-
-      {form.cooldown &&
-        <Box pl={1} pr={1}>
-        <CooldownFormControl>
-
-            <Typography style={{ marginRight: "auto" }}>Duration:</Typography>
-            <CooldownDurationSelect
-              duration={form.cooldownDuration}
-              setDuration={(v) => { setForm({ ...form, cooldownDuration: v }) }}
-              type={form.multiplier}
-              setType={(e) => { setForm({ ...form, multiplier: e.target.value }) }}
-            />
-        </CooldownFormControl>
-
-          <CooldownFormControl>
-            <Typography style={{ marginRight: "auto" }}>Cooldown Type:</Typography>
-            <CooldownTypeSelect
-              type={form.cooldownType}
-              setType={(e) => { setForm({ ...form, cooldownType: e.target.value }) }}
-            />
-          </CooldownFormControl>
-        </Box>
-      }
-    </>
   )
 }
 

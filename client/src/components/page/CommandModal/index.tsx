@@ -1,7 +1,6 @@
 
 
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, ChangeEvent, FormEvent, MouseEvent } from 'react';
 import { Button } from "../../Button"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -14,11 +13,71 @@ import { Box, Divider } from '@material-ui/core';
 import * as controls from './controls'
 import CooldownControl from './cooldown'
 
+// base type for retrieved Command/Response/Reaction entries.
+type EntryBase = {
+  id: string
+  name: string
+  description: string
+  use_regex: boolean
+  multi_response: boolean
+  cooldown: boolean
+  cooldown_bucket: number
+  cooldown_per: number
+  cooldown_multiplier: number
+}
+
+interface CommandEntry extends EntryBase {
+  command: string
+  response: string
+
+  trigger: never
+  reaction: never
+}
+
+interface ResponseEntry extends EntryBase {
+  trigger: string
+  response: string
+
+  command: never
+  reaction: never
+}
+
+interface ReactionEntry extends EntryBase {
+  trigger: string
+  reaction: string
+
+  command: never
+  response: never
+}
+
+type Entry = CommandEntry | ResponseEntry | ReactionEntry
+
+export type EntryFormData = {
+  id: string
+  name: string
+  description: string
+  trigger: string
+  response: string
+  useRegex: boolean
+  multiResponse: boolean
+  cooldown: boolean
+  cooldownType: number
+  cooldownDuration: number
+  multiplier: number
+}
 
 
-const ModalHeader = ({ type, edit, name, trigger, hideModal }) => {
+type ModalHeaderProps = {
+  type: string,
+  edit: boolean,
+  name: string
+  trigger: string
+  hideModal: () => void
+}
 
-  let title
+const ModalHeader = ({ type, edit, name, trigger, hideModal }: ModalHeaderProps) => {
+
+  let title: string
 
   if (type === "Command") {
     name = `!${trigger}`
@@ -43,29 +102,30 @@ const ModalHeader = ({ type, edit, name, trigger, hideModal }) => {
 }
 
 
-const ModalFooter = ({ edit, handleRemove }) => (
-  <div className="modalFooter">
-    {edit &&
-      <Button className="Remove" onClick={handleRemove}>
-        Delete
-      </Button>
-    }
-
-    <Button type="submit">Save</Button>
-  </div>
-)
-
+type CommandModalProps = {
+  type: string,
+  edit: boolean,
+  update: number,
+  entry: Entry,
+  submitURL: string,
+  removeURL: string,
+  hideName: boolean,
+  hideRegex: boolean,
+  hideMultiResponse: boolean,
+  setUpdate: React.Dispatch<any>,
+  hideModal: () => void
+}
 
 // Modal for Commands/Reactions/Responses.
-export const CommandModal = ({ update, entry, ...props }) => {
-  const [form, setForm] = useState({
+export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
+  const [form, setForm] = useState<EntryFormData>({
     id: entry.id,
     name: entry.name,
     description: entry.description,
     trigger: entry.command || entry.trigger,
     response: entry.response || entry.reaction,
-    useRegex: Boolean(entry.use_regex),
-    multiResponse: Boolean(entry.multi_response),
+    useRegex: entry.use_regex,
+    multiResponse: entry.multi_response,
     cooldown: entry.cooldown || false,
     cooldownType: entry.cooldown_bucket || 2,
     cooldownDuration: entry.cooldown_per || 0,
@@ -75,7 +135,7 @@ export const CommandModal = ({ update, entry, ...props }) => {
   const { requestconfig } = useAuth();
 
   // Handles editing/adding an entry.
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLElement>) => {
     event.preventDefault();
     backendCall.post(
       props.submitURL,
@@ -101,7 +161,7 @@ export const CommandModal = ({ update, entry, ...props }) => {
   }
 
   // Handles removing an entry.
-  const handleRemove = (event) => {
+  const handleRemove = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     backendCall.post(
       props.removeURL,
@@ -129,13 +189,13 @@ export const CommandModal = ({ update, entry, ...props }) => {
           {!props.hideName &&
             <controls.NameControl
               name={form.name}
-              onChange={e => { setForm({ ...form, name: e.target.value }) }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => { setForm({ ...form, name: e.target.value }) }}
             />}
 
           <controls.TriggerControl
             type={props.type}
             trigger={form.trigger}
-            onChange={e => { setForm({ ...form, trigger: e.target.value }) }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => { setForm({ ...form, trigger: e.target.value }) }}
           />
 
           {!props.hideRegex &&
@@ -146,7 +206,7 @@ export const CommandModal = ({ update, entry, ...props }) => {
 
           <controls.ResponseControl
             response={form.response}
-            onChange={e => { setForm({ ...form, response: e.target.value }) }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => { setForm({ ...form, response: e.target.value }) }}
           />
 
           {!props.hideMultiResponse &&
@@ -157,7 +217,7 @@ export const CommandModal = ({ update, entry, ...props }) => {
 
           <controls.DescriptionControl
             description={form.description}
-            onChange={e => { setForm({ ...form, description: e.target.value }) }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => { setForm({ ...form, description: e.target.value }) }}
           />
 
           <Box mt={2} mb={2}><Divider /></Box>
@@ -176,55 +236,22 @@ export const CommandModal = ({ update, entry, ...props }) => {
   )
 }
 
-CommandModal.defaultProps = {
-  entry: {
-    name: "",
-    description: "",
-    useRegex: false,
-    multi_response: false,
-  },
-
-  hideName: false,
-  hideRegex: false,
-  hideMultiResponse: false,
+type ModalFooterProps = {
+  edit: boolean,
+  handleRemove: (e: MouseEvent<HTMLButtonElement>) => void
 }
 
-CommandModal.propTypes = {
-  // Modal type
-  type: PropTypes.oneOf(['Command', 'Response', 'Trigger']).isRequired,
-  edit: PropTypes.bool,
+const ModalFooter = ({ edit, handleRemove }: ModalFooterProps) => (
+  <div className="modalFooter">
+    {edit &&
+      <Button className="Remove" onClick={handleRemove}>
+        Delete
+      </Button>
+    }
 
-  // entry data
-  entry: PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string,
-    description: PropTypes.string,
-    trigger: PropTypes.string,
-    command: PropTypes.string,
-    response: PropTypes.string.isRequired,
-    use_regex: PropTypes.bool,
-    multi_response: PropTypes.bool,
-    cooldown: PropTypes.bool,
-    cooldown_rate: PropTypes.number,
-    cooldown_per: PropTypes.number,
-    cooldown_bucket: PropTypes.number,
-    cooldown_multiplier: PropTypes.number
-  }).isRequired,
+    <Button type="submit">Save</Button>
+  </div>
+)
 
-  // API endpoint URLs
-  submitURL: PropTypes.string.isRequired,
-  removeURL: PropTypes.string,
-
-  // render filter props.
-  hideName: PropTypes.bool,
-  hideRegex: PropTypes.bool,
-  hideMultiResponse: PropTypes.bool,
-
-  update: PropTypes.number.isRequired.isRequired,
-  setUpdate: PropTypes.func.isRequired.isRequired,
-  hideModal: PropTypes.func.isRequired.isRequired,
-
-
-}
 
 export default CommandModal
