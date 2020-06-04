@@ -53,6 +53,7 @@ const QuotePage = (props) => {
             </Typography>
           }
 
+          {context.guild &&
           <Search onSubmit={searchSubmit} border={1} >
             <SearchIconWrapper>
               <SearchIcon />
@@ -64,6 +65,7 @@ const QuotePage = (props) => {
               onChange={e => { setSearchContent(e.target.value) }}
             />
           </Search>
+          }
         </Box>
 
         {context.quoteList.map((quote, i) =>
