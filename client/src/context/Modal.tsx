@@ -2,18 +2,32 @@ import React, { useCallback, useState } from 'react'
 import { Fade, Backdrop, StyledModal } from '../components/Modal'
 
 
-const ModalContext = React.createContext()
+type ModalContextProps = {
+  showModal: (arg0: ShowModalProps) => void;
+  hideModal: () => void;
+}
 
-export const renderBackdrop = (props) => <Backdrop {...props} />;
+type ProviderProps = {
+  children: JSX.Element[] | JSX.Element
+}
 
-const ModalProvider = (props) => {
+type ShowModalProps = {
+  content: React.ComponentClass // the component for the body of the modal.
+  contentProps: {} // props for the content component.
+  newModalProps: {} // props for the modal itself.
+}
+
+const ModalContext = React.createContext<Partial<ModalContextProps>>({});
+
+export const renderBackdrop = (props: any) => <Backdrop {...props} />;
+
+const ModalProvider = (props: ProviderProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [modalContent, setModalContent] = useState("")
+  const [modalContent, setModalContent] = useState<JSX.Element>()
   const [modalProps, setModalProps] = useState({})
 
-  const showModal = ({ content: Component, contentProps = {}, newModalProps = {} }) => {
-
-    setModalContent((() => <Component {...contentProps} />))
+  const showModal = ({ content: ContentComponent, contentProps, newModalProps}: ShowModalProps) => {
+    setModalContent((() => <ContentComponent {...contentProps} />))
     setModalProps(newModalProps)
     setIsOpen(true)
   }
