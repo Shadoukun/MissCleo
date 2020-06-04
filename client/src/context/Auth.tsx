@@ -2,20 +2,25 @@ import React from 'react';
 import { createContext, useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-
-export const AuthContext = createContext();
-
-export function useAuth() {
-  return useContext(AuthContext);
+type AuthContextProps = {
+  authToken: string | null
+  setAuthToken: React.Dispatch<string>
+  requestconfig: {}
 }
 
-export const AuthProvider = (props) => {
+type ProviderProps = {
+  children: JSX.Element[] | JSX.Element
+}
+
+export const AuthContext = createContext<Partial<AuthContextProps>>({});
+
+export const AuthProvider = (props: ProviderProps) => {
   const existingToken = localStorage.getItem("auth_token");
   const [authToken, setToken] = useState(existingToken)
   let history = useHistory();
 
 
-  const setAuthToken = (data) => {
+  const setAuthToken = (data: string) => {
     localStorage.setItem("auth_token", data);
     setToken(data);
   }
@@ -26,7 +31,7 @@ export const AuthProvider = (props) => {
       'Authorization': authToken ? `Bearer ${authToken}` : ''
 
     },
-    validateStatus: (status) => {
+    validateStatus: (status: number) => {
       switch (status) {
         case 200:
           return true
@@ -42,8 +47,12 @@ export const AuthProvider = (props) => {
     </AuthContext.Provider>
 
   )
-
 }
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
 
 
 
