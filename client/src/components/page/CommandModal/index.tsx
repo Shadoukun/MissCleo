@@ -14,7 +14,7 @@ import * as controls from './controls'
 import CooldownControl from './cooldown'
 import { useParams } from 'react-router-dom';
 
-// base type for retrieved Command/Response/Reaction entries.
+// type for retrieved Command/Response/Reaction entries.
 type Entry = {
   id: string
   name: string
@@ -32,32 +32,7 @@ type Entry = {
   cooldown_multiplier: number
 }
 
-// interface CommandEntry extends EntryBase {
-//   command: string
-//   response: string
-
-//   trigger: never
-//   reaction: never
-// }
-
-// interface ResponseEntry extends EntryBase {
-//   trigger: string
-//   response: string
-
-//   command: never
-// }
-
-// interface ReactionEntry extends EntryBase {
-//   trigger: string
-//   reaction: string
-
-//   command: never
-//   response: never
-// }
-
-// type Entry = CommandEntry | ResponseEntry | ReactionEntry
-
-
+// type for data in the Entry Form.
 export type EntryFormData = {
   id: string
   guild_id: string
