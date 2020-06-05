@@ -1,11 +1,11 @@
 import React from 'react';
-import { Button, IconButton } from './Button';
+import { Link as RouterLink, useLocation, useRouteMatch} from "react-router-dom";
 import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Button, IconButton } from './Button';
 import { useAuth } from "../context/Auth";
 import styled from 'styled-components';
 
@@ -18,7 +18,7 @@ ${({ theme }) => `
     position: relative;
     margin-bottom: 36px;
 
-  .navWrapper {
+  .nav-wrapper {
     margin-right: auto;
 
     ${theme.breakpoints.down('xs')} {
@@ -92,18 +92,18 @@ const RouterButton = (props) => {
 const Navbar = (props) => {
   const location = useLocation();
   const { authToken } = useAuth();
-
+  let { url } = useRouteMatch();
 
   return (
     <StyledAppBar className="Navbar" position="sticky" elevation={0}>
       <Toolbar>
         <NavTitle className="navTitle" type="title" color="inherit">MissCleo</NavTitle>
 
-        <Box className="navWrapper">
-          <RouterButton to="/quotes" name="Quotes" location={location} />
-          <RouterButton to="/commands" name="Commands" location={location} />
-          <RouterButton to="/responses" name="Responses" location={location} />
-          <RouterButton to="/reactions" name="Reactions" location={location} />
+        <Box className="nav-wrapper">
+          <RouterButton to={`${url}/quotes`} name="Quotes" location={location} />
+          <RouterButton to={`${url}/commands`} name="Commands" location={location} />
+          <RouterButton to={`${url}/responses`} name="Responses" location={location} />
+          <RouterButton to={`${url}/reactions`} name="Reactions" location={location} />
         </Box>
 
         <LoginBar isLoggedIn={authToken} />

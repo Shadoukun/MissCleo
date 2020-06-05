@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box } from '@material-ui/core';
 import { fade } from '@material-ui/core/styles';
@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { rgbToHex } from '../utilities';
 import { DiscordAvatar } from './Avatar';
 import { QuoteDropdown } from './QuoteDropdown';
-import {QuotesContext} from '../context/Quote';
 
 const QuoteTimestamp = styled.div`
 ${({ theme }) => `
@@ -76,13 +75,11 @@ const QuoteHeader = ({ quote }) => {
   )
 }
 
-export const QuoteEntry = ({ quote, ...props }) => {
-  const {memberList} = useContext(QuotesContext);
+export const QuoteEntry = ({ quote, memberList, ...props }) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
-
   useEffect(() => {
-    if (quote.message && memberList) {
+    if (quote.message) {
       setMessage(
         parse(toHTML(quote.message, {
           escapeHTML: false,

@@ -1,70 +1,111 @@
-import React, { useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Typography, Box } from '@material-ui/core';
-import { QuotesContext } from '../context/Quote';
-import { GuildList, MemberList } from '../components/QuoteSidebarList';
+import { MemberList } from '../components/QuoteSidebarList';
 import QuoteList from '../components/QuoteList';
 import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import ReactPaginate from 'react-paginate';
 import ResponsiveDrawer from '../components/Drawer'
+import { useParams, useLocation } from 'react-router-dom';
+import { backendCall } from '../utilities';
 
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 
 const QuotePage = (props) => {
-  const context = useContext(QuotesContext);
+  const query = useQuery();
+  const { guild } = useParams();
+  const user = query.get("user")
 
-  const handlePageClick = (data) => {
-    context.setCurrentPage(data.selected + 1)
+  const [searchString, setSearchString] = useState("");
+  const [memberList, setMemberList] = useState({});
+  const [pageCount, setPageCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [quoteList, setQuoteList] = useState([]);
+
+  const url = "/quotes"
+
+  // Set current page when guild/user changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [guild, user]);
+
+  // repopulate memberList when guildId changes.
+  useEffect(() => {
+    if (guild) {
+      backendCall.get(`/all_members?guild=${guild}`)
+        .then((result) => {
+          let data = [{}]
+          for (var key in result.data) {
+            data[result.data[key].user_id] = result.data[key]
+          }
+          setMemberList(data)
+        })
+    }
+  }, [guild])
+
+  // populate quote list.
+  useEffect(() => {
+    (async () => {
+      let params = []
+
+      if (guild) { params.push(`guild=${guild}`) }
+      if (user && !searchString) { params.push(`user=${user}`) }
+      if (searchString) { params.push(`search=${encodeURIComponent(searchString)}`) }
+      if (currentPage) { params.push(`page=${currentPage}`) }
+
+      let result = await backendCall.get(url + `?${params.join('&')}`)
+      setQuoteList(result.data.quotes)
+      setPageCount(result.data.pages)
+    })();
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-  }
+  }, [guild, user, searchString, currentPage])
 
   return (
     <>
       <ResponsiveDrawer>
-        <GuildList
-          setGuild={context.setGuild}
-          activeGuildId={context.guild}
-        />
-
-        {context.guild &&
+        {guild &&
           <MemberList
-            guildId={context.guild}
-            activeUserId={context.user}
-            setUser={context.setUser}
+            guildId={guild}
+            userId={user}
           />
         }
       </ResponsiveDrawer>
 
       <QuoteList>
         <Box className="quote-list-header" display="flex">
-
-          {context.searchString &&
+          {searchString &&
             <Typography>
-              Search: {context.searchString}
+              Search: {searchString}
             </Typography>
           }
 
-          {context.guild &&
+          {guild &&
             <QuoteSearch
-              searchString={context.searchString}
-              setSearchString={context.setsearchString}
+              searchString={searchString}
+              setSearchString={setSearchString}
             />
           }
-
         </Box>
 
-        {context.quoteList.map((quote, i) =>
-          <QuoteEntry key={i} quote={quote} />
+        {quoteList.map((quote, i) =>
+          <QuoteEntry
+            key={i}
+            quote={quote}
+            memberList={memberList}
+          />
         )}
 
-        {!!context.quoteList.length &&
+        {!!quoteList.length &&
           <ReactPaginate className="pagination"
             containerClassName="pagination"
             breakClassName="page-item"
             breakLabel={<button className="page-link">...</button>}
             previousLabel="<"
             nextLabel=">"
-            pageCount={context.pageCount}
-            forcePage={context.currentPage - 1}
+            pageCount={pageCount}
+            forcePage={currentPage - 1}
             pageClassName="page-item"
             previousClassName="page-item"
             nextClassName="page-item"
@@ -72,7 +113,7 @@ const QuotePage = (props) => {
             previousLinkClassName="page-link"
             nextLinkClassName="page-link"
             activeClassName="active"
-            onPageChange={handlePageClick}
+            onPageChange={(data) => setCurrentPage(data.selected + 1)}
           />
         }
       </QuoteList>
