@@ -314,7 +314,7 @@ class Quotes(commands.Cog):
     async def cleo(self, ctx, *args):
         """Command to post a link to a server's quote page"""
 
-        await ctx.channel.send(config.HOST_URL + "quotes/" + str(ctx.guild.id))
+        await ctx.channel.send(config.HOST_URL + f"{str(ctx.guild.id)}/quotes")
 
 
 def setup(bot):

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table, DateTime, Boolean, UniqueConstraint, JSON, Float
+from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table, DateTime, Boolean, UniqueConstraint, JSON, Float, BigInteger, Index
 from sqlalchemy.orm import relationship, backref, sessionmaker, Query
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -160,11 +160,18 @@ class CustomCommand(Base):
     """
 
     __tablename__ = "custom_commands"
+    __table_args__ = (
+        Index('ix_custom_command_unique_guild_command', 'guild_id', 'command',
+              unique=True, postgresql_where=(Column('command').isnot(None))),
+        Index('ix_custom_command_unique_guild_name', 'guild_id', 'name',
+              unique=True, postgresql_where=(Column('name').isnot(None)))
+    )
 
     id                  = Column(Integer, primary_key=True)
-    name                = Column(String, unique=True)
+    guild_id            = Column(BigInteger, ForeignKey('guilds.id'), nullable=True)
+    name                = Column(String)
     description         = Column(String)
-    command             = Column(String, unique=True)
+    command             = Column(String)
     response            = Column(String)
     multi_response      = Column(Boolean)
 
@@ -174,8 +181,10 @@ class CustomCommand(Base):
     cooldown_bucket     = Column(Integer)
     cooldown_multiplier = Column(Integer)
 
+    guild = relationship("Guild", uselist=False, lazy="joined")
 
     def __init__(self, command, response, description=None, name=None, multi_response=False, **kwargs):
+        self.guild_id = kwargs.get('guild_id')
         self.command = command
         self.response = response
         self.name = name
@@ -193,11 +202,18 @@ class CustomResponse(Base):
     """Custom Responses"""
 
     __tablename__ = "custom_responses"
+    __table_args__ = (
+        Index('ix_custom_response_guild_trigger', 'guild_id', 'trigger',
+              unique=True, postgresql_where=(Column('trigger').isnot(None))),
+        Index('ix_custom_response_unique_guild_name', 'guild_id', 'name',
+              unique=True, postgresql_where=(Column('name').isnot(None)))
+    )
 
     id                  = Column(Integer, primary_key=True)
-    name                = Column(String, unique=True)
+    guild_id            = Column(BigInteger, ForeignKey('guilds.id'), nullable=True)
+    name                = Column(String)
     description         = Column(String)
-    trigger             = Column(String, unique=True)
+    trigger             = Column(String)
     response            = Column(String)
     use_regex           = Column(Boolean)
     multi_response      = Column(Boolean)
@@ -208,8 +224,10 @@ class CustomResponse(Base):
     cooldown_bucket     = Column(Integer)
     cooldown_multiplier = Column(Integer)
 
+    guild = relationship("Guild", uselist=False, lazy="joined")
 
     def __init__(self, trigger, response, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
+        self.guild_id = kwargs.get('guild_id')
         self.trigger = trigger
         self.response = response
         self.name = name
@@ -229,11 +247,18 @@ class CustomReaction(Base):
     """Custom Reactions"""
 
     __tablename__ = "custom_reactions"
+    __table_args__ = (
+        Index('ix_custom_reaction_unique_guild_trigger', 'guild_id', 'trigger',
+              unique=True, postgresql_where=(Column('trigger').isnot(None))),
+        Index('ix_custom_reaction_unique_guild_name', 'guild_id', 'name',
+              unique=True, postgresql_where=(Column('name').isnot(None)))
+    )
 
     id                  = Column(Integer, primary_key=True)
-    name                = Column(String, unique=True)
+    guild_id            = Column(BigInteger, ForeignKey('guilds.id'), nullable=True)
+    name                = Column(String)
     description         = Column(String)
-    trigger             = Column(String, unique=True)
+    trigger             = Column(String)
     reaction            = Column(String)
     use_regex           = Column(Boolean)
     multi_response      = Column(Boolean)
@@ -244,7 +269,10 @@ class CustomReaction(Base):
     cooldown_bucket     = Column(Integer)
     cooldown_multiplier = Column(Integer)
 
+    guild = relationship("Guild", uselist=False, lazy="joined")
+
     def __init__(self, trigger, reaction, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
+        self.guild_id = kwargs.get('guild_id')
         self.trigger = trigger
         self.reaction = reaction
         self.name = name

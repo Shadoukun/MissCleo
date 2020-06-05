@@ -7,18 +7,21 @@ import logging
 import itertools
 import traceback
 from pathlib import Path
+import discord
 from discord.ext import commands
+from discord.ext.commands import Command
+from discord.ext.commands.view import StringView
+from discord.ext.commands.context import Context
 
 from . import utils
 from cleo.api import CleoAPI
 from .tasks import update_all_guild_members, add_update_all_guilds
 from cleo.db import Base, engine, session
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-if not os.path.isfile('database.db'):
-    Base.metadata.create_all(engine)
 
 class CustomHelpCommand(commands.DefaultHelpCommand):
 
@@ -79,20 +82,131 @@ class MissCleo(commands.Bot):
         # idk why I need to do this
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        super().__init__(*args, loop=loop, **kwargs)
 
-        self.session = aiohttp.ClientSession(loop=self.loop)
-        self.db = session
+        super().__init__(*args, loop=loop, **kwargs)
         self.tokens = kwargs.get('tokens')
+        self.db = session
+        self.session = aiohttp.ClientSession(loop=self.loop)
 
         # start REST api.
         self.api = CleoAPI()
         serv = self.loop.create_server(self.api.handler, '127.0.0.1', 10000)
         self.loop.run_until_complete(serv)
 
-        self.help_command = CustomHelpCommand()
+        # Dict Custom Commands added from the web client.
+        # key: guild_id
+        # value: list of Command objects
+        self.custom_commands = {}
+
         self.load_cogs()
+        self.help_command = CustomHelpCommand()
         self.loop.create_task(add_update_all_guilds(self))
+
+    async def get_context(self, message, *, cls=Context):
+        r"""|coro|
+
+        standard get_context overriden to include a check for custom_commands.
+        """
+
+        view = StringView(message.content)
+        ctx = cls(prefix=None, view=view, bot=self, message=message)
+
+        if self._skip_check(message.author.id, self.user.id):
+            return ctx
+
+        prefix = await self.get_prefix(message)
+        invoked_prefix = prefix
+
+        if isinstance(prefix, str):
+            if not view.skip_string(prefix):
+                return ctx
+        else:
+            try:
+                # if the context class' __init__ consumes something from the view this
+                # will be wrong.  That seems unreasonable though.
+                if message.content.startswith(tuple(prefix)):
+                    invoked_prefix = discord.utils.find(
+                        view.skip_string, prefix)
+                else:
+                    return ctx
+
+            except TypeError:
+                if not isinstance(prefix, list):
+                    raise TypeError("get_prefix must return either a string or a list of string, "
+                                    "not {}".format(prefix.__class__.__name__))
+
+                # It's possible a bad command_prefix got us here.
+                for value in prefix:
+                    if not isinstance(value, str):
+                        raise TypeError("Iterable command_prefix or list returned from get_prefix must "
+                                        "contain only strings, not {}".format(value.__class__.__name__))
+
+                # Getting here shouldn't happen
+                raise
+
+        invoker = view.get_word()
+        ctx.invoked_with = invoker
+        ctx.prefix = invoked_prefix
+        ctx.command = self.all_commands.get(invoker)
+
+        # Added Custom Command Check
+        if not ctx.command:
+            try:
+                ctx.command = self.custom_commands[ctx.guild.id].get(invoker)
+
+            # guild isn't in the list. Shouldn't ever happen
+            except KeyError:
+                pass
+
+        return ctx
+
+
+    def add_custom_command(self, command, guild_id):
+        """Adds a :class:`.Command` or its subclasses into the internal list
+        of CUSTOM commands
+
+        Parameters
+        -----------
+        command: :class:`Command`
+            The command to add.
+
+        guild_id: :class:`int`
+            the guild id the command belongs to.
+
+        Raises
+        -------
+        :exc:`.ClientException`
+            If the command is already registered for the guild specified.
+
+        `TypeError`
+            If the command passed is not a subclass of :class:`.Command`.
+        """
+
+        if not isinstance(command, Command):
+            raise TypeError('The command passed must be a subclass of Command')
+
+        if isinstance(self, Command):
+            command.parent = self
+
+        # add guild to custom_commands list if it doesn't already exist.
+        if guild_id not in self.custom_commands:
+            self.custom_commands[guild_id] = {}
+
+        # If custom command is already in all_commands OR custom_commands[guild_id]
+        if command.name in self.all_commands or command.name in self.custom_commands[guild_id]:
+            raise discord.ClientException(
+                'Command {0.name} is already registered.'.format(command))
+
+
+        self.custom_commands[guild_id][command.name] = command
+
+        for alias in command.aliases:
+            # If alias is already in all_commands OR custom_commands[guild_id]
+            if alias in self.all_commands or alias in self.custom_commands[guild_id]:
+                raise discord.ClientException(
+                    'The alias {} is already an existing command or alias.'.format(alias))
+            self.custom_commands[guild_id][alias] = command
+
 
     async def on_ready(self):
         # database background tasks
@@ -141,7 +255,7 @@ class MissCleo(commands.Bot):
             print(f'{error.original.__class__.__name__}: {error.original}', file=sys.stderr)
 
     def load_cogs(self):
-        """Load cogs from cogs folder."""
+        """Load cogs from files in cogs folder."""
 
         logger.info("Loading Cogs...")
         cog_path = Path('cleo/cogs').glob('*.py')

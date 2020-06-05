@@ -16,6 +16,7 @@ export const ResponseListHeader = ({ update, setUpdate }) => {
       contentProps: {
         type: "Response",
         edit: false,
+        entry: {},
         submitURL: "/add_response",
         hideModal: hideModal,
         update: update,

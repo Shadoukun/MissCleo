@@ -12,12 +12,18 @@ import { Box, Divider } from '@material-ui/core';
 
 import * as controls from './controls'
 import CooldownControl from './cooldown'
+import { useParams } from 'react-router-dom';
 
 // base type for retrieved Command/Response/Reaction entries.
-type EntryBase = {
+type Entry = {
   id: string
   name: string
+  guild_id: string
   description: string
+  command: string
+  trigger: string
+  response: string
+  reaction: never
   use_regex: boolean
   multi_response: boolean
   cooldown: boolean
@@ -26,34 +32,35 @@ type EntryBase = {
   cooldown_multiplier: number
 }
 
-interface CommandEntry extends EntryBase {
-  command: string
-  response: string
+// interface CommandEntry extends EntryBase {
+//   command: string
+//   response: string
 
-  trigger: never
-  reaction: never
-}
+//   trigger: never
+//   reaction: never
+// }
 
-interface ResponseEntry extends EntryBase {
-  trigger: string
-  response: string
+// interface ResponseEntry extends EntryBase {
+//   trigger: string
+//   response: string
 
-  command: never
-  reaction: never
-}
+//   command: never
+// }
 
-interface ReactionEntry extends EntryBase {
-  trigger: string
-  reaction: string
+// interface ReactionEntry extends EntryBase {
+//   trigger: string
+//   reaction: string
 
-  command: never
-  response: never
-}
+//   command: never
+//   response: never
+// }
 
-type Entry = CommandEntry | ResponseEntry | ReactionEntry
+// type Entry = CommandEntry | ResponseEntry | ReactionEntry
+
 
 export type EntryFormData = {
   id: string
+  guild_id: string
   name: string
   description: string
   trigger: string
@@ -66,6 +73,20 @@ export type EntryFormData = {
   multiplier: number
 }
 
+const EntryFormDefault = {
+  id: null,
+  name: null,
+  guild_id: null,
+  description: null,
+  trigger: null,
+  response: null,
+  useRegex: false,
+  multiResponse: false,
+  cooldown: false,
+  cooldownType: 2,
+  cooldownDuration: 0,
+  multiplier: 1,
+}
 
 type ModalHeaderProps = {
   type: string,
@@ -118,8 +139,11 @@ type CommandModalProps = {
 
 // Modal for Commands/Reactions/Responses.
 export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
+  const { guild } = useParams();
   const [form, setForm] = useState<EntryFormData>({
+    ...EntryFormDefault,
     id: entry.id,
+    guild_id: entry.guild_id || guild,
     name: entry.name,
     description: entry.description,
     trigger: entry.command || entry.trigger,
@@ -141,6 +165,7 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
       props.submitURL,
       {
         id: form.id,
+        guild_id: form.guild_id,
         name: form.name,
         description: form.description,
         trigger: form.trigger,

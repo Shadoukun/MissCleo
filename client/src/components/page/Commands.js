@@ -85,6 +85,7 @@ export const CommandListHeader = ({ update, setUpdate }) => {
       contentProps: {
         type: "Command",
         edit: false,
+        entry: {},
         submitURL: "/add_command",
         hideModal: hideModal,
         update: update,

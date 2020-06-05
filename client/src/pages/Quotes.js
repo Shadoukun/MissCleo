@@ -29,6 +29,7 @@ const QuotePage = (props) => {
   // Set current page when guild/user changes
   useEffect(() => {
     setCurrentPage(1)
+    setSearchString("")
   }, [guild, user]);
 
   // repopulate memberList when guildId changes.

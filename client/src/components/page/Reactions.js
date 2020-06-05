@@ -14,6 +14,7 @@ export const ReactionListHeader = ({ update, setUpdate }) => {
       contentProps: {
         type: "Reaction",
         edit: false,
+        entry: {},
         submitURL: "/add_reaction",
         hideModal: hideModal,
         update: update,

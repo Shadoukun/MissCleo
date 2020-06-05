@@ -20,6 +20,7 @@ class ResponseData:
     def __init__(self, response):
         self._response = response
         self.id = response.id
+        self.guild_id = response.guild_id
         self.trigger = None
         self.responses = None
         self.useRegex = response.use_regex
@@ -80,6 +81,7 @@ class ReactionData:
     def __init__(self, reaction, custom_emojis):
         self._reaction = reaction
         self.id = reaction.id
+        self.guild_id = reaction.guild_id
         self.trigger = None
         self.reactions = None
         self.useRegex = reaction.use_regex
@@ -155,39 +157,44 @@ class CustomCommands(commands.Cog):
         """
         Add command/reaction/response routes to REST API
 
-        Routes are added here as callbacks so that API can update the bot.
+        Routes are added here as callbacks so that API can access bot attributes.
         """
 
-        self.bot.api.private_routes['get_commands'] = self.api_get_commands
-        self.bot.api.private_routes['add_command'] = self.api_add_command
-        self.bot.api.private_routes['edit_command'] = self.api_edit_command
-        self.bot.api.private_routes['remove_command'] = self.api_remove_command
+        routes = {
+            'get_commands':    self.api_get_commands,
+            'add_command' :    self.api_add_command,
+            'edit_command':    self.api_edit_command,
+            'remove_command':  self.api_remove_command,
 
-        self.bot.api.private_routes['get_responses'] = self.api_get_responses
-        self.bot.api.private_routes['add_response'] = self.api_add_response
-        self.bot.api.private_routes['edit_response'] = self.api_edit_response
-        self.bot.api.private_routes['remove_response'] = self.api_remove_response
+            'get_responses':   self.api_get_responses,
+            'add_response':    self.api_add_response,
+            'edit_response':   self.api_edit_response,
+            'remove_response': self.api_remove_response,
 
-        self.bot.api.private_routes['get_reactions'] = self.api_get_reactions
-        self.bot.api.private_routes['add_reaction'] = self.api_add_reaction
-        self.bot.api.private_routes['edit_reaction'] = self.api_edit_reaction
-        self.bot.api.private_routes['remove_reaction'] = self.api_remove_reaction
+            'get_reactions':   self.api_get_reactions,
+            'add_reaction':    self.api_add_reaction,
+            'edit_reaction':   self.api_edit_reaction,
+            'remove_reaction': self.api_remove_reaction,
+        }
+
+        self.bot.api.private_routes.update(routes)
 
     @commands.Cog.listener()
     async def on_ready(self):
         logger.debug("adding commands, responses, reactions")
 
-        await self.add_custom_commands()
-        await self.add_custom_responses()
-        await self.add_custom_reactions()
+        await self.load_custom_commands()
+        await self.load_custom_responses()
+        await self.load_custom_reactions()
 
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
             return
 
-        await self.process_responses(message)
-        await self.process_reactions(message)
+        ctx = await self.bot.get_context(message)
+        await self.process_responses(ctx, message)
+        await self.process_reactions(ctx, message)
 
     @staticmethod
     async def make_command(command):
@@ -215,25 +222,61 @@ class CustomCommands(commands.Cog):
         return cmd
 
 
-    async def process_responses(self, message):
+    def add_response(self, response):
+        # sqlalchemy seems to not refresh consistently.
+        self.db.refresh(response)
+        response = ResponseData(response)
+
+        response_list = self.responses.get(response.guild_id, None)
+        if not response_list:
+            self.responses[response.guild_id] = {}
+
+        try:
+            self.responses[response.guild_id][response.id] = response
+        except:
+            logger.debug(f"Failed to add response: {response.id} - {response.trigger}")
+
+    def add_reaction(self, reaction):
+        # sqlalchemy seems to not refresh consistently
+        self.db.refresh(reaction)
+        reaction = ReactionData(reaction, self.bot.emojis)
+
+        reaction_list = self.reactions.get(reaction.guild_id, None)
+        if not reaction_list:
+            self.reactions[reaction.guild_id] = {}
+
+        try:
+            self.reactions[reaction.guild_id][reaction.id] = reaction
+        except:
+            logger.debug(f"Failed to add response: {reaction.id} - {reaction.trigger}")
+
+
+    async def process_responses(self, ctx, message):
         """
         Check message for triggers from self.responses.
         Adds responses if found.
         """
         logger.debug("processing responses")
 
+        response_list = self.responses.get(ctx.guild.id)
+
+        if not response_list:
+            return
+
         response = None
         channel = message.channel
-        msg = message.content.lower()
+        message_lower = message.content.lower()
 
         # check for trigger in message
-        for _, r in self.responses.items():
+        for _, r in response_list.items():
+            # if useRegex, trigger is a regex expression
             if r.useRegex:
-                if r.trigger.search(msg):
+                if r.trigger.search(message_lower):
                     response = r
                     break
+            # Otherwise its a regular string
             else:
-                if r.trigger in msg:
+                if r.trigger in message_lower:
                     response = r
                     break
 
@@ -257,30 +300,38 @@ class CustomCommands(commands.Cog):
 
             await channel.send(resp)
 
-    async def process_reactions(self, message):
+    async def process_reactions(self, ctx, message):
         """
         Check message for triggers from self.reactions.
         Add all matching reactions to message.
         """
         logger.debug("processing reactions")
 
-        matched = []
-        msg = message.content.lower()
+        reaction_list = self.reactions.get(ctx.guild.id)
+
+        if not reaction_list:
+            return
+
+
+        matched_reactions = []
+        message_lower = message.content.lower()
 
         # check for trigger. in message.
         # append to list of matching reactions
-        for _, r in self.reactions.items():
+        for _, r in reaction_list.items():
+            # if useRegex, trigger is a regex expression
             if r.useRegex:
-                if r.trigger.search(msg):
-                    matched.append(r)
+                if r.trigger.search(message_lower):
+                    matched_reactions.append(r)
+            # Otherwise its a regular string
             else:
-                if r.trigger in msg:
-                    matched.append(r)
+                if r.trigger in message_lower:
+                    matched_reactions.append(r)
 
         # Iterate and add matching reactions to message.
-        if matched:
+        if matched_reactions:
             # list of matching entries
-            for m in matched:
+            for m in matched_reactions:
                 # Check/Set cooldown. pass if on cooldown
                 # I have no idea how this works.
                 try:
@@ -296,57 +347,58 @@ class CustomCommands(commands.Cog):
                     except:
                         logger.error("EmojiError")
 
-
-    async def add_custom_commands(self):
-        """Adds custom commands from the database to the bot"""
+    async def load_custom_commands(self):
+        """Loads custom commands from the database to the bot"""
 
         cmds = self.db.query(CustomCommand).all()
+        bot_commands = [c.name for c in self.bot.commands]
+
         for c in cmds:
             # check if a command already exists before trying to re-add it.
-            if c.command in [c.name for c in self.bot.commands]:
+            if c.command in bot_commands:
                 self.bot.remove_command(c.command)
 
             cmd = await self.make_command(c)
-            self.bot.add_command(cmd)
+            self.bot.add_custom_command(cmd, c.guild_id)
 
             # if commands cog is enabled, add command to auto-enabled commands.
             if c.command not in self.bot.auto_enable:
                 self.bot.auto_enable.append(c.command)
 
 
-    async def add_custom_responses(self):
-        """Adds custom responses from the database to the bot"""
+    async def load_custom_responses(self):
+        """Loads custom responses from the database to the bot"""
 
         responses = self.db.query(CustomResponse).all()
         for r in responses:
-            # sqlalchemy seems to not refresh consistently.
-            self.db.refresh(r)
-            response = ResponseData(r)
-            self.responses[response.id] = response
+            self.add_response(r)
 
-
-    async def add_custom_reactions(self):
-        """Adds custom reactions to the bot"""
+    async def load_custom_reactions(self):
+        """Loads custom reactions to the bot"""
 
         reactions = self.db.query(CustomReaction).all()
         for r in reactions:
-            # sqlalchemy seems to not refresh consistently
-            self.db.refresh(r)
-            reaction = ReactionData(r, self.bot.emojis)
-            self.reactions[reaction.id] = reaction
+            self.add_reaction(r)
 
 
     ## API CALLBACKS ##
 
-
     # Commands
 
     async def api_get_commands(self, request):
-        """API callback for getting Commands"""
+        """
+        API callback for getting Commands
+
+        Arguments:
+            'request': a request from web client. requires a 'guild' query parameter.
+        """
 
         logger.debug("api_get_commands")
 
+        guild_id = request.rel_url.query.get('guild', None)
+
         cmds = self.db.query(CustomCommand) \
+                        .filter(CustomCommand.guild_id == guild_id) \
                         .order_by(func.lower(CustomCommand.command)) \
                         .all()
 
@@ -445,11 +497,19 @@ class CustomCommands(commands.Cog):
     # Responses
 
     async def api_get_responses(self, request):
-        """API callback for getting Responses"""
+        """
+        API callback for getting Responses
+
+        Arguments:
+            `request`: a request from the web client. requires a `guild` query parameter.
+        """
 
         logger.debug("api_get_response")
 
+        guild_id = request.rel_url.query.get('guild', None)
+
         responses = self.db.query(CustomResponse) \
+            .filter(CustomResponse.guild_id == guild_id) \
             .order_by(func.lower(CustomResponse.trigger)) \
             .order_by(func.lower(CustomResponse.name)).all()
 
@@ -468,7 +528,12 @@ class CustomCommands(commands.Cog):
         self.db.refresh(response)
 
         r = ResponseData(response)
-        self.responses[response.id] = r
+
+        response_list = self.reactions.get(response.guild_id, None)
+        if not response_list:
+            self.reactions[reaction.guild_id] = {}
+
+        self.responses[response.guild_id][response.id] = r
 
         return web.Response(status=200)
 
@@ -505,12 +570,17 @@ class CustomCommands(commands.Cog):
         self.db.refresh(response)
 
         r = ResponseData(response)
-        self.responses[response.id] = r
+        self.responses[response.guild_id][response.id] = r
 
         return web.Response(status=200)
 
     async def api_remove_response(self, request):
-        """API callback for removing a Response"""
+        """
+        API callback for removing a Response
+
+        Arguments:
+            'request': a request from web client. requires a 'guild' query parameter.
+        """
 
         logger.debug("api_remove_response")
 
@@ -519,7 +589,7 @@ class CustomCommands(commands.Cog):
         response = query.first()
 
         # delete from response list and database.
-        del self.responses[response.id]
+        del self.responses[response.guild_id][response.id]
         query.delete()
         self.db.commit()
 
@@ -532,7 +602,10 @@ class CustomCommands(commands.Cog):
 
         logger.debug("api_get_reactions")
 
+        guild_id = request.rel_url.query.get('guild', None)
+
         reactions = self.db.query(CustomReaction) \
+            .filter(CustomReaction.guild_id == guild_id) \
             .order_by(func.lower(CustomReaction.trigger)) \
             .order_by(func.lower(CustomReaction.name)).all()
 
@@ -556,7 +629,7 @@ class CustomCommands(commands.Cog):
         self.db.refresh(reaction)
 
         r = ReactionData(reaction, self.bot.emojis)
-        self.reactions[reaction.id] = r
+        self.reactions[reaction.guild_id][reaction.id] = r
 
         return web.Response(status=200)
 
@@ -594,7 +667,7 @@ class CustomCommands(commands.Cog):
         self.db.refresh(reaction)
 
         r = ReactionData(reaction, self.bot.emojis)
-        self.reactions[reaction.id] = r
+        self.reactions[reaction.guild_id][reaction.id] = r
 
         return web.Response(status=200)
 
@@ -608,7 +681,8 @@ class CustomCommands(commands.Cog):
         reaction = query.first()
 
         # delete from response list and database.
-        del self.reactions[reaction.id]
+        del self.reactions[reaction.guild_id][reaction.id]
+
         query.delete()
         self.db.commit()
 
