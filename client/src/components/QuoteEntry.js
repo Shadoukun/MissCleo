@@ -88,6 +88,8 @@ export const QuoteEntry = ({ quote, memberList, ...props }) => {
           }
         ))
       )
+    } else {
+      setMessage("")
     }
 
     if (quote.attachments) {
@@ -102,7 +104,8 @@ export const QuoteEntry = ({ quote, memberList, ...props }) => {
       <QuoteHeader quote={quote} />
       <Box className="quoteBody" ml={8} mt={-2}>
         {message}
-        {attachments && <br />}
+        {( message && attachments) && <br />}
+
         {attachments.map((attachment, i) =>
           <img src={window.location.origin + `/files/${attachment}`} alt="" />
         )}
