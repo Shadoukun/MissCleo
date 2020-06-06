@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Route, Redirect } from "react-router-dom";
 import { useAuth } from "./context/Auth";
 import axios from 'axios';
@@ -25,6 +25,15 @@ export function PrivateRoute({ component: Component, ...args }) {
       }
     />
   );
+}
+
+// custom hook for getting previous value
+export const usePrevious = (value) => {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
 }
 
 

@@ -6,8 +6,8 @@ import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import ReactPaginate from 'react-paginate';
 import ResponsiveDrawer from '../components/Drawer'
-import { useParams, useLocation } from 'react-router-dom';
-import { backendCall } from '../utilities';
+import { useParams, useLocation, useHistory } from 'react-router-dom';
+import { backendCall, usePrevious } from '../utilities';
 import Fade from '@material-ui/core/Fade';
 import styled from 'styled-components';
 
@@ -26,9 +26,12 @@ function useQuery() {
 }
 
 const QuotePage = (props) => {
-  const query = useQuery();
+  const history = useHistory();
+  const location = useLocation();
+  const lastlocation = usePrevious(location);
+  const query = new URLSearchParams(location.search);
   const { guild } = useParams();
-  const user = query.get("user")
+  const user = query.get("user");
 
   const [searchString, setSearchString] = useState("");
   const [memberList, setMemberList] = useState({});
@@ -37,8 +40,21 @@ const QuotePage = (props) => {
   const [quoteList, setQuoteList] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [update, setUpdate] = useState(1)
-  const url = "/quotes"
+  const [update, setUpdate] = useState(1);
+  const url = "/quotes";
+
+
+  useEffect(() => {
+    if (lastlocation === undefined) {
+      return
+    }
+
+    if (location.key != lastlocation.key && location.pathname === lastlocation.pathname) {
+      setCurrentPage(1)
+      setSearchString("")
+      setUpdate(update + 1)
+    }
+  }, [location])
 
   // Set current page when guild/user changes
   useEffect(() => {
