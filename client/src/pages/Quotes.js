@@ -6,7 +6,7 @@ import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import ReactPaginate from 'react-paginate';
 import ResponsiveDrawer from '../components/Drawer'
-import { useParams, useLocation, useHistory } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { backendCall, usePrevious } from '../utilities';
 import Fade from '@material-ui/core/Fade';
 import styled from 'styled-components';
@@ -21,12 +21,7 @@ ${({ theme }) => `
   }
 `}`
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
-
 const QuotePage = (props) => {
-  const history = useHistory();
   const location = useLocation();
   const lastlocation = usePrevious(location);
   const query = new URLSearchParams(location.search);
@@ -40,40 +35,10 @@ const QuotePage = (props) => {
   const [quoteList, setQuoteList] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [update, setUpdate] = useState(1);
+  const [forceUpdate, setForceUpdate] = useState(1);
   const url = "/quotes";
 
-
-  useEffect(() => {
-    if (lastlocation === undefined) {
-      return
-    }
-
-    if (location.key != lastlocation.key && location.pathname === lastlocation.pathname) {
-      setCurrentPage(1)
-      setSearchString("")
-      setUpdate(update + 1)
-    }
-  }, [location])
-
-  // Set current page when guild/user changes
-  useEffect(() => {
-    setCurrentPage(1)
-    setSearchString("")
-    setUpdate(update + 1)
-  }, [guild, user]);
-
-  const setSearch = (value) => {
-    setSearchString(value)
-    setUpdate(update + 1)
-  }
-
-  const setPage = (value) => {
-    setCurrentPage(value)
-    setUpdate(update + 1)
-  }
-
-  // repopulate memberList when guildId changes.
+  // fetch member list.
   useEffect(() => {
     if (guild) {
       backendCall.get(`/all_members?guild=${guild}`)
@@ -85,11 +50,32 @@ const QuotePage = (props) => {
           setMemberList(data)
         })
     }
-  }, [guild])
+  }, [])
 
-  // populate quote list.
+  // force update when location is updated even if the route is the same.
+  // Allows Navbar button to reset page on subsequent clicks.
+  useEffect(() => {
+    if (lastlocation === undefined) {
+      return
+    }
+
+    if (location.key != lastlocation.key && location.pathname === lastlocation.pathname) {
+      setCurrentPage(1)
+      setSearchString("")
+    }
+  setForceUpdate(u => u + 1)
+  }, [location])
+
+  // reset page when the user changes
+  useEffect(() => {
+    setCurrentPage(1)
+    setSearchString("")
+  }, [user]);
+
+  // fetch quote list.
   useEffect(() => {
     setLoading(true)
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
     let params = []
     if (guild) { params.push(`guild=${guild}`) }
     if (user && !searchString) { params.push(`user=${user}`) }
@@ -105,8 +91,7 @@ const QuotePage = (props) => {
           setLoading(false)
         }, 250)
       })
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-  }, [update])
+  }, [forceUpdate, currentPage, searchString])
 
   return (
     <>
@@ -136,7 +121,7 @@ const QuotePage = (props) => {
               {guild &&
                 <QuoteSearch
                   searchString={searchString}
-                  setSearchString={setSearch}
+                  setSearchString={setSearchString}
                 />
               }
             </Box>
@@ -168,7 +153,7 @@ const QuotePage = (props) => {
               previousLinkClassName="page-link"
               nextLinkClassName="page-link"
               activeClassName="active"
-              onPageChange={(data) => setPage(data.selected + 1)}
+              onPageChange={(data) => setCurrentPage(data.selected + 1)}
               />
             </Box>
           </Box>
