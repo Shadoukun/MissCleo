@@ -25,7 +25,7 @@ const QuotePage = (props) => {
   const location = useLocation();
   const lastlocation = usePrevious(location);
   const query = new URLSearchParams(location.search);
-  const { guild } = useParams();
+  const [guild, _] = useState(useParams().guild);
   const user = query.get("user");
 
   const [searchString, setSearchString] = useState("");
@@ -38,59 +38,69 @@ const QuotePage = (props) => {
   const [forceUpdate, setForceUpdate] = useState(1);
   const url = "/quotes";
 
+  // scroll to top on rerender.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+  })
+
   // fetch member list.
   useEffect(() => {
-    if (guild) {
-      backendCall.get(`/all_members?guild=${guild}`)
-        .then((result) => {
-          let data = [{}]
-          for (var key in result.data) {
-            data[result.data[key].user_id] = result.data[key]
-          }
-          setMemberList(data)
-        })
-    }
+    backendCall.get(`/all_members?guild=${guild}`)
+      .then((result) => {
+        let data = [{}]
+        for (var key in result.data) {
+          data[result.data[key].user_id] = result.data[key]
+        }
+        setMemberList(data)
+      })
   }, [])
 
   // force update when location is updated even if the route is the same.
-  // Allows Navbar button to reset page on subsequent clicks.
+  // Allows Navbar button to reset page and search on subsequent clicks.
   useEffect(() => {
     if (lastlocation === undefined) {
       return
     }
 
-    if (location.key != lastlocation.key && location.pathname === lastlocation.pathname) {
+    if (location.key !== lastlocation.key && location.pathname === lastlocation.pathname) {
       setCurrentPage(1)
       setSearchString("")
     }
-  setForceUpdate(u => u + 1)
+    setForceUpdate(u => u + 1)
   }, [location])
 
-  // reset page when the user changes
+  // reset page and search when the user changes
   useEffect(() => {
     setCurrentPage(1)
     setSearchString("")
   }, [user]);
 
+  // reset page when search is set.
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchString])
+
+
+
   // fetch quote list.
   useEffect(() => {
-    setLoading(true)
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-    let params = []
-    if (guild) { params.push(`guild=${guild}`) }
-    if (user && !searchString) { params.push(`user=${user}`) }
-    if (searchString) { params.push(`search=${encodeURIComponent(searchString)}`) }
-    if (currentPage) { params.push(`page=${currentPage}`) }
+    (async () => {
+      setLoading(true)
+      let params = []
+      if (guild) { params.push(`guild=${guild}`) }
+      if (user && !searchString) { params.push(`user=${user}`) }
+      if (searchString) { params.push(`search=${encodeURIComponent(searchString)}`) }
+      if (currentPage) { params.push(`page=${currentPage}`) }
 
-    backendCall.get(url + `?${params.join('&')}`)
-      .then((result) => {
-        setQuoteList(result.data.quotes)
-        setPageCount(result.data.pages)
+      let result = await backendCall.get(url + `?${params.join('&')}`)
 
-        setTimeout(() => {
-          setLoading(false)
-        }, 250)
-      })
+      setQuoteList(result.data.quotes)
+      setPageCount(result.data.pages)
+      setTimeout(() => {
+        setLoading(false)
+      }, 250)
+
+    })()
   }, [forceUpdate, currentPage, searchString])
 
   return (
@@ -138,22 +148,22 @@ const QuotePage = (props) => {
 
 
             <Box display="flex" m={"auto"}>
-            <ReactPaginate className="pagination"
-              containerClassName="pagination"
-              breakClassName="page-item"
-              breakLabel={<button className="page-link">...</button>}
-              previousLabel="<"
-              nextLabel=">"
-              pageCount={pageCount}
-              forcePage={currentPage - 1}
-              pageClassName="page-item"
-              previousClassName="page-item"
-              nextClassName="page-item"
-              pageLinkClassName="page-link"
-              previousLinkClassName="page-link"
-              nextLinkClassName="page-link"
-              activeClassName="active"
-              onPageChange={(data) => setCurrentPage(data.selected + 1)}
+              <ReactPaginate className="pagination"
+                containerClassName="pagination"
+                breakClassName="page-item"
+                breakLabel={<button className="page-link">...</button>}
+                previousLabel="<"
+                nextLabel=">"
+                pageCount={pageCount}
+                forcePage={currentPage - 1}
+                pageClassName="page-item"
+                previousClassName="page-item"
+                nextClassName="page-item"
+                pageLinkClassName="page-link"
+                previousLinkClassName="page-link"
+                nextLinkClassName="page-link"
+                activeClassName="active"
+                onPageChange={(data) => setCurrentPage(data.selected + 1)}
               />
             </Box>
           </Box>
