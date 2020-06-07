@@ -6,7 +6,7 @@ import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import ReactPaginate from 'react-paginate';
 import ResponsiveDrawer from '../components/Drawer'
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { backendCall, usePrevious } from '../utilities';
 import Fade from '@material-ui/core/Fade';
 import styled from 'styled-components';
@@ -22,25 +22,33 @@ ${({ theme }) => `
 `}`
 
 const QuotePage = (props) => {
+  const history = useHistory();
   const location = useLocation();
-  const lastlocation = usePrevious(location);
+  let lastlocation = usePrevious(location);
+  const [skipLocationCheck, setSkipLocationCheck] = useState(false)
+
   const query = new URLSearchParams(location.search);
   const [guild, _] = useState(useParams().guild);
   const user = query.get("user");
+  const [loading, setLoading] = useState(true);
+  const [forceUpdate, setForceUpdate] = useState(1);
 
-  const [searchString, setSearchString] = useState("");
   const [memberList, setMemberList] = useState({});
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [quoteList, setQuoteList] = useState([]);
+  const [searchString, setSearchString] = useState("");
+  const [displaySearch, setDisplaySearch] = useState("")
 
-  const [loading, setLoading] = useState(true);
-  const [forceUpdate, setForceUpdate] = useState(1);
   const url = "/quotes";
 
   // scroll to top on rerender.
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+    window.scrollTo(
+      { top: 0,
+        left: 0,
+        behavior: 'smooth'
+      })
   })
 
   // fetch member list.
@@ -58,6 +66,13 @@ const QuotePage = (props) => {
   // force update when location is updated even if the route is the same.
   // Allows Navbar button to reset page and search on subsequent clicks.
   useEffect(() => {
+
+    // reset locationcheck and skip.
+    if (skipLocationCheck) {
+      setSkipLocationCheck(false)
+      return
+    }
+
     if (lastlocation === undefined) {
       return
     }
@@ -69,18 +84,25 @@ const QuotePage = (props) => {
     setForceUpdate(u => u + 1)
   }, [location])
 
-  // reset page and search when the user changes
+  // reset search when the user changes.
+  // triggers next useEffect
   useEffect(() => {
-    setCurrentPage(1)
     setSearchString("")
   }, [user]);
 
   // reset page when search is set.
   useEffect(() => {
     setCurrentPage(1)
+    setDisplaySearch("")
+    // route won't change when pushing to history,
+    // skip location check to avoid reset.
+    setSkipLocationCheck(true)
+    history.push({
+      pathname: location.pathname,
+      key: location.key,
+      search: ""
+    })
   }, [searchString])
-
-
 
   // fetch quote list.
   useEffect(() => {
@@ -100,6 +122,7 @@ const QuotePage = (props) => {
         setLoading(false)
       }, 250)
 
+      searchString && setDisplaySearch(searchString)
     })()
   }, [forceUpdate, currentPage, searchString])
 
@@ -122,9 +145,10 @@ const QuotePage = (props) => {
         <Fade in={!loading} out={loading}>
           <Box>
             <Box className="quote-list-header" display="flex">
-              {searchString &&
+              {displaySearch &&
+                // hide before loading finishes to avoid displaying prematurely
                 <Typography>
-                  Search: {searchString}
+                  Search: {displaySearch}
                 </Typography>
               }
 
