@@ -34,6 +34,9 @@ ${({ theme }) => `
     background: ${theme.colors.secondaryBackground};
     border: none;
     scrollbar-width: none;
+    ::-webkit-scrollbar {
+      width: 0px;
+    }
   }
 
   .MuiBackdrop-root {
