@@ -13,6 +13,7 @@ import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import { backendCall } from '../utilities';
 
+
 const StyledProgress = styled(LinearProgress)`
 ${({ theme }) => `
   background-color: unset;
@@ -22,18 +23,12 @@ ${({ theme }) => `
   }
 `}`
 
-type QuoteListType = Array<{}>;
-
-interface MemberList {
-  [key: string]: any
-};
 
 interface QuotePageParams {
   guild: string
 };
 
 type QuoteState = {
-  top: number
   loading: boolean
 
   location: Location<History.PoorMansUnknown>
@@ -48,36 +43,64 @@ type QuoteState = {
   displaySearch: string
 
   quoteList: QuoteListType
-  memberList: { [key: string]: any };
-
+  memberList: MemberListType;
 };
+
+type UserEntry = {
+  id: string
+  name: string
+  avatar_url: string
+}
 
 type MemberEntry = {
-  display_name: string
-  guild?: string
   guild_id: string
-  joined_at: string
-  top_role_color: object
-  top_role_id: string
-  user: object
+  guild?: object
   user_id: string
+  user: UserEntry
+
+  display_name: string
+  joined_at: string
+  top_role: any
+  top_role_id: string
 };
+
+export type QuoteEntryType = {
+  guild_id: string
+  channel_id: string
+  user_id: string
+  guild?: string
+  member: MemberEntry
+  user: UserEntry
+
+  message_id: string
+  message: string
+  timestamp: string
+  attachments: string[]
+}
+
+type QuoteListType = Array<QuoteEntryType>;
+
+export interface MemberListType {
+  [key: string]: MemberEntry
+};
+
+
+const getParams = (location: Location<History.PoorMansUnknown>) => {
+  return new URLSearchParams(location.search || "")
+}
+
 
 class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteState> {
 
   private url = '/quotes';
-  private query = new URLSearchParams(this.props.location.search);
 
   state: QuoteState = {
-    top: 0,
-
     guild: this.props.match.params.guild,
-    user: this.query.get("user") || "",
+    user: getParams(this.props.location).get("user") || "",
 
     location: this.props.location,
     history: this.props.history,
     match: this.props.match,
-    loading: true,
 
     quoteList: [],
     memberList: {},
@@ -86,13 +109,15 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
     searchString: "",
     displaySearch: "",
 
+    loading: true,
+
   };
 
   scrollBar = React.createRef<Scrollbars>();
 
   async fetchMembers() {
     let result = await backendCall.get(`/all_members?guild=${this.state.guild}`)
-    let data: MemberList = {};
+    let data: MemberListType = {};
 
     result.data.forEach((m: MemberEntry) => {
       data[m.user_id] = m
@@ -134,7 +159,7 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
 
   resetPage() {
     this.setState({
-      user: this.query.get("user") || "",
+      user: "",
       currentPage: 1,
       searchString: "",
       displaySearch: "",
@@ -144,8 +169,8 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
 
   handleSearch = (value: string) => {
     this.setState({
-      searchString: value,
       currentPage: 1,
+      searchString: value,
       loading: true
     }, this.fetchQuotes);
   };
@@ -171,8 +196,8 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
   componentDidUpdate(prevProps: RouteComponentProps<QuotePageParams>, prevState: QuoteState) {
 
     // check if user changed
-    let user = new URLSearchParams(this.props.location.search).get("user") || "";
-    if (user !== this.state.user) {
+    let user = getParams(this.props.location).get("user")
+    if (user && user !== this.state.user) {
       this.scrollBar.current?.scrollToTop()
       this.setState({
         user: user,
