@@ -76,12 +76,12 @@ ${({ theme }) => `
 `}`
 
 
-const QuoteSearch = ({ searchString, setSearchString }) => {
+const QuoteSearch = ({ searchString, onSubmit}) => {
   const [searchContent, setSearchContent] = useState("");
 
   const searchSubmit = (event) => {
     event.preventDefault();
-    setSearchString(searchContent)
+    onSubmit(searchContent)
   }
 
   return (

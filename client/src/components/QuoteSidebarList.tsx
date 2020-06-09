@@ -15,8 +15,6 @@ type ListHeaderProps = {
 type ListProps = {
   guildId: string,
   userId: string
-  setGuild: React.Dispatch<string>,
-  setUser: React.Dispatch<string>
 }
 
 

@@ -79,7 +79,7 @@ export const QuoteEntry = ({ quote, memberList, ...props }) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
   useEffect(() => {
-    if (quote.message) {
+    if (quote.message && memberList) {
       setMessage(
         parse(toHTML(quote.message, {
           escapeHTML: false,
