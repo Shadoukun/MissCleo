@@ -104,6 +104,7 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
 
   async fetchQuotes() {
     let params = []
+    console.log(this.state.user)
 
     // compile parameters for API from current state.
     if (this.state.guild) {
@@ -130,6 +131,16 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
     });
 
   };
+
+  resetPage() {
+    this.setState({
+      user: this.query.get("user") || "",
+      currentPage: 1,
+      searchString: "",
+      displaySearch: "",
+      loading: true,
+    }, this.fetchQuotes)
+  }
 
   handleSearch = (value: string) => {
     this.setState({
@@ -158,17 +169,29 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
 
 
   componentDidUpdate(prevProps: RouteComponentProps<QuotePageParams>, prevState: QuoteState) {
-    this.scrollBar.current?.scrollToTop()
 
-    if (prevProps.location.key !== this.props.location.key && prevProps.location.pathname === this.state.location.pathname) {
+    // check if user changed
+    let user = new URLSearchParams(this.props.location.search).get("user") || "";
+    if (user !== this.state.user) {
+      this.scrollBar.current?.scrollToTop()
       this.setState({
+        user: user,
         currentPage: 1,
         searchString: "",
-        displaySearch: "",
         loading: true,
       }, this.fetchQuotes)
+      return true
+    }
+
+    // check if Location updated without changing routes. (Navbar button clicked)
+    if (prevProps.location.key !== this.props.location.key && prevProps.location.pathname === this.state.location.pathname) {
+      this.scrollBar.current?.scrollToTop()
+      this.resetPage()
+      return true
     };
   };
+
+
 
   componentWillUnmount() { };
 
