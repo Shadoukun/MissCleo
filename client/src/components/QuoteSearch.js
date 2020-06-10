@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { fade } from '@material-ui/core/styles';
 import InputBase from '@material-ui/core/InputBase';
+import Box from '@material-ui/core/Box';
 import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import { IconButton } from './Button';
 
 
 const Search = styled.form`
@@ -15,7 +19,6 @@ ${({ theme }) => `
 
   margin-right: ${theme.spacing(2)};
   margin-left: auto;
-  margin-bottom: ${theme.spacing(2)}px;
   width: 100%;
 
   &:hover {
@@ -41,8 +44,11 @@ ${({ theme }) => `
 `}`
 
 
-const SearchInput = styled(InputBase)`
-${({ theme }) => `
+const SearchInput = styled(InputBase).attrs(props => ({
+  size: props.active ? ("20ch") : (0),
+  background: props.active ? fade("#ffffff", 0.1) : "transparent"
+}))`
+${({ theme, ...props }) => `
   background-color: ${fade(theme.palette.common.white, 0.1)};
   width: 100%;
 
@@ -63,9 +69,10 @@ ${({ theme }) => `
     border-bottom-left-radius: 20px;
 
     .MuiInputBase-input {
+      background-color: ${props.background};
       border-top-left-radius: 20px;
       border-bottom-left-radius: 20px;
-      width: 0;
+      width: ${props.size};
     }
 
     &.Mui-focused .MuiInputBase-input {
@@ -75,27 +82,56 @@ ${({ theme }) => `
   }
 `}`
 
+const RemoveButton = styled(IconButton)`
+${({theme}) => `
+  height:35px;
+  width: 32px;
+  padding: 0;
+  margin-right: ${theme.spacing(1)}px;
+  font-size: initial;
+`}`
 
-const QuoteSearch = ({ searchString, onSubmit}) => {
+
+const QuoteSearch = ({ searchString, onSubmit, resetPage }) => {
   const [searchContent, setSearchContent] = useState("");
+  const [active, setActive] = useState(false);
+
 
   const searchSubmit = (event) => {
     event.preventDefault();
     onSubmit(searchContent)
+    setTimeout(() => {
+      setActive(true)
+    }, 100)
+  }
+
+  const searchReset = () => {
+    setSearchContent("")
+    setActive(false)
+    resetPage()
   }
 
   return (
-    <Search onSubmit={searchSubmit} border={1} >
-      <SearchIconWrapper>
-        <SearchIcon />
-      </SearchIconWrapper>
-      <SearchInput
-        placeholder="Search…"
-        inputProps={{ 'aria-label': 'search' }}
-        value={searchContent}
-        onChange={e => { setSearchContent(e.target.value) }}
-      />
-    </Search>
+    <Box mb={2} display="flex" flexDirection="row">
+      {active &&
+        <RemoveButton onClick={searchReset}>
+          <FontAwesomeIcon icon={faTimesCircle} />
+        </RemoveButton>
+      }
+      <Search onSubmit={searchSubmit} border={1} >
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+
+        <SearchInput
+          active={active}
+          placeholder="Search…"
+          inputProps={{ 'aria-label': 'search' }}
+          value={searchContent}
+          onChange={e => { setSearchContent(e.target.value) }}
+          />
+      </Search>
+    </Box>
   )
 }
 

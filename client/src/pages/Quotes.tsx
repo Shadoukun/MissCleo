@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { RouteComponentProps, match } from 'react-router-dom';
 import { History, Location } from 'history';
-import { Typography, Box, LinearProgress, Fade } from '@material-ui/core';
+import { Box, LinearProgress, Fade } from '@material-ui/core';
 import { Scrollbars } from 'react-custom-scrollbars';
 import ResponsiveDrawer from '../components/Drawer';
 import ReactPaginate from 'react-paginate';
 import styled from 'styled-components';
+
 
 import { MemberList } from '../components/QuoteSidebarList';
 import QuoteList from '../components/QuoteList';
@@ -40,7 +41,6 @@ type QuoteState = {
   pageCount: number
   currentPage: number
   searchString: string
-  displaySearch: string
 
   quoteList: QuoteListType
   memberList: MemberListType;
@@ -107,7 +107,6 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
     pageCount: 0,
     currentPage: 1,
     searchString: "",
-    displaySearch: "",
 
     loading: true,
 
@@ -162,7 +161,6 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
       user: "",
       currentPage: 1,
       searchString: "",
-      displaySearch: "",
       loading: true,
     }, this.fetchQuotes)
   }
@@ -214,6 +212,7 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
       this.resetPage()
       return true
     };
+
   };
 
 
@@ -245,17 +244,13 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
               <Fade in={!this.state.loading}>
                 <Box>
                   <Box className="quote-list-header" display="flex">
-                    {this.state.displaySearch &&
-                      // hide before loading finishes to avoid displaying prematurely
-                      <Typography>
-                        Search: {this.state.displaySearch}
-                      </Typography>
-                    }
-
-                    <QuoteSearch
-                      searchString={this.state.searchString}
-                      onSubmit={this.handleSearch}
-                    />
+                    <Box display="flex" flexDirection="row" ml="auto">
+                      <QuoteSearch
+                        searchString={this.state.searchString}
+                        onSubmit={this.handleSearch}
+                        resetPage={() => this.resetPage()}
+                      />
+                    </Box>
                   </Box>
 
                   {this.state.quoteList.map((quote, i) =>
