@@ -116,13 +116,15 @@ const QuoteSearch = ({ searchString, onSubmit, resetPage }) => {
     onSubmit(searchContent)
     setTimeout(() => {
       setActive(true)
-    }, 100)
+    }, 250)
   }
 
   const searchReset = () => {
     setSearchContent("")
-    setActive(false)
     resetPage()
+    setTimeout(() => {
+      setActive(false)
+    }, 250)
   }
 
   return (

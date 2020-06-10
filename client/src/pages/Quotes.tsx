@@ -109,7 +109,6 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
     searchString: "",
 
     loading: true,
-
   };
 
   scrollBar = React.createRef<Scrollbars>();
@@ -128,7 +127,6 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
 
   async fetchQuotes() {
     let params = []
-    console.log(this.state.user)
 
     // compile parameters for API from current state.
     if (this.state.guild) {
@@ -148,12 +146,17 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
 
     let result = await backendCall.get(this.url + `?${params.join('&')}`);
 
+    this.scrollBar.current?.scrollToTop()
+
     this.setState({
       quoteList: result.data.quotes,
       pageCount: result.data.pages,
-      loading: false
     });
-
+    setTimeout(() => {
+      this.setState({
+        loading: false
+      })
+    }, 250)
   };
 
   resetPage() {
@@ -220,7 +223,6 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
   componentWillUnmount() { };
 
   render() {
-    this.scrollBar.current?.scrollToTop()
 
     return (
       <Box display="flex" style={{ height: "calc(100vh - 64px)" }}>
