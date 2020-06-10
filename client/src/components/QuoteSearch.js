@@ -9,20 +9,34 @@ import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { IconButton } from './Button';
 
 
+const SearchBox = styled(Box)`
+${({theme}) => `
+  display: flex;
+  flex-direction: row;
+  margin-bottom: ${theme.spacing(2)}px;
+  margin-left: auto;
+  margin-right: ${theme.spacing(1)}px;
+
+  ${theme.breakpoints.down('sm')} {
+    flex-grow: 1;
+    margin-left: 0;
+    margin-right: 0;
+  }
+`}`
+
 const Search = styled.form`
 ${({ theme }) => `
   position: relative;
-  border-radius: ${theme.shape.borderRadius}px;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
+  border-radius: 10px;
   transition: ${theme.transitions.create('background-color')};
+  background-color: ${fade(theme.palette.common.white, 0.1)};
+
 
   margin-right: ${theme.spacing(2)};
-  margin-left: auto;
   width: 100%;
 
   &:hover {
-    background-color: ${fade(theme.palette.common.white, 0.1)};
+    background-color: ${fade(theme.palette.common.white, 0.15)};
   }
 
   ${theme.breakpoints.up('sm')} {
@@ -45,11 +59,10 @@ ${({ theme }) => `
 
 
 const SearchInput = styled(InputBase).attrs(props => ({
-  size: props.active ? ("20ch") : (0),
+  size: props.active ? ("30ch") : ("10ch"),
   background: props.active ? fade("#ffffff", 0.1) : "transparent"
 }))`
 ${({ theme, ...props }) => `
-  background-color: ${fade(theme.palette.common.white, 0.1)};
   width: 100%;
 
   .MuiInputBase-root {
@@ -60,24 +73,21 @@ ${({ theme, ...props }) => `
     padding: ${theme.spacing(1, 1, 1, 0)};
     padding-left: calc(1em + ${theme.spacing(3)}px);
     transition: ${theme.transitions.create('width')};
-    width: 10ch;
   }
 
   ${theme.breakpoints.up('sm')} {
     background: none;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
+    border-radius: 10px;
+
 
     .MuiInputBase-input {
-      background-color: ${props.background};
-      border-top-left-radius: 20px;
-      border-bottom-left-radius: 20px;
+      background-color: transparent;
+      border-radius: 10px;
       width: ${props.size};
     }
 
     &.Mui-focused .MuiInputBase-input {
-      background-color: ${fade(theme.palette.common.white, 0.1)};
-      width: 20ch;
+      width: 30ch;
     }
   }
 `}`
@@ -89,6 +99,10 @@ ${({theme}) => `
   padding: 0;
   margin-right: ${theme.spacing(1)}px;
   font-size: initial;
+
+  ${theme.breakpoints.up('sm')} {
+    margin-left: auto;
+  ]
 `}`
 
 
@@ -112,7 +126,7 @@ const QuoteSearch = ({ searchString, onSubmit, resetPage }) => {
   }
 
   return (
-    <Box mb={2} display="flex" flexDirection="row">
+    <SearchBox>
       {active &&
         <RemoveButton onClick={searchReset}>
           <FontAwesomeIcon icon={faTimesCircle} />
@@ -131,7 +145,7 @@ const QuoteSearch = ({ searchString, onSubmit, resetPage }) => {
           onChange={e => { setSearchContent(e.target.value) }}
           />
       </Search>
-    </Box>
+    </SearchBox>
   )
 }
 

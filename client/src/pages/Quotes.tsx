@@ -244,13 +244,12 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
               <Fade in={!this.state.loading}>
                 <Box>
                   <Box className="quote-list-header" display="flex">
-                    <Box display="flex" flexDirection="row" ml="auto">
-                      <QuoteSearch
-                        searchString={this.state.searchString}
-                        onSubmit={this.handleSearch}
-                        resetPage={() => this.resetPage()}
-                      />
-                    </Box>
+
+                    <QuoteSearch
+                      searchString={this.state.searchString}
+                      onSubmit={this.handleSearch}
+                      resetPage={() => this.resetPage()}
+                    />
                   </Box>
 
                   {this.state.quoteList.map((quote, i) =>
