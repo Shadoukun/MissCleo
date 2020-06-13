@@ -18,6 +18,16 @@ ${({ theme }) => `
     text-decoration: none;
   }
 
+  .sidebar-member-avatar {
+    min-width: auto;
+    margin-right: ${theme.spacing(2)}px;
+
+    .MuiAvatar-root {
+      height: 32px;
+      width: 32px;
+    }
+  }
+
   &.active .MuiListItem-button::after {
     content: " ";
     white-space: pre;
@@ -44,7 +54,7 @@ interface SidebarEntryProps extends React.HTMLProps<HTMLAnchorElement> {
 const SidebarEntry = ({ to, name, icon, activeClass, textProps }: SidebarEntryProps) => (
   <SidebarLink className={activeClass} component={RouterLink} to={to} underline="none">
     <ListItem button>
-      <ListItemAvatar className="sidebarIcon">
+      <ListItemAvatar className="sidebar-member-avatar">
         <DiscordAvatar src={icon} />
       </ListItemAvatar>
       <ListItemText primary={name} {...textProps} />
