@@ -13,6 +13,7 @@ import QuoteList from '../components/QuoteList';
 import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import { backendCall } from '../utilities';
+import { QuoteListType, MemberListType, MemberEntry } from '../types';
 
 
 const StyledProgress = styled(LinearProgress)`
@@ -46,43 +47,10 @@ type QuoteState = {
   memberList: MemberListType;
 };
 
-type UserEntry = {
-  id: string
-  name: string
-  avatar_url: string
+type QuoteLocationState = {
+  navPressed?: boolean
 }
 
-type MemberEntry = {
-  guild_id: string
-  guild?: object
-  user_id: string
-  user: UserEntry
-
-  display_name: string
-  joined_at: string
-  top_role: any
-  top_role_id: string
-};
-
-export type QuoteEntryType = {
-  guild_id: string
-  channel_id: string
-  user_id: string
-  guild?: string
-  member: MemberEntry
-  user: UserEntry
-
-  message_id: string
-  message: string
-  timestamp: string
-  attachments: string[]
-}
-
-type QuoteListType = Array<QuoteEntryType>;
-
-export interface MemberListType {
-  [key: string]: MemberEntry
-};
 
 
 const getParams = (location: Location<History.PoorMansUnknown>) => {
@@ -90,7 +58,7 @@ const getParams = (location: Location<History.PoorMansUnknown>) => {
 }
 
 
-class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteState> {
+class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, QuoteLocationState>, QuoteState> {
 
   private url = '/quotes';
 
@@ -159,6 +127,7 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
     }, 250)
   };
 
+
   resetPage() {
     this.setState({
       user: "",
@@ -168,10 +137,26 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
     }, this.fetchQuotes)
   }
 
-  handleSearch = (value: string) => {
+  switchUser(newUser: string) {
+    this.scrollBar.current?.scrollToTop()
+    this.setState({
+      user: newUser,
+      currentPage: 1,
+      searchString: "",
+      loading: true,
+    }, this.fetchQuotes)
+  }
+
+  handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    let newSearch = (event.currentTarget[0] as HTMLInputElement).value
+    if (this.state.user) {
+      this.props.history.replace({ ...this.props.location, search: "" })
+    }
     this.setState({
       currentPage: 1,
-      searchString: value,
+      searchString: newSearch,
       loading: true
     }, this.fetchQuotes);
   };
@@ -195,32 +180,23 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
 
 
   componentDidUpdate(prevProps: RouteComponentProps<QuotePageParams>, prevState: QuoteState) {
-
     // check if user changed
     let user = getParams(this.props.location).get("user")
     if (user && user !== this.state.user) {
-      this.scrollBar.current?.scrollToTop()
-      this.setState({
-        user: user,
-        currentPage: 1,
-        searchString: "",
-        loading: true,
-      }, this.fetchQuotes)
+      this.switchUser(user)
       return true
     }
 
-    // check if Location updated without changing routes. (Navbar button clicked)
-    if (prevProps.location.key !== this.props.location.key && prevProps.location.pathname === this.state.location.pathname) {
-      this.scrollBar.current?.scrollToTop()
+    // check if nav Link was pressed again.
+    if (this.props.location.state?.navPressed) {
+      this.props.history.replace({
+        ...this.props.location,
+        state: {}
+      })
       this.resetPage()
       return true
-    };
-
+    }
   };
-
-
-
-  componentWillUnmount() { };
 
   render() {
 
@@ -250,7 +226,7 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams>, QuoteSta
                     <QuoteSearch
                       searchString={this.state.searchString}
                       onSubmit={this.handleSearch}
-                      resetPage={() => this.resetPage()}
+                      onReset={() => this.resetPage()}
                     />
                   </Box>
 

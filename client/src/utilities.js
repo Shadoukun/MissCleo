@@ -10,21 +10,8 @@ export const backendCall = axios.create({
 });
 
 
-export function PrivateRoute({ component: Component, ...args }) {
-  const { authToken } = useAuth();
-
-  return (
-    <Route
-      {...args}
-      render={props =>
-        authToken ? (
-          <Component {...props} />
-        ) : (
-            <Redirect to={{ pathname: "/login", state: { referer: props.location } }} />
-          )
-      }
-    />
-  );
+export const getParams = (location) => {
+  return new URLSearchParams(location.search || "")
 }
 
 // custom hook for getting previous value

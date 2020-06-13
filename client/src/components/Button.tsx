@@ -1,7 +1,7 @@
 import { Button as MuiButton, IconButton as MuiIconButton } from '@material-ui/core'
 import styled from 'styled-components';
 
-export const Button = styled(MuiButton)`
+export const Button = styled(MuiButton)<any>`
  &:hover {
     color: inherit;
     text-decoration: none;
@@ -14,7 +14,7 @@ export const Button = styled(MuiButton)`
     }
 `
 
-export const IconButton = styled(MuiIconButton)`
+export const IconButton = styled(MuiIconButton)<any>`
  &:hover {
     color: inherit;
     text-decoration: none;

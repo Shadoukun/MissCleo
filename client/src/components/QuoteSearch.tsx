@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fade } from '@material-ui/core/styles';
 import InputBase from '@material-ui/core/InputBase';
 import Box from '@material-ui/core/Box';
@@ -8,9 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { IconButton } from './Button';
 
-
 const SearchBox = styled(Box)`
-${({theme}) => `
+${({ theme }) => `
   display: flex;
   flex-direction: row;
   margin-bottom: ${theme.spacing(2)}px;
@@ -22,9 +21,9 @@ ${({theme}) => `
     margin-left: 0;
     margin-right: 0;
   }
-`}`
+`}`;
 
-const Search = styled.form`
+const Search = styled.form<any>`
 ${({ theme }) => `
   position: relative;
   border-radius: 10px;
@@ -43,7 +42,7 @@ ${({ theme }) => `
     margin-left: ${theme.spacing(3)};
     width: auto;
   }
-`}`
+`}`;
 
 const SearchIconWrapper = styled.div`
 ${({ theme }) => `
@@ -54,11 +53,9 @@ ${({ theme }) => `
   display: flex;
   align-items: center;
   justify-content: center;
+`}`;
 
-`}`
-
-
-const SearchInput = styled(InputBase).attrs(props => ({
+const SearchInput = styled<any>(InputBase).attrs(props => ({
   size: props.active ? ("30ch") : ("10ch"),
   background: props.active ? fade("#ffffff", 0.1) : "transparent"
 }))`
@@ -90,10 +87,10 @@ ${({ theme, ...props }) => `
       width: 30ch;
     }
   }
-`}`
+`}`;
 
 const RemoveButton = styled(IconButton)`
-${({theme}) => `
+${({ theme }) => `
   height:35px;
   width: 32px;
   padding: 0;
@@ -103,52 +100,54 @@ ${({theme}) => `
   ${theme.breakpoints.up('sm')} {
     margin-left: auto;
   ]
-`}`
+`}`;
 
 
-const QuoteSearch = ({ searchString, onSubmit, resetPage }) => {
-  const [searchContent, setSearchContent] = useState("");
+type QuoteSearchProps = {
+  searchString: string
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  onReset: () => void
+};
+
+const QuoteSearch: React.FC<QuoteSearchProps> = ({ searchString, onSubmit, onReset }) => {
+
+  const [inputValue, setInputValue] = useState(searchString);
   const [active, setActive] = useState(false);
 
-
-  const searchSubmit = (event) => {
-    event.preventDefault();
-    onSubmit(searchContent)
+  // set search input value when searchString changes
+  useEffect(() => {
+    setInputValue(searchString)
     setTimeout(() => {
-      setActive(true)
-    }, 250)
-  }
+      setActive(!!searchString)
+    }, 200)
+  }, [searchString]);
 
-  const searchReset = () => {
-    setSearchContent("")
-    resetPage()
-    setTimeout(() => {
-      setActive(false)
-    }, 250)
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
+  };
 
   return (
     <SearchBox>
       {active &&
-        <RemoveButton onClick={searchReset}>
+        <RemoveButton onClick={onReset}>
           <FontAwesomeIcon icon={faTimesCircle} />
         </RemoveButton>
       }
-      <Search onSubmit={searchSubmit} border={1} >
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
+      <Search onSubmit={onSubmit} border={1} >
+        <SearchIconWrapper>
+          <SearchIcon />
+        </SearchIconWrapper>
 
         <SearchInput
           active={active}
           placeholder="Search…"
           inputProps={{ 'aria-label': 'search' }}
-          value={searchContent}
-          onChange={e => { setSearchContent(e.target.value) }}
-          />
+          value={inputValue}
+          onChange={handleChange}
+        />
       </Search>
     </SearchBox>
-  )
-}
+  );
+};
 
 export default QuoteSearch

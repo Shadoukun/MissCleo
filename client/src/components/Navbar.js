@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as RouterLink, useLocation, useRouteMatch} from "react-router-dom";
+import { Link as RouterLink, useLocation, useRouteMatch } from "react-router-dom";
 import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -41,7 +41,7 @@ ${({ theme }) => `
 `}`
 
 const NavTitle = styled(Typography)`
-${({theme}) => `
+${({ theme }) => `
   font-size: 24px;
   margin-right: ${theme.spacing(3)}px;
 
@@ -100,7 +100,7 @@ const Navbar = (props) => {
         <NavTitle className="navTitle" type="title" color="inherit">MissCleo</NavTitle>
 
         <Box className="nav-wrapper">
-          <RouterButton to={`${url}/quotes`} name="Quotes" location={location} />
+          <RouterButton to={{ pathname: `${url}/quotes`, state: { navPressed: true } }} name="Quotes" location={location} />
           <RouterButton to={`${url}/commands`} name="Commands" location={location} />
           <RouterButton to={`${url}/responses`} name="Responses" location={location} />
           <RouterButton to={`${url}/reactions`} name="Reactions" location={location} />
@@ -114,17 +114,8 @@ const Navbar = (props) => {
 
 const LoginBar = ({ isLoggedIn }) => {
 
-  const LoginButton = (props) => (
-    <LoginButtonStyled component={RouterLink} to={`/${props.type}`}>
-      <AccountCircle />
-      <Typography>
-        {props.type}
-      </Typography>
-    </LoginButtonStyled>
-  )
-
   return (
-    <Box className="login" style={{ marginLeft: "auto"}}>
+    <Box className="login" style={{ marginLeft: "auto" }}>
       {!isLoggedIn ? (
         <LoginButton type="login" />
       ) : (
@@ -133,5 +124,14 @@ const LoginBar = ({ isLoggedIn }) => {
     </Box>
   )
 }
+
+const LoginButton = (props) => (
+  <LoginButtonStyled component={RouterLink} to={`/${props.type}`}>
+    <AccountCircle />
+    <Typography>
+      {props.type}
+    </Typography>
+  </LoginButtonStyled>
+)
 
 export default Navbar
