@@ -5,7 +5,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { Button, IconButton } from './Button';
+import { Button, IconButton, LinkButton } from './Button';
 import { useAuth } from "../context/Auth";
 import styled from 'styled-components';
 
@@ -50,7 +50,6 @@ ${({ theme }) => `
   }
 `}`
 
-
 const LoginButtonStyled = styled(IconButton)`
 ${({ theme }) => `
   border-radius: ${theme.shape.borderRadius}px;
@@ -68,26 +67,28 @@ ${({ theme }) => `
   }
 `}`
 
-const NavButton = styled(Button)`
+const NavButton = styled(LinkButton)`
 ${({ theme }) => `
-  padding: ${theme.spacing(1, 1, 1, 1)};
-  font-size: 14px;
-  font-weight: bold;
+    padding: ${theme.spacing(1, 1, 1, 1)};
+    font-size: 14px;
+    font-weight: bold;
 
-  ${theme.breakpoints.down('xs')} {
-    font-size: 12px;
-  }
+    &.active::after {
+      content: " ";
+      white-space: pre;
+      background: ${theme.colors.primaryFontColor};
+      position: absolute;
+      bottom: 4px;
+      width: 5px;
+      height: 5px;
+      border-radius: 100%;
+    }
+
+    ${theme.breakpoints.down('xs')} {
+      font-size: 12px;
+    }
 `}`
 
-const RouterButton = (props) => {
-  const isActive = (value) => (props.location.pathname.startsWith(value) ? "active" : '')
-
-  return (
-    <NavButton className={isActive(props.to)} component={RouterLink} to={props.to}>
-      {props.name}
-    </NavButton>
-  )
-}
 
 const Navbar = (props) => {
   const location = useLocation();
@@ -100,10 +101,10 @@ const Navbar = (props) => {
         <NavTitle className="navTitle" type="title" color="inherit">MissCleo</NavTitle>
 
         <Box className="nav-wrapper">
-          <RouterButton to={{ pathname: `${url}/quotes`, state: { navPressed: true } }} name="Quotes" location={location} />
-          <RouterButton to={`${url}/commands`} name="Commands" location={location} />
-          <RouterButton to={`${url}/responses`} name="Responses" location={location} />
-          <RouterButton to={`${url}/reactions`} name="Reactions" location={location} />
+          <NavButton to={{ pathname: `${url}/quotes`, state: { navPressed: true } }} label="Quotes" location={location} />
+          <NavButton to={{ pathname: `${url}/commands`, state: { navPressed: true } }} label="Commands" location={location} />
+          <NavButton to={{ pathname: `${url}/responses`, state: { navPressed: true } }} label="Responses" location={location} />
+          <NavButton to={{ pathname: `${url}/reactions`, state: { navPressed: true } }} label="Reactions" location={location} />
         </Box>
 
         <LoginBar isLoggedIn={authToken} />
@@ -113,7 +114,6 @@ const Navbar = (props) => {
 }
 
 const LoginBar = ({ isLoggedIn }) => {
-
   return (
     <Box className="login" style={{ marginLeft: "auto" }}>
       {!isLoggedIn ? (
