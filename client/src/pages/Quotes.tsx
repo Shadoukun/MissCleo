@@ -14,6 +14,7 @@ import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import { backendCall } from '../utilities';
 import { QuoteListType, MemberListType, MemberEntry } from '../types';
+import { GuildContext } from '../context/Guild';
 
 
 const StyledProgress = styled(LinearProgress)`
@@ -60,6 +61,8 @@ const getParams = (location: Location<History.PoorMansUnknown>) => {
 
 class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, QuoteLocationState>, QuoteState> {
 
+  static contextType = GuildContext;
+
   private url = '/quotes';
 
   state: QuoteState = {
@@ -81,17 +84,6 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, Quot
 
   scrollBar = React.createRef<Scrollbars>();
 
-  async fetchMembers() {
-    let result = await backendCall.get(`/all_members?guild=${this.state.guild}`)
-    let data: MemberListType = {};
-
-    result.data.forEach((m: MemberEntry) => {
-      data[m.user_id] = m
-    });
-    this.setState({
-      memberList: data
-    });
-  };
 
   async fetchQuotes() {
     let params = []
@@ -170,12 +162,19 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, Quot
 
 
   componentDidMount() {
-    this.fetchMembers()
-      .then(() => {
+
+    // wait for memberList from GuildContext to be populated
+    const fetchAfterMembers = () => {
+      if (!this.context.memberList) {
+        setTimeout(fetchAfterMembers, 100)
+      } else {
         (async () => {
           await this.fetchQuotes();
         })()
-      });
+      }
+    }
+
+    fetchAfterMembers()
   };
 
 

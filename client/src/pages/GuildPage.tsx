@@ -6,13 +6,14 @@ import QuotePage from './Quotes'
 import { ResponsesPage } from './Responses';
 import CommandsPage from './Commands';
 import ReactionsPage from './Reactions';
+import { GuildProvider } from '../context/Guild';
 
 
 class GuildPage extends Component<RouteComponentProps, {}> {
 
   render() {
     return (
-      <React.Fragment>
+      <GuildProvider>
         <Navbar />
 
         {/* TODO: Put something here */}
@@ -24,7 +25,7 @@ class GuildPage extends Component<RouteComponentProps, {}> {
           <Route path={`/:guild(\\d+)/reactions`} component={ReactionsPage} />
         </Switch>
 
-      </React.Fragment>
+      </GuildProvider>
     )
   }
 }

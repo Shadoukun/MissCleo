@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { rgbToHex } from '../utilities';
 import { DiscordAvatar } from './Avatar';
 import { QuoteDropdown } from './QuoteDropdown';
+import { useGuildContext } from '../context/Guild';
 
 const QuoteTimestamp = styled.div`
 ${({ theme }) => `
@@ -75,9 +76,12 @@ const QuoteHeader = ({ quote }) => {
   )
 }
 
-export const QuoteEntry = ({ quote, memberList, ...props }) => {
+export const QuoteEntry = ({ quote, ...props }) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
+
+  const { memberList } = useGuildContext();
+
   useEffect(() => {
     if (quote.message && memberList) {
       setMessage(
