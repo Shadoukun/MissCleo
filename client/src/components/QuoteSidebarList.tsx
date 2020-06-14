@@ -19,7 +19,7 @@ type ListProps = {
 
 
 const SidebarListHeader = (props: ListHeaderProps) => (
-  <ListSubheader component="div" id={`nested-list-${props.name}`}>
+  <ListSubheader component="div" disableSticky id={`nested-list-${props.name}`}>
     {props.name}
   </ListSubheader>
 )
