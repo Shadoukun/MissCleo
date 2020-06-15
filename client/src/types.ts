@@ -1,4 +1,8 @@
 
+export type Dict = {
+  [key: string]: any
+}
+
 // Discord User
 export type UserEntry = {
   id: string
