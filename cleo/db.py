@@ -201,7 +201,7 @@ class CustomCommand(Base):
         self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
-        self.user_filter = kwargs.get('user_filer', [])
+        self.user_filter = kwargs.get('user_filter', [])
 
 
 class CustomResponse(Base):
@@ -250,7 +250,7 @@ class CustomResponse(Base):
         self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
-        self.user_filter = kwargs.get('user_filer', [])
+        self.user_filter = kwargs.get('user_filter', [])
 
 
 class CustomReaction(Base):
@@ -298,7 +298,7 @@ class CustomReaction(Base):
         self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
-        self.user_filter = kwargs.get('user_filer', [])
+        self.user_filter = kwargs.get('user_filter', [])
 
 
 class Admin(Base):

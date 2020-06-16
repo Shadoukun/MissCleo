@@ -7,13 +7,12 @@ import ResponsiveDrawer from '../components/Drawer';
 import ReactPaginate from 'react-paginate';
 import styled from 'styled-components';
 
-
 import { MemberList } from '../components/QuoteSidebarList';
 import QuoteList from '../components/QuoteList';
 import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
-import { backendCall } from '../utilities';
-import { QuoteListType, MemberListType, MemberEntry } from '../types';
+import { backendCall, getParams } from '../utilities';
+import { QuoteListType, MemberListType } from '../types';
 import { GuildContext } from '../context/Guild';
 
 
@@ -26,10 +25,15 @@ ${({ theme }) => `
   }
 `}`
 
+type QuoteLocationState = {
+  navPressed?: boolean
+}
 
 interface QuotePageParams {
   guild: string
 };
+
+type QuoteRouteComponentProps = RouteComponentProps<QuotePageParams, any, QuoteLocationState>
 
 type QuoteState = {
   loading: boolean
@@ -48,18 +52,8 @@ type QuoteState = {
   memberList: MemberListType;
 };
 
-type QuoteLocationState = {
-  navPressed?: boolean
-}
 
-
-
-const getParams = (location: Location<History.PoorMansUnknown>) => {
-  return new URLSearchParams(location.search || "")
-}
-
-
-class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, QuoteLocationState>, QuoteState> {
+class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
 
   static contextType = GuildContext;
 
@@ -84,7 +78,6 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, Quot
 
   scrollBar = React.createRef<Scrollbars>();
 
-
   async fetchQuotes() {
     let params = []
 
@@ -105,20 +98,17 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, Quot
     };
 
     let result = await backendCall.get(this.url + `?${params.join('&')}`);
-
     this.scrollBar.current?.scrollToTop()
 
     this.setState({
       quoteList: result.data.quotes,
       pageCount: result.data.pages,
     });
+
     setTimeout(() => {
-      this.setState({
-        loading: false
-      })
+      this.setState({ loading: false })
     }, 250)
   };
-
 
   resetPage() {
     this.setState({
@@ -160,9 +150,7 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, Quot
     }, this.fetchQuotes);
   };
 
-
   componentDidMount() {
-
     // wait for memberList from GuildContext to be populated
     const fetchAfterMembers = () => {
       if (!this.context.memberList) {
@@ -177,8 +165,7 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, Quot
     fetchAfterMembers()
   };
 
-
-  componentDidUpdate(prevProps: RouteComponentProps<QuotePageParams>, prevState: QuoteState) {
+  componentDidUpdate(prevProps: QuoteRouteComponentProps, prevState: QuoteState) {
     // check if user changed
     let user = getParams(this.props.location).get("user")
     if (user && user !== this.state.user) {
@@ -200,71 +187,73 @@ class QuotePage extends Component<RouteComponentProps<QuotePageParams, any, Quot
   render() {
 
     return (
-      <Box display="flex" style={{ height: "calc(100vh - 64px)" }}>
-        <Scrollbars ref={this.scrollBar} {...this.props}>
-          <Box style={{ flexGrow: 1 }} >
-            <Box style={{ display: this.state.loading ? "block" : "none" }}>
-              <StyledProgress color="primary" variant="query" />
+      <>
+        <Box className="loading-bar" style={{ display: this.state.loading ? "block" : "none" }}>
+          <StyledProgress color="primary" variant="query" />
+        </Box>
+
+        <Box className="container" display="flex" style={{ height: "calc(100vh - 64px)" }}>
+          <Scrollbars ref={this.scrollBar} {...this.props}>
+            <Box className="scrollbar-inner-container">
+
+              <ResponsiveDrawer>
+                {this.state.memberList &&
+                  <MemberList
+                    guildId={this.state.guild}
+                    userId={this.state.user}
+                  />}
+              </ResponsiveDrawer>
+
+              <QuoteList>
+                <Fade in={!this.state.loading}>
+                  <Box>
+                    <Box className="quote-list-header" display="flex">
+
+                      <QuoteSearch
+                        searchString={this.state.searchString}
+                        onSubmit={this.handleSearch}
+                        onReset={() => this.resetPage()}
+                      />
+                    </Box>
+
+                    {this.state.quoteList.map((quote, i) =>
+                      <QuoteEntry
+                        key={i}
+                        quote={quote}
+                        memberList={this.state.memberList}
+                      />
+                    )}
+
+
+                    <Box display="flex" m={"auto"}>
+                      <ReactPaginate
+                        containerClassName="pagination"
+                        breakClassName="page-item"
+                        breakLabel={<button className="page-link">...</button>}
+                        previousLabel="<"
+                        nextLabel=">"
+                        pageCount={this.state.pageCount}
+                        forcePage={this.state.currentPage - 1}
+                        pageClassName="page-item"
+                        previousClassName="page-item"
+                        nextClassName="page-item"
+                        pageLinkClassName="page-link"
+                        previousLinkClassName="page-link"
+                        nextLinkClassName="page-link"
+                        activeClassName="active"
+                        pageRangeDisplayed={5}
+                        marginPagesDisplayed={3}
+                        onPageChange={(p) => this.handlePageChange(p.selected + 1)}
+                      />
+                    </Box>
+
+                  </Box>
+                </Fade>
+              </QuoteList>
             </Box>
-
-            <ResponsiveDrawer>
-              {this.state.memberList &&
-                <MemberList
-                  guildId={this.state.guild}
-                  userId={this.state.user}
-                />
-              }
-            </ResponsiveDrawer>
-
-            <QuoteList>
-
-              <Fade in={!this.state.loading}>
-                <Box>
-                  <Box className="quote-list-header" display="flex">
-
-                    <QuoteSearch
-                      searchString={this.state.searchString}
-                      onSubmit={this.handleSearch}
-                      onReset={() => this.resetPage()}
-                    />
-                  </Box>
-
-                  {this.state.quoteList.map((quote, i) =>
-                    <QuoteEntry
-                      key={i}
-                      quote={quote}
-                      memberList={this.state.memberList}
-                    />
-                  )}
-
-
-                  <Box display="flex" m={"auto"}>
-                    <ReactPaginate
-                      containerClassName="pagination"
-                      breakClassName="page-item"
-                      breakLabel={<button className="page-link">...</button>}
-                      previousLabel="<"
-                      nextLabel=">"
-                      pageCount={this.state.pageCount}
-                      forcePage={this.state.currentPage - 1}
-                      pageClassName="page-item"
-                      previousClassName="page-item"
-                      nextClassName="page-item"
-                      pageLinkClassName="page-link"
-                      previousLinkClassName="page-link"
-                      nextLinkClassName="page-link"
-                      activeClassName="active"
-                      pageRangeDisplayed={5}
-                      marginPagesDisplayed={3}
-                      onPageChange={(p) => this.handlePageChange(p.selected + 1)}
-                    />
-                  </Box>
-                </Box>
-              </Fade>
-            </QuoteList>
-          </Box>
-        </Scrollbars>
-      </Box>
+          </Scrollbars>
+        </Box>
+      </>
     );
   };
 };
