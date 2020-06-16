@@ -32,6 +32,8 @@ class ResponseData:
         self.cooldown_bucket = 0
         self._buckets = None
 
+        self.user_filter = response.user_filter
+
         self.process_trigger()
         self.process_response()
         self.process_cooldown()
@@ -92,6 +94,8 @@ class ReactionData:
         self.cooldown_per = 0
         self.cooldown_bucket = 0
         self._buckets = None
+
+        self.user_filter = reaction.user_filter
 
         self.process_trigger()
         self.process_responses()
@@ -269,11 +273,17 @@ class CustomCommands(commands.Cog):
 
         # check for trigger in message
         for _, r in response_list.items():
-            # if useRegex, trigger is a regex expression
+            # If user_filter isn't empty,
+            # check if it contains the sender's user id.
+            if r.user_filter and str(ctx.message.author.id) not in r.user_filter:
+                return
+
+            # if useRegex, search message with trigger as a regular expression
             if r.useRegex:
                 if r.trigger.search(message_lower):
                     response = r
                     break
+
             # Otherwise its a regular string
             else:
                 if r.trigger in message_lower:
@@ -312,13 +322,15 @@ class CustomCommands(commands.Cog):
         if not reaction_list:
             return
 
-
         matched_reactions = []
         message_lower = message.content.lower()
 
         # check for trigger. in message.
         # append to list of matching reactions
         for _, r in reaction_list.items():
+            if str(ctx.message.author.id) not in r.user_filter:
+                return
+
             # if useRegex, trigger is a regex expression
             if r.useRegex:
                 if r.trigger.search(message_lower):
@@ -454,7 +466,8 @@ class CustomCommands(commands.Cog):
             'cooldown_rate',
             'cooldown_per',
             'cooldown_bucket',
-            'cooldown_multiplier'
+            'cooldown_multiplier',
+            'user_filter'
             ]
 
         for f in fields:
@@ -529,9 +542,9 @@ class CustomCommands(commands.Cog):
 
         r = ResponseData(response)
 
-        response_list = self.reactions.get(response.guild_id, None)
+        response_list = self.responses.get(response.guild_id, None)
         if not response_list:
-            self.reactions[reaction.guild_id] = {}
+            self.responses[response.guild_id] = {}
 
         self.responses[response.guild_id][response.id] = r
 
@@ -560,7 +573,8 @@ class CustomCommands(commands.Cog):
             'cooldown_rate',
             'cooldown_per',
             'cooldown_bucket',
-            'cooldown_multiplier'
+            'cooldown_multiplier',
+            'user_filter'
             ]
 
         for f in fields:
@@ -657,7 +671,8 @@ class CustomCommands(commands.Cog):
             'cooldown_rate',
             'cooldown_per',
             'cooldown_bucket',
-            'cooldown_multiplier'
+            'cooldown_multiplier',
+            'user_filter'
             ]
 
         for f in fields:

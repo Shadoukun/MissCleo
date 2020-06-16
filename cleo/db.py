@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, backref, sessionmaker, Query
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.dialects.postgresql import ARRAY
 import json
 import datetime
 import config
@@ -181,6 +182,9 @@ class CustomCommand(Base):
     cooldown_bucket     = Column(Integer)
     cooldown_multiplier = Column(Integer)
 
+    user_filter = Column(ARRAY(String), server_default='{}')
+
+
     guild = relationship("Guild", uselist=False, lazy="joined")
 
     def __init__(self, command, response, description=None, name=None, multi_response=False, **kwargs):
@@ -196,6 +200,8 @@ class CustomCommand(Base):
         self.coldown_per = kwargs.get('cooldown_per', 0)
         self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
+
+        self.user_filter = kwargs.get('user_filer', [])
 
 
 class CustomResponse(Base):
@@ -224,6 +230,9 @@ class CustomResponse(Base):
     cooldown_bucket     = Column(Integer)
     cooldown_multiplier = Column(Integer)
 
+    user_filter = Column(ARRAY(String), server_default='{}')
+
+
     guild = relationship("Guild", uselist=False, lazy="joined")
 
     def __init__(self, trigger, response, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
@@ -241,6 +250,7 @@ class CustomResponse(Base):
         self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
+        self.user_filter = kwargs.get('user_filer', [])
 
 
 class CustomReaction(Base):
@@ -269,6 +279,8 @@ class CustomReaction(Base):
     cooldown_bucket     = Column(Integer)
     cooldown_multiplier = Column(Integer)
 
+    user_filter = Column(ARRAY(String), server_default='{}')
+
     guild = relationship("Guild", uselist=False, lazy="joined")
 
     def __init__(self, trigger, reaction, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
@@ -285,6 +297,8 @@ class CustomReaction(Base):
         self.coldown_per = kwargs.get('cooldown_per', 0)
         self.cooldown_bucket = kwargs.get('cooldown_bucket', 2)
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
+
+        self.user_filter = kwargs.get('user_filer', [])
 
 
 class Admin(Base):

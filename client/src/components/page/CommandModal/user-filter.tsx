@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
-import Autocomplete, { AutocompleteProps, AutocompleteRenderInputParams, } from '@material-ui/lab/Autocomplete';
+import Autocomplete, { AutocompleteRenderInputParams, } from '@material-ui/lab/Autocomplete';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 import { VariableSizeList, ListChildComponentProps } from 'react-window';
-import { Typography, Chip } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import { MemberEntry } from '../../../types';
 import { useGuildContext } from '../../../context/Guild';
 import styled from 'styled-components';
 import { FormLabel } from '../../Form';
 import { lighten, darken } from 'polished';
 
+const LISTBOX_PADDING = 8; // px
+
 type RenderInputParams = AutocompleteRenderInputParams;
 type ListboxComponentType = React.ComponentType<React.HTMLAttributes<HTMLElement>>
 
-const LISTBOX_PADDING = 8; // px
+type UserFilterType = string[]
 
 function renderRow(props: ListChildComponentProps) {
   const { data, index, style } = props;
@@ -40,14 +42,13 @@ function useResetCache(data: any) {
 
 const OuterElementContext = React.createContext({});
 
-
 const OuterElementType = React.forwardRef<HTMLDivElement>((props, ref) => {
   const outerProps = React.useContext(OuterElementContext);
   return <div ref={ref} {...props} {...outerProps} />;
 });
 
 
-// Adapter for react-window
+// Adapter component for react-window
 const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxComponent(props, ref) {
   const { children, ...other } = props;
   const itemData = React.Children.toArray(children);
@@ -139,28 +140,60 @@ const AutocompleteInput = (params: RenderInputParams) => (
     variant="filled"
     InputProps={{ ...params.InputProps, disableUnderline: true }}
   />
-
 )
 
+type UserFilterInputProps = {
+  userFilter: UserFilterType
+  setUserFilter: (newValue: UserFilterType) => any
+}
 
-const VirtualizedUserFilterInput: React.FC = () => {
+const VirtualizedUserFilterInput: React.FC<UserFilterInputProps> = ({ userFilter, setUserFilter }) => {
   const classes = useStyles();
-  const { memberList } = useGuildContext();
-  const [userList, setUserList] = useState<MemberEntry[]>();
 
+  // array of selected objects
   const [value, setValue] = useState<MemberEntry[]>([]);
+  // value of the underlying input element
   const [inputValue, setInputValue] = useState<string>("");
 
+  const [userList, setUserList] = useState<MemberEntry[]>();
+  const [userIds, setUserIds] = useState<any>();
+  const { memberList } = useGuildContext();
 
+
+  // wait for memberList to populate
   useEffect(() => {
     if (memberList === undefined) {
       return
     }
-    let members: MemberEntry[] = Object.keys(memberList).map((key, i) => {
-      return memberList[key]
-    })
+
+    // MemberListType => MemberEntry[]
+    let members: MemberEntry[] = Object.keys(memberList).map((key, i) => memberList[key])
+
+    // userFilter: string[] => MemberEntry[]
+    let filterValue = userFilter.map((key, i) => memberList[key])
+
+
     setUserList(members)
+    setUserIds(Object.keys(memberList))
+    setValue(filterValue)
   }, [memberList])
+
+  // set userFilter to an array of user ids from `value`
+  useEffect(() => {
+    if (memberList === undefined) {
+      return
+    }
+
+    // value: MemberEntry[] => newFilterValue: string[]
+    let newFilterValue: UserFilterType = value.filter(
+      member => userIds.includes(member.user_id)).reduce((members: any, m: any) => {
+        members.push(m.user_id)
+        return members
+      }, [] as UserFilterType)
+
+    setUserFilter(newFilterValue)
+  }, [value])
+
 
   const onChange = (event: React.ChangeEvent, newValue: MemberEntry[]) => {
     setValue(newValue);
@@ -188,9 +221,7 @@ const VirtualizedUserFilterInput: React.FC = () => {
           classes={classes}
           ListboxComponent={ListboxComponent as ListboxComponentType}
           options={userList}
-          getOptionLabel={(member: MemberEntry) =>
-            `${member.display_name} <${member.user.name}>`
-          }
+          getOptionLabel={(member: MemberEntry) => `${member.display_name} <${member.user.name}>`}
           getOptionSelected={(member: MemberEntry, value: any) => member.display_name === value.display_name}
           renderInput={AutocompleteInput}
           renderOption={(member: MemberEntry) => (
@@ -202,7 +233,10 @@ const VirtualizedUserFilterInput: React.FC = () => {
       </>
     );
   } else {
-    return (<React.Fragment />)
+    return (
+      <>
+      </>
+    )
   }
 }
 

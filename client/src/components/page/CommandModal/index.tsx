@@ -1,5 +1,3 @@
-
-
 import React, { useState, ChangeEvent, FormEvent, MouseEvent, useEffect } from 'react';
 import { Button } from "../../Button"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -28,9 +26,10 @@ type Entry = Dict & {
   reaction: never
   use_regex: boolean
   multi_response: boolean
-  user_filter: Array<string>
+  user_filter: string[]
   cooldown: boolean
   cooldown_bucket: number
+  cooldown_rate: number
   cooldown_per: number
   cooldown_multiplier: number
 }
@@ -45,9 +44,10 @@ export type EntryFormData = Dict & {
   response: string
   useRegex: boolean
   multiResponse: boolean
-  userFilter: Array<string>
+  userFilter: string[]
   cooldown: boolean
   cooldownType: number
+  cooldownRate: number
   cooldownDuration: number
   multiplier: number
 }
@@ -63,6 +63,7 @@ const EntryFormDefault: Dict = {
   multiResponse: false,
   cooldown: false,
   cooldownType: 2,
+  cooldownRate: 1,
   cooldownDuration: 0,
   multiplier: 1,
 }
@@ -79,6 +80,7 @@ const entryMap: Dict = {
   userFilter: "user_filter",
   cooldown: "cooldown",
   cooldownType: "cooldown_bucket",
+  cooldownRate: "cooldown_rate",
   cooldownDuration: "cooldown_per",
   multiplier: "cooldown_multiplier"
 }
@@ -148,6 +150,7 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
     userFilter: entry.user_filter || [],
     cooldown: entry.cooldown || false,
     cooldownType: entry.cooldown_bucket || 2,
+    cooldownRate: entry.cooldown_rate || 1,
     cooldownDuration: entry.cooldown_per || 0,
     multiplier: entry.cooldown_multiplier || 1
   })
@@ -161,7 +164,7 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
     // map data from `form` to back to backend-friendly keys.
     let entryData = Object.keys(form).reduce((data: any, key) => {
       data[entryMap[key]] = form[key]
-    return data
+      return data
     }, {})
 
     backendCall.post(
@@ -237,16 +240,16 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
           <Box mt={2} mb={2}><Divider /></Box>
 
           <Box className="user-filter-box">
-            <VirtualizedUserFilterInput />
+            <VirtualizedUserFilterInput
+              userFilter={form.userFilter}
+              setUserFilter={(newValue: string[]) => setForm({ ...form, userFilter: newValue })}
+            />
           </Box>
 
           <Box mt={2} mb={2}><Divider /></Box>
 
           <Box className="cooldown-box">
-            <CooldownControl
-              form={form}
-              setForm={setForm}
-            />
+            <CooldownControl form={form} setForm={setForm} />
           </Box>
           <ModalFooter edit={props.edit} handleRemove={handleRemove} />
         </ModalForm>
