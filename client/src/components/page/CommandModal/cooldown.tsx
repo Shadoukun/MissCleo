@@ -8,15 +8,29 @@ import { ToggleProps } from './controls'
 import { EntryFormData } from './index'
 
 const CooldownFormControl = styled(FormControl)`
+${({theme}) => `
   display: flex;
   flex-direction: row;
   width: 100%;
-`
+  height: 40px;
+
+`}`
 
 const CooldownSelect = styled(Select) <any>`
-  flex-grow: 1;
-  text-align: center;
-`
+${({ theme }) => `
+flex-grow: 1;
+
+.MuiSelect-root {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.MuiSelect-select {
+  padding: 0;
+}
+`}`
 
 const CooldownMenuItem = styled(MenuItem) <any>`
   justify-content: center;
@@ -38,6 +52,15 @@ const CooldownBox = styled(Box)`
   width: 30%;
 `
 
+const CooldownContainer = styled(Box)`
+${({theme}) => `
+  padding: ${theme.spacing(2, 1, 1, 1)};
+
+  ${CooldownFormControl}:first-child {
+    margin-bottom: ${theme.spacing(1)}px;
+  }
+
+`}`
 
 export const CooldownToggle = (props: ToggleProps) => (
   <Box display="flex">
@@ -66,7 +89,7 @@ export const CooldownControl = ({ form, setForm, ...props }: CooldownControlProp
       />
 
       {form.cooldown &&
-        <Box pl={1} pr={1}>
+        <CooldownContainer>
           <CooldownFormControl>
 
             <Typography style={{ marginRight: "auto" }}>Duration:</Typography>
@@ -85,7 +108,7 @@ export const CooldownControl = ({ form, setForm, ...props }: CooldownControlProp
               setType={(e: ChangeEvent<HTMLSelectElement>) => { setForm({ ...form, cooldownType: Number(e.target.value) }) }}
             />
           </CooldownFormControl>
-        </Box>
+      </CooldownContainer>
       }
     </>
   )
@@ -152,7 +175,9 @@ export const CooldownDurationSelect = ({ duration, setDuration, type, setType, .
         labelId="duration-type-select-label"
         id="duration-type-select"
         value={type}
+        variant="filled"
         onChange={setType}
+        disableUnderline
       >
         {durationTypeMap.map((type, i) =>
           <CooldownMenuItem
@@ -195,8 +220,10 @@ export const CooldownTypeSelect = (props: TypeSelectProps) => {
       <CooldownSelect
         labelId="cooldown-type-select-label"
         id="cooldown-type-select"
+        variant="filled"
         value={props.type}
         onChange={props.setType}
+        disableUnderline
       >
         {cooldownTypeMap.map((ctype: any, i) =>
           <CooldownMenuItem
