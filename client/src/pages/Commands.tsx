@@ -6,16 +6,16 @@ import { backendCall } from '../utilities';
 import { Container, CssBaseline, Box } from '@material-ui/core'
 import { useParams } from 'react-router-dom';
 import { Scrollbars } from 'react-custom-scrollbars';
+import { CommandEntry } from '../types';
 
 
-
-const CommandsPage = (props) => {
-  const [commands, setCommands] = useState([])
+const CommandsPage = () => {
+  const [commands, setCommands] = useState<CommandEntry[]>([])
   const [update, setUpdate] = useState(0)
   const { requestconfig } = useAuth();
   const { guild } = useParams();
 
-  const scrollBar = useRef();
+  const scrollBar = useRef() as React.RefObject<Scrollbars>;
 
   useEffect(() => {
     (async () => {
@@ -28,7 +28,7 @@ const CommandsPage = (props) => {
     <>
       <CssBaseline />
       <Box style={{ height: "calc(100vh - 64px)" }}>
-        <Scrollbars ref={scrollBar} {...props}>
+        <Scrollbars ref={scrollBar} >
           <ModalProvider>
             <Container maxWidth="md" >
               <CommandListHeader update={update} setUpdate={setUpdate} />

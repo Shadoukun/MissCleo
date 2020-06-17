@@ -162,8 +162,8 @@ class CustomCommand(Base):
 
     __tablename__ = "custom_commands"
     __table_args__ = (
-        Index('ix_custom_command_unique_guild_command', 'guild_id', 'command',
-              unique=True, postgresql_where=(Column('command').isnot(None))),
+        Index('ix_custom_command_unique_guild_command', 'guild_id', 'trigger',
+              unique=True, postgresql_where=(Column('trigger').isnot(None))),
         Index('ix_custom_command_unique_guild_name', 'guild_id', 'name',
               unique=True, postgresql_where=(Column('name').isnot(None)))
     )
@@ -172,7 +172,7 @@ class CustomCommand(Base):
     guild_id            = Column(BigInteger, ForeignKey('guilds.id'), nullable=True)
     name                = Column(String)
     description         = Column(String)
-    command             = Column(String)
+    trigger             = Column(String)
     response            = Column(String)
     multi_response      = Column(Boolean)
 
@@ -187,9 +187,9 @@ class CustomCommand(Base):
 
     guild = relationship("Guild", uselist=False, lazy="joined")
 
-    def __init__(self, command, response, description=None, name=None, multi_response=False, **kwargs):
+    def __init__(self, trigger, response, description=None, name=None, multi_response=False, **kwargs):
         self.guild_id = kwargs.get('guild_id')
-        self.command = command
+        self.trigger = trigger
         self.response = response
         self.name = name
         self.description = description
@@ -269,7 +269,7 @@ class CustomReaction(Base):
     name                = Column(String)
     description         = Column(String)
     trigger             = Column(String)
-    reaction            = Column(String)
+    response            = Column(String)
     use_regex           = Column(Boolean)
     multi_response      = Column(Boolean)
 
@@ -283,10 +283,10 @@ class CustomReaction(Base):
 
     guild = relationship("Guild", uselist=False, lazy="joined")
 
-    def __init__(self, trigger, reaction, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
+    def __init__(self, trigger, response, name=None, description=None, use_regex=False, multi_response=False, **kwargs):
         self.guild_id = kwargs.get('guild_id')
         self.trigger = trigger
-        self.reaction = reaction
+        self.response = response
         self.name = name
         self.description = description
         self.use_regex = use_regex

@@ -43,3 +43,28 @@ export type QuoteEntryType = {
   timestamp: string
   attachments: string[]
 }
+
+
+export type CommandEntry = {
+  id: string
+  guild_id: string
+
+  trigger: string
+  response: string
+  description: string
+
+  // variables used by responses/reactions
+  name?: string
+  use_regex?: boolean
+  multi_response?: boolean
+
+  cooldown: boolean
+  cooldown_rate: number
+  cooldown_per: number
+  cooldown_bucket: number
+  cooldown_multiplier: number
+
+  user_filter: string[]
+}
+
+

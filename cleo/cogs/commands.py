@@ -19,6 +19,7 @@ class ResponseData:
 
     def __init__(self, response):
         self._response = response
+
         self.id = response.id
         self.guild_id = response.guild_id
         self.trigger = None
@@ -112,15 +113,21 @@ class ReactionData:
 
     def process_responses(self):
         # split response in to lines if multi_response == True
-        self.reactions = self._reaction.reaction.replace(':', '').split('\n')
+        try:
+            self.reactions = self._reaction.response.replace(':', '').split('\n')
+        except:
+            logger.error(f"failed to process reactions for {self.guild_id} - {self.trigger}")
 
     def process_custom_emojis(self, custom_emojis):
-        """check and set custom emojis in list of reactions to correct emoji type."""
-        for i, react in enumerate(self.reactions):
-            for emoji in custom_emojis:
-                if react == emoji.name:
-                    self.reactions[i] = emoji
-                    break
+        try:
+            """check and set custom emojis in list of reactions to correct emoji type."""
+            for i, react in enumerate(self.reactions):
+                for emoji in custom_emojis:
+                    if react == emoji.name:
+                        self.reactions[i] = emoji
+                        break
+        except:
+            logger.error(f"failed to process emojis for {self.guild_id} - {self.trigger}")
 
     def process_cooldown(self):
         self.cooldown = self._reaction.cooldown
@@ -206,14 +213,14 @@ class CustomCommands(commands.Cog):
         Accepts a command from database and returns
         a callback for sending discord message.
         """
-        logger.debug(f"creating command: {command.command}")
+        logger.debug(f"creating command: {command.trigger}")
 
         # callback function for custom commands
         async def _command(ctx):
             nonlocal command
             await ctx.channel.send(command.response)
 
-        cmd = commands.Command(_command, name=command.command)
+        cmd = commands.Command(_command, name=command.trigger)
         cmd.category = 'Custom'
 
         # create cooldown to command if there is one.
@@ -328,7 +335,7 @@ class CustomCommands(commands.Cog):
         # check for trigger. in message.
         # append to list of matching reactions
         for _, r in reaction_list.items():
-            if str(ctx.message.author.id) not in r.user_filter:
+            if r.user_filter and str(ctx.message.author.id) not in r.user_filter:
                 return
 
             # if useRegex, trigger is a regex expression
@@ -367,15 +374,15 @@ class CustomCommands(commands.Cog):
 
         for c in cmds:
             # check if a command already exists before trying to re-add it.
-            if c.command in bot_commands:
-                self.bot.remove_command(c.command)
+            if c.trigger in bot_commands:
+                self.bot.remove_command(c.trigger)
 
             cmd = await self.make_command(c)
             self.bot.add_custom_command(cmd, c.guild_id)
 
             # if commands cog is enabled, add command to auto-enabled commands.
-            if c.command not in self.bot.auto_enable:
-                self.bot.auto_enable.append(c.command)
+            if c.trigger not in self.bot.auto_enable:
+                self.bot.auto_enable.append(c.trigger)
 
 
     async def load_custom_responses(self):
@@ -411,7 +418,7 @@ class CustomCommands(commands.Cog):
 
         cmds = self.db.query(CustomCommand) \
                         .filter(CustomCommand.guild_id == guild_id) \
-                        .order_by(func.lower(CustomCommand.command)) \
+                        .order_by(func.lower(CustomCommand.trigger)) \
                         .all()
 
         cmds = json.dumps(cmds, cls=new_alchemy_encoder(False, []))
@@ -425,13 +432,9 @@ class CustomCommands(commands.Cog):
 
         data = await request.json()
 
-        # lol command uses a different variable
-        # and I'm not changing it right now.
-        data['command'] = data['trigger']
-
         command = CustomCommand(**data)
 
-        logger.debug(f"{command.command}, {command.response}")
+        logger.debug(f"{command.trigger}, {command.response}")
         self.db.add(command)
         self.db.commit()
         self.db.refresh(command)
@@ -440,8 +443,8 @@ class CustomCommands(commands.Cog):
         self.bot.add_command(cmd)
 
         # if commands cog is enabled, add command to auto-enabled commands.
-        if command.command not in self.bot.auto_enable:
-            self.bot.auto_enable.append(command.command)
+        if command.trigger not in self.bot.auto_enable:
+            self.bot.auto_enable.append(command.trigger)
 
         return web.Response(status=200)
 
@@ -456,10 +459,9 @@ class CustomCommands(commands.Cog):
         c = self.db.query(CustomCommand).filter_by(id=command_id).first()
 
         # replace command.f with data[f]
-        data['command'] = data['trigger']
 
         fields = [
-            'command',
+            'trigger',
             'response',
             'description',
             'cooldown',
@@ -499,7 +501,7 @@ class CustomCommands(commands.Cog):
         cmd = query.first()
 
         # remove command from bot.
-        if cmd.command in [c.name for c in self.bot.commands]:
+        if cmd.trigger in [c.name for c in self.bot.commands]:
             self.bot.remove_command(cmd.command)
 
         query.delete()
@@ -633,14 +635,14 @@ class CustomCommands(commands.Cog):
 
         data = await request.json()
 
-        # lol reactions uses a different variable
-        # and I'm not changing it right now.
-        data['reaction'] = data['response']
-
         reaction = CustomReaction(**data)
         self.db.add(reaction)
         self.db.commit()
         self.db.refresh(reaction)
+
+        reaction_list = self.reactions.get(reaction.guild_id, None)
+        if not reaction_list:
+            self.reactions[reaction.guild_id] = {}
 
         r = ReactionData(reaction, self.bot.emojis)
         self.reactions[reaction.guild_id][reaction.id] = r
@@ -659,13 +661,12 @@ class CustomCommands(commands.Cog):
             return web.Response(status=500)
 
         # replace reaction.f with data[f]
-        data['reaction'] = data['response']
 
         fields = [
             'name',
             'description',
             'trigger',
-            'reaction',
+            'response',
             'use_regex',
             'cooldown',
             'cooldown_rate',

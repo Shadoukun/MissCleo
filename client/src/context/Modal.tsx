@@ -12,9 +12,9 @@ type ProviderProps = {
 }
 
 type ShowModalProps = {
-  content: React.ComponentClass // the component for the body of the modal.
+  content: React.ReactNode // the component for the body of the modal.
   contentProps: {} // props for the content component.
-  newModalProps: {} // props for the modal itself.
+  modalProps: {} // props for the modal itself.
 }
 
 const ModalContext = React.createContext<Partial<ModalContextProps>>({});
@@ -26,9 +26,11 @@ const ModalProvider = (props: ProviderProps) => {
   const [modalContent, setModalContent] = useState<JSX.Element>()
   const [modalProps, setModalProps] = useState({})
 
-  const showModal = ({ content: ContentComponent, contentProps, newModalProps}: ShowModalProps) => {
+  const showModal = ({ content, contentProps, modalProps}: ShowModalProps) => {
+    const ContentComponent = content as React.ComponentClass
+
     setModalContent((() => <ContentComponent {...contentProps} />))
-    setModalProps(newModalProps)
+    setModalProps(modalProps)
     setIsOpen(true)
   }
 
@@ -62,7 +64,7 @@ const useModal = () => {
   if (context === undefined) {
     throw new Error('useModal must be used within a ModalProvider. Idiot.')
   }
-  return context
+  return context as ModalContextProps
 }
 
 export { ModalProvider, useModal }

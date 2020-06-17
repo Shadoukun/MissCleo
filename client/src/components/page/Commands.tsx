@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useModal } from '../../context/Modal';
 import { CommandModal } from './CommandModal';
 import { fade } from '@material-ui/core/styles';
+import { CommandEntry } from '../../types';
 
 
 export const CommandListHeaderStyled = styled.div`
@@ -75,26 +76,36 @@ ${({ theme }) => `
   color: ${darken(0.5, theme.colors.primaryFontColor)}
 `}`
 
+type CommandListProps = {
+  commands?: CommandEntry[] | undefined
+  update: number
+  setUpdate: React.Dispatch<number>
+}
 
-export const CommandListHeader = ({ update, setUpdate }) => {
+export const CommandListHeader = ({ update, setUpdate }: CommandListProps) => {
   const { showModal, hideModal } = useModal()
 
+
+
   const handleClick = () => {
+
+    const contentProps = {
+      type: "Command",
+      edit: false,
+      entry: {},
+      submitURL: "/add_command",
+      hideModal: hideModal,
+      update: update,
+      setUpdate: setUpdate,
+      hideName: true,
+      hideRegex: true,
+      hideMultiResponse: true,
+    }
+
     showModal({
       content: CommandModal,
-      contentProps: {
-        type: "Command",
-        edit: false,
-        entry: {},
-        submitURL: "/add_command",
-        hideModal: hideModal,
-        update: update,
-        setUpdate: setUpdate,
-        hideName: true,
-        hideRegex: true,
-        hideMultiResponse: true,
-      },
-      ModalProps: {}
+      contentProps: contentProps,
+      modalProps: {}
     })
   }
 
@@ -108,42 +119,49 @@ export const CommandListHeader = ({ update, setUpdate }) => {
   )
 }
 
-
-export function CommandListMain({ commands, update, setUpdate }) {
+export function CommandListMain({ commands, update, setUpdate }: CommandListProps) {
   const { showModal, hideModal } = useModal()
 
-  const handleClick = (command) => {
+
+  const handleClick = (command: CommandEntry) => {
+
+    const contentProps = {
+      type: "Command",
+      edit: true,
+      entry: command,
+      submitURL: "/edit_command",
+      removeURL: "/remove_command",
+      hideModal: hideModal,
+      update: update,
+      setUpdate: setUpdate,
+      hideName: true,
+      hideRegex: true,
+      hideMultiResponse: true,
+    }
+
     showModal({
       content: CommandModal,
-      contentProps: {
-        type: "Command",
-        edit: true,
-        entry: command,
-        submitURL: "/edit_command",
-        removeURL: "/remove_command",
-        hideModal: hideModal,
-        update: update,
-        setUpdate: setUpdate,
-        hideName: true,
-        hideRegex: true,
-        hideMultiResponse: true,
-      },
-      ModalProps: {}
+      contentProps: contentProps,
+      modalProps: {}
     })
   }
 
-  return (
-    <>
-      {commands.map((command, i) =>
-        <CommandEntryStyled key={i}>
-          <div className="command_name"> {"!" + command.command} </div>
-          <CommandDescription>{command.description}</CommandDescription>
-          <Button onClick={() => handleClick(command)}>
-            Edit
-          </Button>
-        </CommandEntryStyled>
-      )}
-    </>
-  );
-}
+  if (commands) {
+    return (
+      <>
+        {commands.map((command, i) =>
+          <CommandEntryStyled key={i}>
+            <div className="command_name"> {"!" + command.trigger} </div>
+            <CommandDescription>{command.description}</CommandDescription>
+            <Button onClick={() => handleClick(command)}>
+              Edit
+            </Button>
+          </CommandEntryStyled>
+        )}
+      </>
+    );
+  } else {
+    return (<React.Fragment/>)
+  };
+};
 

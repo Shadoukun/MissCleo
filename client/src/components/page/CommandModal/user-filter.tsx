@@ -60,7 +60,6 @@ ${({ theme }) => `
     font-size: 16px;
     transition: ${theme.transitions.create(['background-color', 'border-color', 'box-shadow'])};
 
-
     .MuiAutocomplete-inputRoot[class*="MuiFilledInput-root"] {
       padding-top: unset;
       border-radius: 4px;
@@ -203,19 +202,16 @@ const VirtualizedUserFilterInput: React.FC<UserFilterInputProps> = ({ userFilter
   const [userIds, setUserIds] = useState<any>();
   const { memberList } = useGuildContext();
 
-
   // wait for memberList to populate
   useEffect(() => {
     if (memberList === undefined) {
       return
     }
-
     // MemberListType => MemberEntry[]
     let members: MemberEntry[] = Object.keys(memberList).map((key, i) => memberList[key])
 
     // userFilter: string[] => MemberEntry[]
     let filterValue = userFilter.map((key, i) => memberList[key])
-
 
     setUserList(members)
     setUserIds(Object.keys(memberList))
@@ -227,7 +223,6 @@ const VirtualizedUserFilterInput: React.FC<UserFilterInputProps> = ({ userFilter
     if (memberList === undefined) {
       return
     }
-
     // value: MemberEntry[] => newFilterValue: string[]
     let newFilterValue: UserFilterType = value.filter(
       member => userIds.includes(member.user_id)).reduce((members: any, m: any) => {
