@@ -125,16 +125,16 @@ const Navbar = (props) => {
   const [loading, setLoading] = useState(true)
 
   const { authToken } = useAuth();
-  const { guildData } = useGuildContext();
+  const { guild } = useGuildContext();
   const location = useLocation();
   let { url } = useRouteMatch();
 
   useEffect(() => {
-    if (guildData !== undefined) {
-      setCurrentGuild(guildData)
+    if (guild !== undefined) {
+      setCurrentGuild(guild)
       setLoading(false)
     }
-  }, [guildData])
+  }, [guild])
 
   return (
     <StyledAppBar className="Navbar" position="sticky" elevation={0}>

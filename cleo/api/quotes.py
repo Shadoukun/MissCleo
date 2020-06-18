@@ -57,9 +57,9 @@ def getQuotes(guild_id, user_id, search, page):
 def guilds(request):
     guild_id = request.rel_url.query.get('guild', None)
 
-    filters = [Guild.id == guild_id]
+    guilds = json.dumps(getGuilds(guild_id),
+                        cls=new_alchemy_encoder(False, ['roles', 'members']))
 
-    guilds = json.dumps(getGuilds(guild_id), cls=new_alchemy_encoder(False))
     return web.json_response(text=guilds)
 
 
