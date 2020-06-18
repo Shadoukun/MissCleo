@@ -83,7 +83,7 @@ export const QuoteEntry = ({ quote, ...props }) => {
   const { memberList } = useGuildContext();
 
   useEffect(() => {
-    if (quote.message && memberList) {
+    if (quote.message) {
       setMessage(
         parse(toHTML(quote.message, {
           escapeHTML: false,

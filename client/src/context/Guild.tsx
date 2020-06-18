@@ -37,14 +37,19 @@ export const GuildProvider = (props: PropsWithChildren<{}>) => {
 
   const [guild, setGuild] = useState<Guild | undefined>();
   const [user, setUser] = useState<string>(userId);
-  const [memberList, setMemberList] = useState<MemberListType>({});
+  const [memberList, setMemberList] = useState<MemberListType | undefined>();
   const [roleList, setRoleList] = useState<any>()
 
   useEffect(() => {
     fetchGuild().then((data) => {
       setGuild(data)
-      setMemberList(data.members)
       setRoleList(data.roles)
+
+      let members: MemberListType = {}
+      data.members.forEach((m: MemberEntry) => {
+        members[m.user_id] = m
+      });
+      setMemberList(members)
     })
   }, [])
 
