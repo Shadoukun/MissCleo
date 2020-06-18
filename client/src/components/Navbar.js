@@ -105,7 +105,8 @@ ${({ theme }) => `
 
   .guild-icon {
     margin-right: ${theme.spacing(1)}px;
-      div {
+
+    div {
       height: 24px;
       width: 24px;
     }
@@ -116,6 +117,17 @@ ${({ theme }) => `
     color: ${darken(0.5, theme.colors.primaryFontColor)};
     font-size: 14px;
     line-height: 1;
+  }
+
+  ${theme.breakpoints.down("xs")} {
+    padding-right: 0;
+
+    .guild-icon {
+      margin-right: 0;
+    }
+    .guild-text p {
+      display: none;
+    }
   }
 `}`
 
