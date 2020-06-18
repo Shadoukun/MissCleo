@@ -58,7 +58,7 @@ def guilds(request):
     guild_id = request.rel_url.query.get('guild', None)
 
     guilds = json.dumps(getGuilds(guild_id),
-                        cls=new_alchemy_encoder(False, ['roles', 'members']))
+                        cls=new_alchemy_encoder(False, ['roles', 'members', 'user']))
 
     return web.json_response(text=guilds)
 
