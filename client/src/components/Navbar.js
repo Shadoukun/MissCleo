@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, useLocation, useRouteMatch } from "react-router-dom";
 import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
@@ -8,6 +8,11 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import { Button, IconButton, LinkButton } from './Button';
 import { useAuth } from "../context/Auth";
 import styled from 'styled-components';
+import { DiscordAvatar } from './Avatar';
+import { darken } from 'polished';
+import { useGuildContext } from '../context/Guild';
+import { Fade, Divider } from '@material-ui/core';
+
 
 const StyledAppBar = styled(AppBar)`
 ${({ theme }) => `
@@ -89,11 +94,47 @@ ${({ theme }) => `
     }
 `}`
 
+const GuildBadgeBox = styled(Box)`
+${({ theme }) => `
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-left: auto;
+  margin-right: ${theme.spacing(2)}px;;
+  padding: ${theme.spacing(1)}px;
+
+  .guild-icon {
+    margin-right: ${theme.spacing(1)}px;
+      div {
+      height: 24px;
+      width: 24px;
+    }
+  }
+
+  .guild-text p {
+    max-width: 200px;
+    color: ${darken(0.5, theme.colors.primaryFontColor)};
+    font-size: 14px;
+    line-height: 1;
+  }
+`}`
+
 
 const Navbar = (props) => {
-  const location = useLocation();
+  const [currentGuild, setCurrentGuild] = useState({});
+  const [loading, setLoading] = useState(true)
+
   const { authToken } = useAuth();
+  const { guildData } = useGuildContext();
+  const location = useLocation();
   let { url } = useRouteMatch();
+
+  useEffect(() => {
+    if (guildData !== undefined) {
+      setCurrentGuild(guildData)
+      setLoading(false)
+    }
+  }, [guildData])
 
   return (
     <StyledAppBar className="Navbar" position="sticky" elevation={0}>
@@ -107,6 +148,21 @@ const Navbar = (props) => {
           <NavButton to={{ pathname: `${url}/reactions`, state: { navPressed: true } }} label="Reactions" location={location} />
         </Box>
 
+        {currentGuild &&
+          <Fade in={!loading} timeout={{enter: 250, exit: 250}}>
+            <GuildBadgeBox>
+              <Box className="guild-icon">
+                <DiscordAvatar src={currentGuild.icon_url}/>
+              </Box>
+              <Box className="guild-text">
+                <Typography>
+                  {currentGuild.name}
+                </Typography>
+              </Box>
+            </GuildBadgeBox>
+          </Fade>
+        }
+
         <LoginBar isLoggedIn={authToken} />
       </Toolbar>
     </StyledAppBar>
@@ -115,7 +171,7 @@ const Navbar = (props) => {
 
 const LoginBar = ({ isLoggedIn }) => {
   return (
-    <Box className="login" style={{ marginLeft: "auto" }}>
+    <Box className="login">
       {!isLoggedIn ? (
         <LoginButton type="login" />
       ) : (

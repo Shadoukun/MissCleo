@@ -8,8 +8,13 @@ from sqlalchemy import and_, func
 quote_routes = web.RouteTableDef()
 
 
-def getGuilds():
-    return session.query(Guild).all()
+def getGuilds(guild_id=None):
+    filters = []
+
+    if guild_id:
+        filters = [Guild.id == guild_id]
+
+    return session.query(Guild).filter(*filters).all()
 
 def getMembers(guild_id):
     """Returns members that have quotes in a guild."""
@@ -50,7 +55,11 @@ def getQuotes(guild_id, user_id, search, page):
 
 @quote_routes.get('/guilds')
 def guilds(request):
-    guilds = json.dumps(getGuilds(), cls=new_alchemy_encoder(False))
+    guild_id = request.rel_url.query.get('guild', None)
+
+    filters = [Guild.id == guild_id]
+
+    guilds = json.dumps(getGuilds(guild_id), cls=new_alchemy_encoder(False))
     return web.json_response(text=guilds)
 
 

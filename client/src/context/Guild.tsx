@@ -6,6 +6,7 @@ import { backendCall } from '../utilities';
 
 type GuildContextType = {
   guild: string
+  guildData: Guild
   user: string
   memberList: MemberListType
 
@@ -13,6 +14,11 @@ type GuildContextType = {
   setUser: React.Dispatch<string>
 }
 
+type Guild = {
+  id: string
+  name: string
+  icon_url: string
+}
 
 export const GuildContext = createContext<Partial<GuildContextType>>({});
 
@@ -22,19 +28,24 @@ export const GuildProvider = (props: PropsWithChildren<{}>) => {
   const [guild, setGuild] = useState<string>(guildId);
   const [user, setUser] = useState<string>(userId);
   const [memberList, setMemberList] = useState<MemberListType>({});
+  const [guildData, setGuildData] = useState()
 
   useEffect(() => {
-    (async () => {
-      let members = await fetchMembers()
-      setMemberList(members)
-    })()
-    },[])
+    fetchGuild().then((data) => {
+      setGuildData(data[0])
+    }).then(() => {
+      (async () => {
+        let members = await fetchMembers()
+        setMemberList(members)
+      })();
+    })
+  }, [])
 
-    useEffect(() => {
-      setUser(userId)
-    }, [userId])
+  useEffect(() => {
+    setUser(userId)
+  }, [userId])
 
-    const fetchMembers = async () => {
+  const fetchMembers = async () => {
     let result = await backendCall.get(`/all_members?guild=${guild}`)
     let data: MemberListType = {}
     result.data.forEach((m: MemberEntry) => {
@@ -43,8 +54,13 @@ export const GuildProvider = (props: PropsWithChildren<{}>) => {
     return data
   };
 
+  const fetchGuild = async () => {
+    let result = await backendCall.get(`/guilds?guild=${guild}`)
+    return result.data
+  }
+
   return (
-    <GuildContext.Provider value={{ guild, setGuild, user, setUser, memberList }} >
+    <GuildContext.Provider value={{ guild, setGuild, user, setUser, guildData, memberList }} >
       {props.children}
     </GuildContext.Provider>
   )
