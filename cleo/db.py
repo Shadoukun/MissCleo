@@ -25,6 +25,7 @@ class Guild(Base):
 
     members     = relationship("GuildMembership")
     channels    = relationship("Channel", backref=backref("guild"))
+    roles = relationship("Role", back_populates="guild")
     quotes = relationship("Quote", primaryjoin="foreign(Quote.guild_id) == Guild.id")
 
     def __init__(self, guild):
@@ -118,7 +119,7 @@ class Role(Base):
     guild_id = Column(Integer, ForeignKey('guilds.id'))
     position = Column(Integer)
 
-    guild = relationship("Guild", uselist=False, backref=backref("roles"))
+    guild = relationship("Guild", back_populates="roles")
 
     def __init__(self, role):
         self.id = role.id

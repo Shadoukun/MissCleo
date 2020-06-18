@@ -17,6 +17,17 @@ type Guild = {
   id: string
   name: string
   icon_url: string
+  members: MemberListType
+  roles: Role
+}
+
+type Role = {
+  id: string
+  guild_id: string
+  color: string
+  name: string
+  position: string
+  raw_permissions: string
 }
 
 export const GuildContext = createContext<Partial<GuildContextType>>({});
@@ -27,11 +38,13 @@ export const GuildProvider = (props: PropsWithChildren<{}>) => {
   const [guild, setGuild] = useState<Guild | undefined>();
   const [user, setUser] = useState<string>(userId);
   const [memberList, setMemberList] = useState<MemberListType>({});
+  const [roleList, setRoleList] = useState<any>()
 
   useEffect(() => {
     fetchGuild().then((data) => {
       setGuild(data)
       setMemberList(data.members)
+      setRoleList(data.roles)
     })
   }, [])
 
