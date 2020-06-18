@@ -283,7 +283,7 @@ class CustomCommands(commands.Cog):
             # If user_filter isn't empty,
             # check if it contains the sender's user id.
             if r.user_filter and str(ctx.message.author.id) not in r.user_filter:
-                return
+                continue
 
             # if useRegex, search message with trigger as a regular expression
             if r.useRegex:
@@ -336,7 +336,7 @@ class CustomCommands(commands.Cog):
         # append to list of matching reactions
         for _, r in reaction_list.items():
             if r.user_filter and str(ctx.message.author.id) not in r.user_filter:
-                return
+                continue
 
             # if useRegex, trigger is a regex expression
             if r.useRegex:
