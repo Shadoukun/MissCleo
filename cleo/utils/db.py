@@ -76,7 +76,7 @@ async def update_member(self, before, after):
                     .one_or_none()
 
     if member and after:
-        member.user.avatar_url = str(after.icon_url_as(format=None, static_format="webp", size=512))
+        member.user.avatar_url = str(after.avatar_url_as(format=None, static_format="webp", size=512))
         member.display_name = after.display_name
         member.top_role_id = after.top_role.id
         member.roles = [str(r.id) for r in after.roles]
