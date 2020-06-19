@@ -5,7 +5,7 @@ import { Switch, Box, Select, MenuItem, Typography } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import styled from 'styled-components';
 import { ToggleProps } from './controls'
-import { EntryFormData } from './index'
+import { Entry } from './index'
 
 const CooldownFormControl = styled(FormControl)`
 ${({theme}) => `
@@ -76,11 +76,11 @@ export const CooldownToggle = (props: ToggleProps) => (
 
 
 type CooldownControlProps = {
-  form: EntryFormData
+  form: Entry
   setForm: Dispatch<any>
 }
 
-export const CooldownControl = ({ form, setForm, ...props }: CooldownControlProps) => {
+export const CooldownControl: React.FC<CooldownControlProps> = ({ form, setForm }) => {
   return (
     <>
       <CooldownToggle
@@ -94,18 +94,18 @@ export const CooldownControl = ({ form, setForm, ...props }: CooldownControlProp
 
             <Typography style={{ marginRight: "auto" }}>Duration:</Typography>
             <CooldownDurationSelect
-              duration={form.cooldownDuration}
-              setDuration={(v) => { setForm({ ...form, cooldownDuration: v }) }}
-              type={form.multiplier}
-              setType={(e: ChangeEvent<HTMLSelectElement>) => { setForm({ ...form, multiplier: Number(e.target.value) }) }}
+              duration={form.cooldown_per}
+              setDuration={(v) => { setForm({ ...form, cooldown_per: v }) }}
+              type={form.cooldown_multiplier}
+              setType={(e: ChangeEvent<HTMLSelectElement>) => { setForm({ ...form, cooldown_multiplier: Number(e.target.value) }) }}
             />
           </CooldownFormControl>
 
           <CooldownFormControl>
             <Typography style={{ marginRight: "auto" }}>Cooldown Type:</Typography>
             <CooldownTypeSelect
-              type={form.cooldownType}
-              setType={(e: ChangeEvent<HTMLSelectElement>) => { setForm({ ...form, cooldownType: Number(e.target.value) }) }}
+              type={form.cooldown_bucket}
+              setType={(e: ChangeEvent<HTMLSelectElement>) => { setForm({ ...form, cooldown_bucket: Number(e.target.value) }) }}
             />
           </CooldownFormControl>
       </CooldownContainer>

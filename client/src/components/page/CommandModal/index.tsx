@@ -1,21 +1,21 @@
-import React, { useState, ChangeEvent, FormEvent, MouseEvent, useEffect } from 'react';
-import { Button } from "../../Button"
+import React, { useState, ChangeEvent, FormEvent, MouseEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { Box, Divider } from '@material-ui/core';
+
+import { Dict } from '../../../types'
 import { useAuth } from '../../../context/Auth';
 import { backendCall } from '../../../utilities';
-
+import { Button } from "../../Button"
 import { ModalForm } from '../../Modal';
-import { Box, Divider } from '@material-ui/core';
 
 import * as controls from './controls'
 import CooldownControl from './cooldown'
-import { useParams } from 'react-router-dom';
 import VirtualizedUserFilterInput from './user-filter'
-import { Dict } from '../../../types'
 
-// type for retrieved Command/Response/Reaction entries.
-type Entry = Dict & {
+
+// data for an entry from the database.
+export type Entry = Dict & {
   id: string
   name: string
   guild_id: string
@@ -34,79 +34,27 @@ type Entry = Dict & {
   cooldown_multiplier: number
 }
 
-
-export type EntryFormData = Dict & {
-  id: string
-  guild_id: string
-  name: string
-  description: string
-  trigger: string
-  response: string
-  useRegex: boolean
-  multiResponse: boolean
-  userFilter: string[]
-  cooldown: boolean
-  cooldownType: number
-  cooldownRate: number
-  cooldownDuration: number
-  multiplier: number
-}
-
-const EntryFormDefault: Dict = {
-  id: null,
-  name: null,
-  guild_id: null,
-  description: null,
-  trigger: null,
-  response: null,
-  useRegex: false,
-  multiResponse: false,
+const EntryDefault: Dict & Partial<Entry> = {
+  use_regex: false,
+  multi_response: false,
+  user_filter: [],
   cooldown: false,
-  cooldownType: 2,
-  cooldownRate: 1,
-  cooldownDuration: 0,
-  multiplier: 1,
+  cooldown_bucket: 2,
+  cooldown_rate: 1,
+  cooldown_per: 0,
+  cooldown_multiplier: 1,
 }
 
-const entryMap: Dict = {
-  id: "id",
-  guild_id: "guild_id",
-  name: "name",
-  description: "description",
-  trigger: "trigger",
-  response: "response",
-  useRegex: "use_regex",
-  multiResponse: "multi_response",
-  userFilter: "user_filter",
-  cooldown: "cooldown",
-  cooldownType: "cooldown_bucket",
-  cooldownRate: "cooldown_rate",
-  cooldownDuration: "cooldown_per",
-  multiplier: "cooldown_multiplier"
-}
-
-
-type ModalHeaderProps = {
-  type: string,
-  edit: boolean,
+type ModalHeaderProps = Partial<CommandModalProps> & {
   name: string
   trigger: string
-  hideModal: () => void
 }
 
-const ModalHeader = ({ type, edit, name, trigger, hideModal }: ModalHeaderProps) => {
+const ModalHeader: React.FC<ModalHeaderProps> =  ({ type, edit, name, trigger, hideModal }) => {
 
-  let title: string
+  if (type === "Command") { name = `!${trigger}` }
 
-  if (type === "Command") {
-    name = `!${trigger}`
-  }
-
-  if (!edit) {
-    title = `New ${type}`
-  } else {
-    title = name || trigger
-  }
+  let title: string = edit ? (name || trigger) : (`New ${type}`)
 
   return (
     <div className="modalHeader">
@@ -121,38 +69,26 @@ const ModalHeader = ({ type, edit, name, trigger, hideModal }: ModalHeaderProps)
 }
 
 type CommandModalProps = {
-  type: string,
-  edit: boolean,
-  update: number,
   entry: Entry,
-  submitURL: string,
-  removeURL: string,
+
+  type: string,
+  edit?: boolean,
   hideName: boolean,
   hideRegex: boolean,
   hideMultiResponse: boolean,
+
+  submitURL: string,
+  removeURL: string,
+  update: number,
   setUpdate: React.Dispatch<any>,
   hideModal: () => void
 }
 
 // Modal for Commands/Reactions/Responses.
-export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
-  const { guild } = useParams();
-  const [form, setForm] = useState<EntryFormData>({
-    ...EntryFormDefault,
-    id: entry.id,
-    guild_id: entry.guild_id || guild,
-    name: entry.name,
-    description: entry.description,
-    trigger: entry.trigger,
-    response: entry.response,
-    useRegex: entry.use_regex,
-    multiResponse: entry.multi_response,
-    userFilter: entry.user_filter || [],
-    cooldown: entry.cooldown || false,
-    cooldownType: entry.cooldown_bucket || 2,
-    cooldownRate: entry.cooldown_rate || 1,
-    cooldownDuration: entry.cooldown_per || 0,
-    multiplier: entry.cooldown_multiplier || 1
+export const CommandModal: React.FC<CommandModalProps> = ({ entry, ...props }) => {
+  const [form, setForm] = useState<Entry>({
+    ...EntryDefault,
+    ...entry
   })
 
   const { requestconfig } = useAuth();
@@ -161,15 +97,9 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
   const handleSubmit = (event: FormEvent<HTMLElement>) => {
     event.preventDefault();
 
-    // map data from `form` to back to backend-friendly keys.
-    let entryData = Object.keys(form).reduce((data: any, key) => {
-      data[entryMap[key]] = form[key]
-      return data
-    }, {})
-
     backendCall.post(
       props.submitURL,
-      entryData,
+      form,
       requestconfig
     ).then(() => {
       props.setUpdate(() => ++props.update)
@@ -217,8 +147,8 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
 
           {!props.hideRegex &&
             <controls.RegexControl
-              toggle={form.useRegex}
-              onToggle={() => { setForm({ ...form, useRegex: !form.useRegex }) }}
+              toggle={form.use_regex}
+              onToggle={() => { setForm({ ...form, use_regex: !form.use_regex }) }}
             />}
 
           <controls.ResponseControl
@@ -228,8 +158,8 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
 
           {!props.hideMultiResponse &&
             <controls.MultiResponseControl
-              toggle={form.multiResponse}
-              onToggle={() => { setForm({ ...form, multiResponse: !form.multiResponse }) }}
+              toggle={form.multi_response}
+              onToggle={() => { setForm({ ...form, multi_response: !form.multi_response }) }}
             />}
 
           <controls.DescriptionControl
@@ -241,8 +171,8 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
 
           <Box className="user-filter-box">
             <VirtualizedUserFilterInput
-              userFilter={form.userFilter}
-              setUserFilter={(newValue: string[]) => setForm({ ...form, userFilter: newValue })}
+              userFilter={form.user_filter}
+              setUserFilter={(newValue: string[]) => setForm({ ...form, user_filter: newValue })}
             />
           </Box>
 
@@ -259,20 +189,20 @@ export const CommandModal = ({ entry, ...props }: CommandModalProps) => {
 }
 
 type ModalFooterProps = {
-  edit: boolean,
+  edit: boolean | undefined,
   handleRemove: (e: MouseEvent<HTMLButtonElement>) => void
 }
 
 const ModalFooter = ({ edit, handleRemove }: ModalFooterProps) => (
-  <div className="modalFooter">
+  <Box className="modalFooter">
     {edit &&
       <Button className="Remove" onClick={handleRemove}>
         Delete
       </Button>
     }
 
-    <Button type="submit">Save</Button>
-  </div>
+    <Button style={{ marginLeft: "auto"}} type="submit">Save</Button>
+  </Box>
 )
 
 
