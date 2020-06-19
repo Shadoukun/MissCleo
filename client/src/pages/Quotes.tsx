@@ -25,15 +25,10 @@ ${({ theme }) => `
   }
 `}`
 
-type QuoteLocationState = {
-  navPressed?: boolean
-}
+type QuoteLocationState = { navPressed?: boolean };
+interface QuotePageParams { guild: string };
 
-interface QuotePageParams {
-  guild: string
-};
-
-type QuoteRouteComponentProps = RouteComponentProps<QuotePageParams, any, QuoteLocationState>
+type QuoteRouteComponentProps = RouteComponentProps<QuotePageParams, any, QuoteLocationState>;
 
 type QuoteState = {
   loading: boolean
@@ -51,7 +46,6 @@ type QuoteState = {
   quoteList: QuoteListType
   memberList: MemberListType;
 };
-
 
 class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
 
@@ -110,32 +104,30 @@ class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
     }, 250)
   };
 
-  resetPage() {
+  // switch to user page.
+  // reset to default page if newUser isn't provided
+  switchPage(newUser?: string) {
+    this.scrollBar.current?.scrollToTop();
     this.setState({
-      user: "",
+      user: newUser || "",
       currentPage: 1,
       searchString: "",
       loading: true,
     }, this.fetchQuotes)
-  }
-
-  switchUser(newUser: string) {
-    this.scrollBar.current?.scrollToTop()
-    this.setState({
-      user: newUser,
-      currentPage: 1,
-      searchString: "",
-      loading: true,
-    }, this.fetchQuotes)
-  }
+  };
 
   handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     let newSearch = (event.currentTarget[0] as HTMLInputElement).value
+
+    // reset query parameters if attempting to search while `user` is defined.
     if (this.state.user) {
-      this.props.history.replace({ ...this.props.location, search: "" })
-    }
+      this.props.history.replace({
+        ...this.props.location,
+        search: ""
+      })
+    };
+
     this.setState({
       currentPage: 1,
       searchString: newSearch,
@@ -154,14 +146,13 @@ class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
     // wait for memberList from GuildContext to be populated
     const fetchAfterMembers = () => {
       if (!this.context.memberList) {
-        setTimeout(fetchAfterMembers, 100)
+        setTimeout(fetchAfterMembers, 100);
       } else {
         (async () => {
           await this.fetchQuotes();
-        })()
-      }
-    }
-
+        })();
+      };
+    };
     fetchAfterMembers()
   };
 
@@ -169,9 +160,9 @@ class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
     // check if user changed
     let user = getParams(this.props.location).get("user")
     if (user && user !== this.state.user) {
-      this.switchUser(user)
+      this.switchPage(user)
       return true
-    }
+    };
 
     // reset page when location.state.navPressed. Only fire after initial mount.
     if (prevProps !== this.props && this.props.location.state?.navPressed) {
@@ -179,9 +170,9 @@ class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
         ...this.props.location,
         state: {}
       })
-      this.resetPage()
+      this.switchPage()
       return true
-    }
+    };
   };
 
   render() {
@@ -211,7 +202,7 @@ class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
                       <QuoteSearch
                         searchString={this.state.searchString}
                         onSubmit={this.handleSearch}
-                        onReset={() => this.resetPage()}
+                        onReset={() => this.switchPage()}
                       />
                     </Box>
 
