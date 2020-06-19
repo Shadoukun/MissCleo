@@ -173,8 +173,8 @@ class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
       return true
     }
 
-    // check if nav Link was pressed again.
-    if (this.props.location.state?.navPressed) {
+    // reset page when location.state.navPressed. Only fire after initial mount.
+    if (prevProps !== this.props && this.props.location.state?.navPressed) {
       this.props.history.replace({
         ...this.props.location,
         state: {}
@@ -185,7 +185,6 @@ class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {
   };
 
   render() {
-
     return (
       <>
         <Box className="loading-bar" style={{ display: this.state.loading ? "block" : "none" }}>
