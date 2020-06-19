@@ -7,6 +7,7 @@ export type Dict = {
 export type UserEntry = {
   id: string
   name: string
+  discriminator: string
   avatar_url: string
 }
 

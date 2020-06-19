@@ -178,7 +178,7 @@ const AutoCompleteOption = ({ member }: { member: MemberEntry }) => (
   <StyledOption>
     <Avatar src={member.user.avatar_url} />
     <Typography className="display-name" noWrap>{member.display_name}</Typography>
-    <Typography className="username" noWrap>{member.user.name}</Typography>
+    <Typography className="username" noWrap>{member.user.name}#{member.user.discriminator}</Typography>
 
   </StyledOption>
 )
@@ -269,7 +269,7 @@ const VirtualizedUserFilterInput: React.FC<UserFilterInputProps> = ({ userFilter
           classes={classes}
           ListboxComponent={ListboxComponent as ListboxComponentType}
           options={userList}
-          getOptionLabel={(member: MemberEntry) => `${member.display_name} (${member.user.name})`}
+          getOptionLabel={(member: MemberEntry) => `${member.display_name} (${member.user.name}#${member.user.discriminator})`}
           getOptionSelected={(member: MemberEntry, value: any) => member.display_name === value.display_name}
           renderInput={AutocompleteInput}
           renderOption={(member: MemberEntry) => (<AutoCompleteOption member={member} />)}

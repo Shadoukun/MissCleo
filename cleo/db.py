@@ -67,6 +67,7 @@ class User(Base):
 
     id              = Column(Integer, primary_key=True)
     name            = Column(String)
+    discriminator   = Column(String)
     avatar_url      = Column(String)
 
     def __init__(self, user):
