@@ -216,8 +216,13 @@ class MissCleo(commands.Bot):
 
     async def on_member_update(self, before, after):
         # User and GuildMembership are updated together.
-        if (str(before.avatar_url) != str(after.avatar_url)) \
-        or (before.display_name != after.display_name):
+        user_changed = [
+            before.display_name != after.display_name,
+            before.top_role != after.top_role
+        ]
+        roles_changed = [True for b in before.roles if b.id in [a.id for a in after.roles]]
+
+        if True in user_changed or True in roles_changed:
             await utils.update_member(self, before, after)
 
     async def on_member_join(self, member):
@@ -245,6 +250,9 @@ class MissCleo(commands.Bot):
         logger.debug(f"Role updated.\n"
                      f"{before.id} - {before.name}"
                      f"{after.id} - {after.name}")
+
+    async def on_user_update(self, before, after):
+        await utils.update_user(self, after)
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.DisabledCommand):

@@ -76,8 +76,10 @@ async def update_member(self, before, after):
                     .one_or_none()
 
     if member and after:
-        member.user.avatar_url = str(guild.icon_url_as(format=None, static_format="webp", size=512))
+        member.user.avatar_url = str(after.icon_url_as(format=None, static_format="webp", size=512))
         member.display_name = after.display_name
+        member.top_role_id = after.top_role.id
+        member.roles = [str(r.id) for r in after.roles]
 
         self.db.commit()
         logger.debug((f"Member info updated.\n"
@@ -103,5 +105,14 @@ async def update_role(self, role):
     dbrole.color = role.color.value
     dbrole.raw_permissions = role.permissions.value
     dbrole.position = role.position
+
+    self.db.commit()
+
+async def update_user(self, newuser):
+    user = self.db.query(User).filter_by(id=newuser.id).one()
+
+    user.name = newuser.name
+    user.discriminator = newuser.discriminator
+    user.avatar_url = newuser.avatar_url = str(newuser.avatar_url_as(format=None, static_format="webp", size=512))
 
     self.db.commit()

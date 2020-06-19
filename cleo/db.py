@@ -89,6 +89,8 @@ class GuildMembership(Base):
     user_id         = Column(Integer, ForeignKey("users.id"), primary_key=True)
     display_name    = Column('display_name', String, nullable=True)
     joined_at       = Column('joined_at', DateTime, nullable=True)
+    roles           = Column(ARRAY(String), server_default='{}')
+
     top_role_id = Column(Integer, ForeignKey('roles.id', name="fk_top_role_id"))
 
 

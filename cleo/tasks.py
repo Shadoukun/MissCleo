@@ -69,6 +69,8 @@ async def update_all_guild_members(self):
                 m.top_role_id = member.top_role.id if member.top_role else 0
                 m.user.name = member.name
                 m.user.discriminator = member.discriminator
+                m.roles = [str(r.id) for r in member.roles]
+
 
                 logger.debug((f"Updating Member for '{guild.name}': "
                             f"({member.id}) {member.name} - {member.display_name}"))
