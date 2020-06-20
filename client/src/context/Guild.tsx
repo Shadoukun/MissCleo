@@ -1,5 +1,5 @@
 import React, { createContext, PropsWithChildren, useState, useEffect } from 'react';
-import { MemberListType, MemberEntry } from '../types';
+import { MemberEntryList, MemberEntry } from '../types';
 import { useParams } from 'react-router';
 import { backendCall } from '../utilities';
 
@@ -7,7 +7,7 @@ import { backendCall } from '../utilities';
 type GuildContextType = {
   guild: Guild
   user: string
-  memberList: MemberListType
+  memberList: MemberEntryList
 
   setGuild: React.Dispatch<Guild>
   setUser: React.Dispatch<string>
@@ -17,7 +17,7 @@ type Guild = {
   id: string
   name: string
   icon_url: string
-  members: MemberListType
+  members: MemberEntryList
   roles: Role
 }
 
@@ -30,6 +30,10 @@ type Role = {
   raw_permissions: string
 }
 
+type RoleList = {
+  [key: string]: Role
+}
+
 export const GuildContext = createContext<Partial<GuildContextType>>({});
 
 export const GuildProvider = (props: PropsWithChildren<{}>) => {
@@ -37,19 +41,24 @@ export const GuildProvider = (props: PropsWithChildren<{}>) => {
 
   const [guild, setGuild] = useState<Guild | undefined>();
   const [user, setUser] = useState<string>(userId);
-  const [memberList, setMemberList] = useState<MemberListType | undefined>();
-  const [roleList, setRoleList] = useState<any>()
+  const [memberList, setMemberList] = useState<MemberEntryList | undefined>();
+  const [roleList, setRoleList] = useState<RoleList | undefined>()
 
   useEffect(() => {
     fetchGuild().then((data) => {
       setGuild(data)
-      setRoleList(data.roles)
 
-      let members: MemberListType = {}
-      data.members.forEach((m: MemberEntry) => {
+      let members = data.members.reduce((members: MemberEntryList, m: MemberEntry) => {
         members[m.user_id] = m
-      });
+        return members
+      }, {});
       setMemberList(members)
+
+      let roles = data.roles.reduce((roles: RoleList, r: Role) => {
+        roles[r.id] = r
+        return roles
+      }, {})
+      setRoleList(roles)
     })
   }, [])
 

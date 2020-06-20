@@ -12,7 +12,7 @@ import QuoteList from '../components/QuoteList';
 import { QuoteEntry } from '../components/QuoteEntry';
 import QuoteSearch from '../components/QuoteSearch'
 import { backendCall, getParams } from '../utilities';
-import { QuoteListType, MemberListType } from '../types';
+import { QuoteListType, MemberEntryList } from '../types';
 import { GuildContext } from '../context/Guild';
 
 
@@ -44,7 +44,7 @@ type QuoteState = {
   searchString: string
 
   quoteList: QuoteListType
-  memberList: MemberListType;
+  memberList: MemberEntryList;
 };
 
 class QuotePage extends Component<QuoteRouteComponentProps, QuoteState> {

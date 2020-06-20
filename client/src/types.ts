@@ -24,7 +24,7 @@ export type MemberEntry = {
   top_role_id: string
 };
 
-export interface MemberListType {
+export interface MemberEntryList {
   [key: string]: MemberEntry
 };
 
