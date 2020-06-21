@@ -11,7 +11,7 @@ import { ModalForm } from '../../Modal';
 
 import * as controls from './controls'
 import CooldownControl from './cooldown'
-import VirtualizedUserFilterInput from './user-filter'
+import UserFilterInput from './user-filter'
 
 
 // data for an entry from the database.
@@ -170,7 +170,7 @@ export const CommandModal: React.FC<CommandModalProps> = ({ entry, ...props }) =
           <Box mt={2} mb={2}><Divider /></Box>
 
           <Box className="user-filter-box">
-            <VirtualizedUserFilterInput
+            <UserFilterInput
               userFilter={form.user_filter}
               setUserFilter={(newValue: string[]) => setForm({ ...form, user_filter: newValue })}
             />
