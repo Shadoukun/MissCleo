@@ -34,6 +34,7 @@ class ResponseData:
         self._buckets = None
 
         self.user_filter = response.user_filter
+        self.role_filter = response.role_filter
 
         self.process_trigger()
         self.process_response()
@@ -97,6 +98,7 @@ class ReactionData:
         self._buckets = None
 
         self.user_filter = reaction.user_filter
+        self.role_filter = reaction.role_filter
 
         self.process_trigger()
         self.process_responses()
@@ -285,6 +287,9 @@ class CustomCommands(commands.Cog):
             if r.user_filter and str(ctx.message.author.id) not in r.user_filter:
                 continue
 
+            if r.role_filter and not [a for b in ctx.message.author.roles for a in r.role_filter if a == str(b.id)]:
+                return
+
             # if useRegex, search message with trigger as a regular expression
             if r.useRegex:
                 if r.trigger.search(message_lower):
@@ -335,8 +340,12 @@ class CustomCommands(commands.Cog):
         # check for trigger. in message.
         # append to list of matching reactions
         for _, r in reaction_list.items():
+
             if r.user_filter and str(ctx.message.author.id) not in r.user_filter:
                 continue
+
+            if r.role_filter and not [a for b in ctx.message.author.roles for a in r.role_filter if a == str(b.id)]:
+                return
 
             # if useRegex, trigger is a regex expression
             if r.useRegex:
@@ -469,7 +478,8 @@ class CustomCommands(commands.Cog):
             'cooldown_per',
             'cooldown_bucket',
             'cooldown_multiplier',
-            'user_filter'
+            'user_filter',
+            'role_filter'
             ]
 
         for f in fields:
@@ -576,7 +586,8 @@ class CustomCommands(commands.Cog):
             'cooldown_per',
             'cooldown_bucket',
             'cooldown_multiplier',
-            'user_filter'
+            'user_filter',
+            'role_filter'
             ]
 
         for f in fields:
@@ -673,7 +684,8 @@ class CustomCommands(commands.Cog):
             'cooldown_per',
             'cooldown_bucket',
             'cooldown_multiplier',
-            'user_filter'
+            'user_filter',
+            'role_filter'
             ]
 
         for f in fields:

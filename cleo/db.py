@@ -187,6 +187,7 @@ class CustomCommand(Base):
     cooldown_multiplier = Column(Integer)
 
     user_filter = Column(ARRAY(String), server_default='{}')
+    role_filter = Column(ARRAY(String), server_default='{}')
 
 
     guild = relationship("Guild", uselist=False, lazy="joined")
@@ -206,6 +207,7 @@ class CustomCommand(Base):
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
         self.user_filter = kwargs.get('user_filter', [])
+        self.role_filter = kwargs.get('role_filter', [])
 
 
 class CustomResponse(Base):
@@ -235,6 +237,7 @@ class CustomResponse(Base):
     cooldown_multiplier = Column(Integer)
 
     user_filter = Column(ARRAY(String), server_default='{}')
+    role_filter = Column(ARRAY(String), server_default='{}')
 
 
     guild = relationship("Guild", uselist=False, lazy="joined")
@@ -255,6 +258,8 @@ class CustomResponse(Base):
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
         self.user_filter = kwargs.get('user_filter', [])
+        self.role_filter = kwargs.get('role_filter', [])
+
 
 
 class CustomReaction(Base):
@@ -284,6 +289,7 @@ class CustomReaction(Base):
     cooldown_multiplier = Column(Integer)
 
     user_filter = Column(ARRAY(String), server_default='{}')
+    role_filter = Column(ARRAY(String), server_default='{}')
 
     guild = relationship("Guild", uselist=False, lazy="joined")
 
@@ -303,6 +309,7 @@ class CustomReaction(Base):
         self.cooldown_multiplier = kwargs.get('cooldown_multiplier', 1)
 
         self.user_filter = kwargs.get('user_filter', [])
+        self.role_filter = kwargs.get('role_filter', [])
 
 
 class Admin(Base):

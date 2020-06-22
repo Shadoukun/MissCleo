@@ -28,6 +28,19 @@ export interface MemberEntryList {
   [key: string]: MemberEntry
 };
 
+export type Role = {
+  id: string
+  guild_id: string
+  color: string
+  name: string
+  position: string
+  raw_permissions: string
+}
+
+export type RoleList = {
+  [key: string]: Role
+}
+
 export type QuoteListType = Array<QuoteEntryType>;
 
 // Quote Entry Data

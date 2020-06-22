@@ -12,6 +12,7 @@ import { ModalForm } from '../../Modal';
 import * as controls from './controls'
 import CooldownControl from './cooldown'
 import UserFilterInput from './user-filter'
+import RoleFilterInput from './role-filter';
 
 
 // data for an entry from the database.
@@ -26,7 +27,10 @@ export type Entry = Dict & {
   reaction: never
   use_regex: boolean
   multi_response: boolean
+
   user_filter: string[]
+  role_filter: string[]
+
   cooldown: boolean
   cooldown_bucket: number
   cooldown_rate: number
@@ -38,6 +42,7 @@ const EntryDefault: Dict & Partial<Entry> = {
   use_regex: false,
   multi_response: false,
   user_filter: [],
+  role_filter: [],
   cooldown: false,
   cooldown_bucket: 2,
   cooldown_rate: 1,
@@ -173,6 +178,13 @@ export const CommandModal: React.FC<CommandModalProps> = ({ entry, ...props }) =
             <UserFilterInput
               userFilter={form.user_filter}
               setUserFilter={(newValue: string[]) => setForm({ ...form, user_filter: newValue })}
+            />
+          </Box>
+
+          <Box className="role-filter-box">
+            <RoleFilterInput
+              roleFilter={form.role_filter}
+              setRoleFilter={(newValue: string[]) => setForm({ ...form, role_filter: newValue })}
             />
           </Box>
 

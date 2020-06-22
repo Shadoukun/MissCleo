@@ -1,5 +1,5 @@
 import React, { createContext, PropsWithChildren, useState, useEffect } from 'react';
-import { MemberEntryList, MemberEntry } from '../types';
+import { MemberEntryList, MemberEntry, Role, RoleList } from '../types';
 import { useParams } from 'react-router';
 import { backendCall } from '../utilities';
 
@@ -8,6 +8,7 @@ type GuildContextType = {
   guild: Guild
   user: string
   memberList: MemberEntryList
+  roleList: RoleList
 
   setGuild: React.Dispatch<Guild>
   setUser: React.Dispatch<string>
@@ -19,19 +20,6 @@ type Guild = {
   icon_url: string
   members: MemberEntryList
   roles: Role
-}
-
-type Role = {
-  id: string
-  guild_id: string
-  color: string
-  name: string
-  position: string
-  raw_permissions: string
-}
-
-type RoleList = {
-  [key: string]: Role
 }
 
 export const GuildContext = createContext<Partial<GuildContextType>>({});
@@ -72,7 +60,7 @@ export const GuildProvider = (props: PropsWithChildren<{}>) => {
   }
 
   return (
-    <GuildContext.Provider value={{ guild, setGuild, user, setUser, memberList }} >
+    <GuildContext.Provider value={{ guild, setGuild, user, setUser, memberList, roleList }} >
       {props.children}
     </GuildContext.Provider>
   )
