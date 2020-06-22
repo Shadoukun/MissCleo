@@ -3,9 +3,9 @@ import logging
 import yaml
 from pathlib import Path
 from threading import Thread
-from config import PORT
+import config
 from cleo.bot import MissCleo
-
+import watchgod
 
 def setup_logging():
     # logging setup
@@ -29,4 +29,7 @@ def main():
     client.run(tokens['discord'])
 
 if __name__ == "__main__":
-    main()
+    if config.DEBUG:
+        watchgod.run_process('./cleo', main)
+    else:
+        main()

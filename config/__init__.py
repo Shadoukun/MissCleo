@@ -1,6 +1,7 @@
 import os
+from distutils.util import strtobool
 
-DEBUG = True
+DEBUG = strtobool(os.environ.get("DEBUG", False))
 SECRET_KEY = 'my precious'
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
