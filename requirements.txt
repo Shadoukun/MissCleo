@@ -11,7 +11,7 @@ asyncore-wsgi==0.0.9
 attrs==19.3.0
 bcrypt==3.1.7
 beautifulsoup4==4.9.1
-bottle==0.12.18
+bottle==0.12.19
 bs4==0.0.1
 CacheControl==0.12.6
 cachetools==4.1.0
